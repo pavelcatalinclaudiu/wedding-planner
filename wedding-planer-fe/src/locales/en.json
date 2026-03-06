@@ -896,6 +896,7 @@
       "slow": "Slow",
       "noData": "No data",
       "platformAvg": "Platform avg:",
+      "conversionRate": "Conversion rate",
       "noPerfData": "No performance data yet",
       "monthlyLeads": "Monthly Leads",
       "noLeadData": "No lead data yet"
