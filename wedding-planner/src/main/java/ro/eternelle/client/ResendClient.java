@@ -13,5 +13,7 @@ import ro.eternelle.dto.email.SendEmailResponse;
 public interface ResendClient {
 
     @POST
-    SendEmailResponse send(SendEmailRequest request);
+    SendEmailResponse send(
+            @HeaderParam("Authorization") String authorization,
+            SendEmailRequest request);
 }

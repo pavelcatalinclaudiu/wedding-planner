@@ -9,8 +9,11 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import ro.eternelle.dto.auth.AuthResponse;
+import ro.eternelle.dto.auth.ForgotPasswordRequest;
 import ro.eternelle.dto.auth.LoginRequest;
 import ro.eternelle.dto.auth.RegisterRequest;
+import ro.eternelle.dto.auth.ResetPasswordRequest;
+import ro.eternelle.dto.auth.VerifyEmailRequest;
 
 import java.util.UUID;
 
@@ -45,7 +48,6 @@ public class AuthResource {
     @Path("/logout")
     @PermitAll
     public Response logout() {
-        // JWT is stateless — invalidation is handled client-side by discarding the token
         return Response.noContent().build();
     }
 
@@ -55,5 +57,37 @@ public class AuthResource {
     public Response me() {
         UUID userId = UUID.fromString(jwt.getSubject());
         return Response.ok(authService.getByUserId(userId)).build();
+    }
+
+    @POST
+    @Path("/verify-email")
+    @PermitAll
+    public Response verifyEmail(@Valid VerifyEmailRequest req) {
+        authService.verifyEmail(req.token);
+        return Response.noContent().build();
+    }
+
+    @POST
+    @Path("/resend-verification")
+    @PermitAll
+    public Response resendVerification(ForgotPasswordRequest req) {
+        authService.resendVerification(req.email);
+        return Response.noContent().build();
+    }
+
+    @POST
+    @Path("/forgot-password")
+    @PermitAll
+    public Response forgotPassword(@Valid ForgotPasswordRequest req) {
+        authService.requestPasswordReset(req.email);
+        return Response.noContent().build();
+    }
+
+    @POST
+    @Path("/reset-password")
+    @PermitAll
+    public Response resetPassword(@Valid ResetPasswordRequest req) {
+        authService.resetPassword(req.token, req.newPassword);
+        return Response.noContent().build();
     }
 }

@@ -16,4 +16,12 @@ public class UserRepository implements PanacheRepositoryBase<User, UUID> {
     public boolean existsByEmail(String email) {
         return count("email", email) > 0;
     }
+
+    public Optional<User> findByEmailVerificationToken(String token) {
+        return find("emailVerificationToken", token).firstResultOptional();
+    }
+
+    public Optional<User> findByPasswordResetToken(String token) {
+        return find("passwordResetToken", token).firstResultOptional();
+    }
 }

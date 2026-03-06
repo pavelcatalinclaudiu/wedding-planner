@@ -13,6 +13,7 @@ const authStore = useAuthStore();
 const step = ref(1);
 const loading = ref(false);
 const error = ref("");
+const pendingVerification = ref(false);
 const showPassword = ref(false);
 
 // Step 1
@@ -83,7 +84,9 @@ async function handleSubmit() {
       description: description.value,
       basePrice: basePrice.value,
     });
-    router.push("/vendor/overview");
+    // Profile created — log out so the user must verify before accessing the app
+    authStore.logout();
+    pendingVerification.value = true;
   } catch (e: unknown) {
     const err = e as { response?: { data?: { message?: string } } };
     error.value =
@@ -98,13 +101,24 @@ async function handleSubmit() {
   <div class="auth-page">
     <div class="auth-card">
       <div class="auth-logo">Eternelle</div>
-      <div class="step-indicator">
-        <span :class="{ active: step >= 1 }">1</span>
-        <span class="sep">—</span>
-        <span :class="{ active: step >= 2 }">2</span>
+
+      <!-- ✅ Email verification pending -->
+      <div v-if="pendingVerification" class="pending-verification">
+        <div class="pv-icon">✉️</div>
+        <h2 class="pv-title">{{ t("auth.checkEmail.title") }}</h2>
+        <p class="pv-sub">{{ t("auth.checkEmail.subtitle", { email }) }}</p>
+        <p class="pv-note">{{ t("auth.checkEmail.note") }}</p>
+        <RouterLink to="/login" class="btn-primary">{{ t("auth.checkEmail.goToLogin") }}</RouterLink>
       </div>
 
-      <template v-if="step === 1">
+      <template v-else>
+        <div class="step-indicator">
+          <span :class="{ active: step >= 1 }">1</span>
+          <span class="sep">—</span>
+          <span :class="{ active: step >= 2 }">2</span>
+        </div>
+
+        <template v-if="step === 1">
         <h1 class="auth-title">{{ t("auth.registerVendor.title") }}</h1>
         <form @submit.prevent="nextStep" class="auth-form">
           <div class="field">
@@ -216,6 +230,7 @@ async function handleSubmit() {
           t("auth.registerVendor.signIn")
         }}</RouterLink>
       </p>
+      </template>
     </div>
   </div>
 </template>
@@ -355,5 +370,32 @@ async function handleSubmit() {
 .auth-links a {
   color: var(--color-gold);
   text-decoration: none;
+}
+.pending-verification {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0;
+  text-align: center;
+}
+.pv-icon {
+  font-size: 3rem;
+}
+.pv-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+.pv-sub {
+  font-size: 0.95rem;
+  color: var(--color-muted);
+  margin: 0;
+}
+.pv-note {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  margin: 0;
 }
 </style>

@@ -258,6 +258,12 @@
       "backToLogin": "Back to sign in",
       "noToken": "No verification token found.",
       "verificationFailed": "Verification failed."
+    },
+    "checkEmail": {
+      "title": "Check your inbox",
+      "subtitle": "We sent a verification link to {email}. Click it to activate your account.",
+      "note": "Can\u2019t find it? Check your spam folder.",
+      "goToLogin": "Go to login"
     }
   },
 

@@ -15,6 +15,7 @@ const { getEnquiryIntent, redirectAfterAuth } = useAuthRedirect();
 const step = ref(1);
 const loading = ref(false);
 const error = ref("");
+const pendingVerification = ref(false);
 
 // Step 1
 const email = ref("");
@@ -68,7 +69,9 @@ async function handleSubmit() {
       estimatedGuestCount: estimatedGuestCount.value,
       totalBudget: totalBudget.value,
     });
-    redirectAfterAuth("COUPLE");
+    // Profile created — log out so the user must verify before accessing the app
+    authStore.logout();
+    pendingVerification.value = true;
   } catch (e: unknown) {
     const err = e as { response?: { data?: { message?: string } } };
     error.value =
@@ -84,7 +87,16 @@ async function handleSubmit() {
     <div class="auth-card">
       <div class="auth-logo">Eternelle</div>
 
-      <!-- Intent banner: shown when arriving from vendor profile enquiry -->
+      <!-- ✅ Email verification pending -->
+      <div v-if="pendingVerification" class="pending-verification">
+        <div class="pv-icon">✉️</div>
+        <h2 class="pv-title">{{ t("auth.checkEmail.title") }}</h2>
+        <p class="pv-sub">{{ t("auth.checkEmail.subtitle", { email }) }}</p>
+        <p class="pv-note">{{ t("auth.checkEmail.note") }}</p>
+        <RouterLink to="/login" class="btn-primary">{{ t("auth.checkEmail.goToLogin") }}</RouterLink>
+      </div>
+
+      <template v-else>
       <div v-if="intent" class="intent-banner">
         <div
           class="intent-avatar"
@@ -228,6 +240,7 @@ async function handleSubmit() {
           t("auth.registerCouple.signIn")
         }}</RouterLink>
       </p>
+      </template>
     </div>
   </div>
 </template>
@@ -428,5 +441,32 @@ async function handleSubmit() {
 .auth-links a {
   color: var(--color-gold);
   text-decoration: none;
+}
+.pending-verification {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0;
+  text-align: center;
+}
+.pv-icon {
+  font-size: 3rem;
+}
+.pv-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+.pv-sub {
+  font-size: 0.95rem;
+  color: var(--color-muted);
+  margin: 0;
+}
+.pv-note {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  margin: 0;
 }
 </style>

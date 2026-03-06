@@ -30,6 +30,18 @@ public class User extends PanacheEntityBase {
     @Column(name = "email_verified")
     public boolean emailVerified = false;
 
+    @Column(name = "email_verification_token")
+    public String emailVerificationToken;
+
+    @Column(name = "email_verification_expires")
+    public Instant emailVerificationExpires;
+
+    @Column(name = "password_reset_token")
+    public String passwordResetToken;
+
+    @Column(name = "password_reset_expires")
+    public Instant passwordResetExpires;
+
     @Column(name = "created_at")
     public Instant createdAt = Instant.now();
 

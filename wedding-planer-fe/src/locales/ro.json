@@ -258,6 +258,12 @@
       "backToLogin": "Înapoi la autentificare",
       "noToken": "Niciun token de verificare găsit.",
       "verificationFailed": "Verificare eșuată."
+    },
+    "checkEmail": {
+      "title": "Verifică-ți căsuța poștală",
+      "subtitle": "Am trimis un link de verificare la {email}. Dă click pentru a activa contul.",
+      "note": "Nu îl găsești? Verifică folderul Spam.",
+      "goToLogin": "Mergi la autentificare"
     }
   },
 
