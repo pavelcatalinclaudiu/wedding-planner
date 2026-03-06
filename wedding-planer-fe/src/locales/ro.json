@@ -143,7 +143,7 @@
       "subtitle": "Planifică-ți ziua perfectă",
       "subtitleWithIntent": "Mesajul tău va fi trimis automat după autentificare.",
       "email": "Email",
-      "emailPlaceholder": "tu@exemplu.com",
+      "emailPlaceholder": "tu{'@'}exemplu.com",
       "password": "Parolă",
       "passwordPlaceholder": "••••••••",
       "show": "Arată",

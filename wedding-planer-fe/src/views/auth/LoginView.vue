@@ -10,10 +10,6 @@ const route = useRoute();
 const authStore = useAuthStore();
 const { getEnquiryIntent, redirectAfterAuth } = useAuthRedirect();
 
-const route = useRoute();
-const authStore = useAuthStore();
-const { getEnquiryIntent, redirectAfterAuth } = useAuthRedirect();
-
 const email = ref("");
 const password = ref("");
 const showPassword = ref(false);

@@ -143,7 +143,7 @@
       "subtitle": "Plan your perfect day",
       "subtitleWithIntent": "Your message will be sent automatically after you log in.",
       "email": "Email",
-      "emailPlaceholder": "you@example.com",
+      "emailPlaceholder": "you{'@'}example.com",
       "password": "Password",
       "passwordPlaceholder": "••••••••",
       "show": "Show",
