@@ -68,6 +68,14 @@
     "tagline": "Your wedding planner"
   },
 
+  "pubNav": {
+    "findVendors": "Find Vendors",
+    "logIn": "Log in",
+    "getStarted": "Get Started",
+    "myDashboard": "My Dashboard",
+    "switchLanguage": "Switch language"
+  },
+
   "nav": {
     "couple": {
       "sections": {

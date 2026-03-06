@@ -68,6 +68,14 @@
     "tagline": "Planificatorul tău de nuntă"
   },
 
+  "pubNav": {
+    "findVendors": "Caută furnizori",
+    "logIn": "Intră în cont",
+    "getStarted": "Începe acum",
+    "myDashboard": "Tabloul meu",
+    "switchLanguage": "Schimbă limba"
+  },
+
   "nav": {
     "couple": {
       "sections": {
