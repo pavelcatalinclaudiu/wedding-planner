@@ -59,7 +59,7 @@ const activeChips = computed(() => {
     chips.push({
       key: "category",
       label:
-        categories.find((c) => c.key === category.value)?.label ??
+        categories.value.find((c) => c.key === category.value)?.label ??
         category.value,
     });
   if (city.value) chips.push({ key: "city", label: city.value });
