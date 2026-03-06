@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
   emoji: string;
@@ -14,6 +15,8 @@ const props = defineProps<{
   value?: number | null;
   thresholds?: { green: number; amber: number };
 }>();
+
+const { t } = useI18n();
 
 const trendUp = computed(() => props.trend != null && props.trend > 0);
 const trendDown = computed(() => props.trend != null && props.trend < 0);
@@ -62,7 +65,7 @@ const primaryClass = computed(() => {
         <span v-else-if="trendDown" class="trend-down">
           ↓ {{ formatTrend(trend) }} {{ trendLabel }}
         </span>
-        <span v-else-if="trendFlat" class="trend-flat">No change</span>
+        <span v-else-if="trendFlat" class="trend-flat">{{ t("vendor.stats.noChange") }}</span>
       </div>
       <p class="card-sub" v-if="sub">{{ sub }}</p>
     </template>

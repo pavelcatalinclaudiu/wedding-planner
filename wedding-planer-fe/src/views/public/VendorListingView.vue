@@ -44,7 +44,10 @@ const categories = computed(() => [
   { key: "PLANNER", label: t("categories.PLANNER") },
   { key: "TRANSPORTATION", label: t("categories.TRANSPORTATION") },
   { key: "LIGHTING", label: t("categories.LIGHTING") },
-  { key: "INVITATION_STATIONERY", label: t("categories.INVITATION_STATIONERY") },
+  {
+    key: "INVITATION_STATIONERY",
+    label: t("categories.INVITATION_STATIONERY"),
+  },
   { key: "JEWELRY", label: t("categories.JEWELRY") },
   { key: "OTHER", label: t("categories.OTHER") },
 ]);
@@ -309,7 +312,9 @@ onMounted(fetchVendors);
         <!-- Bar -->
         <div class="results-bar">
           <span class="results-count">
-            <span v-if="!loading">{{ vendors.length }} {{ t("vendors.professionals") }}</span>
+            <span v-if="!loading"
+              >{{ vendors.length }} {{ t("vendors.professionals") }}</span
+            >
             <span v-else>{{ t("vendors.loadingVendors") }}</span>
           </span>
           <div class="sort-wrap">
@@ -317,7 +322,9 @@ onMounted(fetchVendors);
             <select v-model="sortBy" class="sort-select">
               <option value="">{{ t("vendors.sortRelevance") }}</option>
               <option value="price_asc">{{ t("vendors.sortPriceLow") }}</option>
-              <option value="price_desc">{{ t("vendors.sortPriceHigh") }}</option>
+              <option value="price_desc">
+                {{ t("vendors.sortPriceHigh") }}
+              </option>
               <option value="rating">{{ t("vendors.sortTopRated") }}</option>
             </select>
           </div>
@@ -373,7 +380,9 @@ onMounted(fetchVendors);
           >
             {{ t("vendors.prev") }}
           </button>
-          <span class="pg-info">{{ t("vendors.pageOf", { page, total: totalPages }) }}</span>
+          <span class="pg-info">{{
+            t("vendors.pageOf", { page, total: totalPages })
+          }}</span>
           <button
             class="pg-btn"
             :disabled="page >= totalPages"

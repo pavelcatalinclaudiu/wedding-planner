@@ -55,7 +55,12 @@
     "completed": "Finalizat",
     "active": "Activ",
     "inactive": "Inactiv",
-    "new": "Nou"
+    "new": "Nou",
+    "minsAgo": "{m}m în urmă",
+    "hrsAgo": "{h}h în urmă",
+    "daysAgo": "{d}z în urmă",
+    "inMins": "în {m}m",
+    "inHrs": "în {h}h"
   },
 
   "brand": {
@@ -716,7 +721,10 @@
       "RESPONDED": "Răspuns",
       "BOOKED": "Rezervat",
       "DECLINED": "Refuzat",
-      "CLOSED": "Închis"
+      "CLOSED": "Închis",
+      "IN_DISCUSSION": "În Discuţie",
+      "OFFER_SENT": "Ofertă Trimisă",
+      "CHAT": "Chat"
     },
     "noLeads": "Nu ai solicitări.",
     "sendOffer": "Trimite ofertă",
@@ -860,7 +868,8 @@
       "newToday": "noi astăzi",
       "thisWeek": "săptămâna aceasta",
       "reviews": "recenzii",
-      "within24h": "în 24h"
+      "within24h": "în 24h",
+      "noChange": "Fără schimbare"
     },
     "overview": {
       "title": "Prezentare generală",
@@ -871,7 +880,25 @@
       "responseRate": "Rată de răspuns",
       "rating": "Rating mediu",
       "recentLeads": "Solicitări recente",
-      "upcomingEvents": "Evenimente viitoare"
+      "upcomingEvents": "Evenimente viitoare",
+      "viewAll": "Vezi toate →",
+      "noLeadsTitle": "Nicio solicitare nouă",
+      "noLeadsSub": "Profilul tău este activ — cuplurile te vor găsi curând",
+      "upcomingCalls": "Apeluri programate",
+      "join": "Intră",
+      "noCallsTitle": "Niciun apel programat",
+      "noCallsSub": "Programează o consultatie cu un lead",
+      "profilePerformance": "Performanţă Profil",
+      "searchRank": "Poziţie în căutări",
+      "avgResponseTime": "Timp mediu de răspuns",
+      "excellent": "Excelent",
+      "good": "Bun",
+      "slow": "Lent",
+      "noData": "Fără date",
+      "platformAvg": "Media platformei:",
+      "noPerfData": "Nu există date de performanţă",
+      "monthlyLeads": "Solicitări Lunare",
+      "noLeadData": "Fără date despre solicitări"
     },
     "portfolio": {
       "title": "Portofoliu",

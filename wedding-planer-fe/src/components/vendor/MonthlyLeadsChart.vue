@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 import type { MonthlyLeadDTO } from "@/types/vendor.types";
 
 const props = defineProps<{
   data: MonthlyLeadDTO[];
   loading?: boolean;
-}>();
+}>(); 
+
+const { t } = useI18n();
 
 const maxCount = computed(() =>
   props.data.length ? Math.max(...props.data.map((d) => d.count), 1) : 1,
@@ -22,7 +25,7 @@ const skeletonHeights = [30, 55, 40, 75, 50, 90, 65];
 
 <template>
   <div class="chart-card">
-    <h3 class="chart-title">Monthly Leads</h3>
+    <h3 class="chart-title">{{ t("vendor.overview.monthlyLeads") }}</h3>
 
     <div class="bar-row" v-if="!loading && data.length">
       <div
@@ -49,7 +52,7 @@ const skeletonHeights = [30, 55, 40, 75, 50, 90, 65];
       </div>
     </div>
 
-    <div v-else class="chart-empty">No lead data yet</div>
+    <div v-else class="chart-empty">{{ t("vendor.overview.noLeadData") }}</div>
   </div>
 </template>
 

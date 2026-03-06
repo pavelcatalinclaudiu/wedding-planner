@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
 import type { UpcomingCallDTO } from "@/types/vendor.types";
 
 const props = defineProps<{
@@ -7,6 +8,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{ join: [callId: string] }>();
+
+const { t } = useI18n();
 
 function formatDateTime(iso: string): string {
   const d = new Date(iso);
@@ -28,9 +31,9 @@ function minutesUntil(iso: string): number {
 function countdownLabel(iso: string): string | null {
   const mins = minutesUntil(iso);
   if (mins < 0) return null;
-  if (mins < 60) return `in ${mins}m`;
+  if (mins < 60) return t("common.inMins", { m: mins });
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `in ${hrs}h`;
+  if (hrs < 24) return t("common.inHrs", { h: hrs });
   return null;
 }
 
@@ -43,8 +46,8 @@ function isImminent(iso: string): boolean {
 <template>
   <div class="widget">
     <div class="widget-header">
-      <h3>Upcoming Calls</h3>
-      <RouterLink to="/vendor/calls" class="view-all">View all →</RouterLink>
+      <h3>{{ t("vendor.overview.upcomingCalls") }}</h3>
+      <RouterLink to="/vendor/calls" class="view-all">{{ t("vendor.overview.viewAll") }}</RouterLink>
     </div>
 
     <template v-if="loading">
@@ -78,15 +81,15 @@ function isImminent(iso: string): boolean {
             :class="{ pulse: isImminent(call.scheduledAt) }"
             @click="emit('join', call.callId)"
           >
-            Join
+            {{ t("vendor.overview.join") }}
           </button>
         </div>
       </div>
     </template>
 
     <div v-else class="empty">
-      <p class="empty-title">No calls scheduled</p>
-      <p class="empty-sub">Schedule a consultation with a lead</p>
+      <p class="empty-title">{{ t("vendor.overview.noCallsTitle") }}</p>
+      <p class="empty-sub">{{ t("vendor.overview.noCallsSub") }}</p>
     </div>
   </div>
 </template>

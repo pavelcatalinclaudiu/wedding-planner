@@ -55,7 +55,12 @@
     "completed": "Completed",
     "active": "Active",
     "inactive": "Inactive",
-    "new": "New"
+    "new": "New",
+    "minsAgo": "{m}m ago",
+    "hrsAgo": "{h}h ago",
+    "daysAgo": "{d}d ago",
+    "inMins": "in {m}m",
+    "inHrs": "in {h}h"
   },
 
   "brand": {
@@ -716,7 +721,10 @@
       "RESPONDED": "Responded",
       "BOOKED": "Booked",
       "DECLINED": "Declined",
-      "CLOSED": "Closed"
+      "CLOSED": "Closed",
+      "IN_DISCUSSION": "In Discussion",
+      "OFFER_SENT": "Offer Sent",
+      "CHAT": "Chat"
     },
     "noLeads": "No enquiries yet.",
     "sendOffer": "Send offer",
@@ -860,7 +868,8 @@
       "newToday": "new today",
       "thisWeek": "this week",
       "reviews": "reviews",
-      "within24h": "within 24h"
+      "within24h": "within 24h",
+      "noChange": "No change"
     },
     "overview": {
       "title": "Overview",
@@ -870,8 +879,26 @@
       "totalRevenue": "Total revenue",
       "responseRate": "Response rate",
       "rating": "Average rating",
-      "recentLeads": "Recent enquiries",
-      "upcomingEvents": "Upcoming events"
+      "recentLeads": "Recent Leads",
+      "upcomingEvents": "Upcoming events",
+      "viewAll": "View all →",
+      "noLeadsTitle": "No new leads yet",
+      "noLeadsSub": "Your profile is live — couples will find you soon",
+      "upcomingCalls": "Upcoming Calls",
+      "join": "Join",
+      "noCallsTitle": "No calls scheduled",
+      "noCallsSub": "Schedule a consultation with a lead",
+      "profilePerformance": "Profile Performance",
+      "searchRank": "Search rank",
+      "avgResponseTime": "Avg response time",
+      "excellent": "Excellent",
+      "good": "Good",
+      "slow": "Slow",
+      "noData": "No data",
+      "platformAvg": "Platform avg:",
+      "noPerfData": "No performance data yet",
+      "monthlyLeads": "Monthly Leads",
+      "noLeadData": "No lead data yet"
     },
     "portfolio": {
       "title": "Portfolio",

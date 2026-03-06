@@ -35,8 +35,7 @@ async function submit() {
     });
     step.value = form.value.attending ? "thanks" : "declined";
   } catch (e: any) {
-    error.value =
-      e?.response?.data?.message ?? t("errors.serverError");
+    error.value = e?.response?.data?.message ?? t("errors.serverError");
   } finally {
     loading.value = false;
   }

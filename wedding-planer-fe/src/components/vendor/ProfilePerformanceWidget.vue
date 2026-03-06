@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
 import type { ProfilePerformanceDTO } from "@/types/vendor.types";
 
 const props = defineProps<{
@@ -14,10 +15,10 @@ function rankColour(rank: number): string {
 
 function responseLabel(hours: number): { text: string; colour: string } {
   if (hours < 0)
-    return { text: "No data", colour: "var(--color-muted, #8a7f76)" };
-  if (hours < 2) return { text: "Excellent", colour: "#2e7d32" };
-  if (hours < 12) return { text: "Good", colour: "#e65100" };
-  return { text: "Slow", colour: "#c62828" };
+    return { text: t("vendor.overview.noData"), colour: "var(--color-muted, #8a7f76)" };
+  if (hours < 2) return { text: t("vendor.overview.excellent"), colour: "#2e7d32" };
+  if (hours < 12) return { text: t("vendor.overview.good"), colour: "#e65100" };
+  return { text: t("vendor.overview.slow"), colour: "#c62828" };
 }
 
 function formatHours(h: number): string {
@@ -35,7 +36,7 @@ function conversionColour(rate: number, avg: number): string {
 
 <template>
   <div class="widget">
-    <h3 class="widget-title">Profile Performance</h3>
+    <h3 class="widget-title">{{ t("vendor.overview.profilePerformance") }}</h3>
 
     <template v-if="loading">
       <div v-for="i in 3" :key="i" class="sk-row">
@@ -47,7 +48,7 @@ function conversionColour(rate: number, avg: number): string {
     <template v-else-if="data">
       <!-- Search Rank -->
       <div class="perf-row">
-        <span class="perf-label">Search rank</span>
+        <span class="perf-label">{{ t("vendor.overview.searchRank") }}</span>
         <div class="perf-val-group">
           <span
             class="perf-val"
@@ -62,7 +63,7 @@ function conversionColour(rate: number, avg: number): string {
 
       <!-- Avg Response Time -->
       <div class="perf-row">
-        <span class="perf-label">Avg response time</span>
+        <span class="perf-label">{{ t("vendor.overview.avgResponseTime") }}</span>
         <div class="perf-val-group">
           <span class="perf-val">{{
             formatHours(data.avgResponseTimeHours)
@@ -79,7 +80,7 @@ function conversionColour(rate: number, avg: number): string {
 
       <!-- Conversion Rate -->
       <div class="perf-row">
-        <span class="perf-label">Conversion rate</span>
+        <span class="perf-label">{{ t("vendor.overview.conversionRate") }}</span>
         <div class="perf-val-group">
           <span
             class="perf-val"
@@ -93,13 +94,13 @@ function conversionColour(rate: number, avg: number): string {
             {{ data.conversionRate }}%
           </span>
           <span class="perf-sub"
-            >Platform avg: {{ data.platformAvgConversion }}%</span
+            >{{ t("vendor.overview.platformAvg") }} {{ data.platformAvgConversion }}%</span
           >
         </div>
       </div>
     </template>
 
-    <div v-else class="empty">No performance data yet</div>
+    <div v-else class="empty">{{ t("vendor.overview.noPerfData") }}</div>
   </div>
 </template>
 

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import type { RecentLeadDTO } from "@/types/vendor.types";
 
 const props = defineProps<{
@@ -8,6 +9,7 @@ const props = defineProps<{
 }>();
 
 const router = useRouter();
+const { t } = useI18n();
 
 function openLead() {
   router.push("/vendor/leads");
@@ -25,10 +27,10 @@ function initials(name: string): string {
 function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diff / 60_000);
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 60) return t("common.minsAgo", { m: mins });
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  return `${Math.floor(hrs / 24)}d ago`;
+  if (hrs < 24) return t("common.hrsAgo", { h: hrs });
+  return t("common.daysAgo", { d: Math.floor(hrs / 24) });
 }
 
 const statusColour: Record<string, string> = {
@@ -44,8 +46,8 @@ const statusColour: Record<string, string> = {
 <template>
   <div class="widget">
     <div class="widget-header">
-      <h3>Recent Leads</h3>
-      <RouterLink to="/vendor/leads" class="view-all">View all →</RouterLink>
+      <h3>{{ t("vendor.overview.recentLeads") }}</h3>
+      <RouterLink to="/vendor/leads" class="view-all">{{ t("vendor.overview.viewAll") }}</RouterLink>
     </div>
 
     <template v-if="loading">
@@ -82,15 +84,15 @@ const statusColour: Record<string, string> = {
           <span
             class="status-pill"
             :style="{ background: statusColour[lead.status] ?? '#999' }"
-            >{{ lead.status.replace("_", " ") }}</span
+            >{{ t("leads.statuses." + lead.status, lead.status.replace(/_/g, " ")) }}</span
           >
         </div>
       </button>
     </template>
 
     <div v-else class="empty">
-      <p class="empty-title">No new leads yet</p>
-      <p class="empty-sub">Your profile is live — couples will find you soon</p>
+      <p class="empty-title">{{ t("vendor.overview.noLeadsTitle") }}</p>
+      <p class="empty-sub">{{ t("vendor.overview.noLeadsSub") }}</p>
     </div>
   </div>
 </template>

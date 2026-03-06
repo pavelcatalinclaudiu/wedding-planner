@@ -61,9 +61,9 @@ onMounted(async () => {
           <p>
             {{ t("website.rsvpDesc") }}
           </p>
-          <RouterLink :to="`/rsvp/${route.params.slug}`" class="rsvp-btn"
-            >{{ t("website.rsvpBtn") }}</RouterLink
-          >
+          <RouterLink :to="`/rsvp/${route.params.slug}`" class="rsvp-btn">{{
+            t("website.rsvpBtn")
+          }}</RouterLink>
         </section>
       </div>
 

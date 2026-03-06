@@ -160,7 +160,9 @@ onMounted(async () => {
     </div>
     <div v-else-if="!vendor" class="state-msg">
       {{ t("publicVendor.notFound") }}
-      <RouterLink to="/vendors">{{ t("publicVendor.backToDirectory") }}</RouterLink>
+      <RouterLink to="/vendors">{{
+        t("publicVendor.backToDirectory")
+      }}</RouterLink>
     </div>
 
     <template v-else>
@@ -206,7 +208,8 @@ onMounted(async () => {
               }})</span
             >
             <span v-if="vendor.yearsExperience">
-              · {{ vendor.yearsExperience }} {{ t("publicVendor.yearsExp") }}</span
+              · {{ vendor.yearsExperience }}
+              {{ t("publicVendor.yearsExp") }}</span
             >
           </p>
         </div>
@@ -222,24 +225,34 @@ onMounted(async () => {
             <p v-if="vendor.description" class="about-text">
               {{ vendor.description }}
             </p>
-            <p v-else class="about-text muted">{{ t("publicVendor.noDescription") }}</p>
+            <p v-else class="about-text muted">
+              {{ t("publicVendor.noDescription") }}
+            </p>
             <div class="quick-facts">
               <div v-if="vendor.basePrice" class="qf">
-                <span class="qf-label">{{ t("publicVendor.startingFrom") }}</span>
+                <span class="qf-label">{{
+                  t("publicVendor.startingFrom")
+                }}</span>
                 <span class="qf-val"
                   >{{ vendor.basePrice.toLocaleString() }} RON</span
                 >
               </div>
               <div v-if="vendor.yearsExperience" class="qf">
                 <span class="qf-label">{{ t("publicVendor.experience") }}</span>
-                <span class="qf-val">{{ t("publicVendor.yearsExperience", { n: vendor.yearsExperience }) }}</span>
+                <span class="qf-val">{{
+                  t("publicVendor.yearsExperience", {
+                    n: vendor.yearsExperience,
+                  })
+                }}</span>
               </div>
               <div v-if="vendor.languages?.length" class="qf">
                 <span class="qf-label">{{ t("publicVendor.languages") }}</span>
                 <span class="qf-val">{{ vendor.languages.join(", ") }}</span>
               </div>
               <div class="qf">
-                <span class="qf-label">{{ t("publicVendor.responseTime") }}</span>
+                <span class="qf-label">{{
+                  t("publicVendor.responseTime")
+                }}</span>
                 <span class="qf-val">{{
                   formatResponseTime(avgResponseHours)
                 }}</span>
@@ -336,7 +349,9 @@ onMounted(async () => {
           <section v-if="partners.length" class="vp-section">
             <h2 class="sec-title">{{ t("publicVendor.workingWith") }}</h2>
             <p class="ww-subtitle">
-              {{ t("publicVendor.workingWithSub", { name: vendor.businessName }) }}
+              {{
+                t("publicVendor.workingWithSub", { name: vendor.businessName })
+              }}
             </p>
             <div class="ww-grid">
               <a
@@ -369,7 +384,8 @@ onMounted(async () => {
           <!-- Reviews -->
           <section class="vp-section">
             <h2 class="sec-title">
-              {{ t("publicVendor.reviews") }} <span class="review-count">({{ reviews.length }})</span>
+              {{ t("publicVendor.reviews") }}
+              <span class="review-count">({{ reviews.length }})</span>
             </h2>
             <div v-if="reviews.length" class="reviews-layout">
               <div class="rating-breakdown">
@@ -395,16 +411,18 @@ onMounted(async () => {
                   </div>
                   <p class="review-text">{{ r.comment }}</p>
                   <div v-if="r.vendorReply" class="vendor-reply">
-                    <span class="reply-label"
-                      >{{ t("publicVendor.replyFrom", { name: vendor.businessName }) }}</span
-                    >
+                    <span class="reply-label">{{
+                      t("publicVendor.replyFrom", { name: vendor.businessName })
+                    }}</span>
                     <p class="reply-text">{{ r.vendorReply }}</p>
                   </div>
                 </div>
               </div>
             </div>
             <p v-else class="muted">
-              {{ t("publicVendor.noReviewsYet", { name: vendor.businessName }) }}
+              {{
+                t("publicVendor.noReviewsYet", { name: vendor.businessName })
+              }}
             </p>
           </section>
         </div>
@@ -417,13 +435,20 @@ onMounted(async () => {
                 {{ t("publicVendor.startingFrom") }}
                 <strong>{{ vendor.basePrice.toLocaleString() }} RON</strong>
               </p>
-              <p v-else class="ep-price-nr">{{ t("publicVendor.priceOnRequest") }}</p>
+              <p v-else class="ep-price-nr">
+                {{ t("publicVendor.priceOnRequest") }}
+              </p>
               <div v-if="vendor.averageRating" class="ep-rating">
                 <span class="stars"
                   >★ {{ vendor.averageRating.toFixed(1) }}</span
                 >
                 <span class="rc"
-                  >({{ vendor.reviewCount }} {{ vendor.reviewCount !== 1 ? t("vendor.analytics.reviewPlural") : t("vendor.analytics.reviewSingular") }})</span
+                  >({{ vendor.reviewCount }}
+                  {{
+                    vendor.reviewCount !== 1
+                      ? t("vendor.analytics.reviewPlural")
+                      : t("vendor.analytics.reviewSingular")
+                  }})</span
                 >
               </div>
             </div>
@@ -444,9 +469,15 @@ onMounted(async () => {
               <p class="ep-note">
                 {{ t("publicVendor.noObligation") }}
                 {{
-                  !avgResponseHours || avgResponseHours <= 0 || avgResponseHours >= 24
+                  !avgResponseHours ||
+                  avgResponseHours <= 0 ||
+                  avgResponseHours >= 24
                     ? t("publicVendor.respondTime24h")
-                    : t("publicVendor.respondTimeTypically", { time: formatResponseTime(avgResponseHours).toLowerCase() })
+                    : t("publicVendor.respondTimeTypically", {
+                        time: formatResponseTime(
+                          avgResponseHours,
+                        ).toLowerCase(),
+                      })
                 }}
               </p>
             </template>
@@ -458,14 +489,22 @@ onMounted(async () => {
               </div>
               <div v-if="vendor.yearsExperience" class="ep-detail">
                 <span>⏳</span
-                ><span>{{ t("publicVendor.yearsExperience", { n: vendor.yearsExperience }) }}</span>
+                ><span>{{
+                  t("publicVendor.yearsExperience", {
+                    n: vendor.yearsExperience,
+                  })
+                }}</span>
               </div>
               <div class="ep-detail">
                 <span>💬</span
-                ><span>{{ vendor.languages?.join(", ") || t("publicVendor.defaultLanguage") }}</span>
+                ><span>{{
+                  vendor.languages?.join(", ") ||
+                  t("publicVendor.defaultLanguage")
+                }}</span>
               </div>
               <div class="ep-detail">
-                <span>📅</span><span>{{ t("publicVendor.checkAvailability") }}</span>
+                <span>📅</span
+                ><span>{{ t("publicVendor.checkAvailability") }}</span>
               </div>
             </div>
           </div>

@@ -24,7 +24,8 @@ onMounted(async () => {
   } catch (e: unknown) {
     const err = e as { response?: { data?: { message?: string } } };
     status.value = "error";
-    error.value = err.response?.data?.message ?? t("auth.verifyEmail.verificationFailed");
+    error.value =
+      err.response?.data?.message ?? t("auth.verifyEmail.verificationFailed");
   }
 });
 
@@ -54,7 +55,9 @@ async function resend() {
         <span class="icon">✓</span>
         <h2>{{ t("auth.verifyEmail.verified") }}</h2>
         <p>{{ t("auth.verifyEmail.active") }}</p>
-        <RouterLink to="/login" class="btn-primary">{{ t("auth.verifyEmail.goToLogin") }}</RouterLink>
+        <RouterLink to="/login" class="btn-primary">{{
+          t("auth.verifyEmail.goToLogin")
+        }}</RouterLink>
       </div>
 
       <div v-else class="state-msg error">
