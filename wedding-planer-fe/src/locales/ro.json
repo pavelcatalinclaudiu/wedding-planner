@@ -724,6 +724,8 @@
       "CLOSED": "Închis",
       "IN_DISCUSSION": "În Discuţie",
       "OFFER_SENT": "Ofertă Trimisă",
+      "QUOTED": "Ofertă Trimisă",
+      "QUOTED_COUPLE": "Ofertă Primită",
       "CHAT": "Chat"
     },
     "noLeads": "Nu ai solicitări.",
@@ -760,7 +762,10 @@
     "packagePlaceholder": "Descrierea pachetului...",
     "price": "Preț (€)",
     "expiresOn": "Expiră la",
-    "pendingOfferAwaiting": "O ofertă în așteptare așteaptă răspunsul cuplului."
+    "pendingOfferAwaiting": "O ofertă în așteptare așteaptă răspunsul cuplului.",
+    "cardAccept": "Acceptă",
+    "cardDecline": "Refuză",
+    "openChat": "Deschide chat →"
   },
 
   "messaging": {

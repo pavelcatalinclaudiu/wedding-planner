@@ -724,6 +724,8 @@
       "CLOSED": "Closed",
       "IN_DISCUSSION": "In Discussion",
       "OFFER_SENT": "Offer Sent",
+      "QUOTED": "Offer Sent",
+      "QUOTED_COUPLE": "Offer Received",
       "CHAT": "Chat"
     },
     "noLeads": "No enquiries yet.",
@@ -760,7 +762,10 @@
     "packagePlaceholder": "Describe what's included...",
     "price": "Price (£)",
     "expiresOn": "Expires on",
-    "pendingOfferAwaiting": "A pending offer is awaiting the couple's response."
+    "pendingOfferAwaiting": "A pending offer is awaiting the couple's response.",
+    "cardAccept": "Accept",
+    "cardDecline": "Decline",
+    "openChat": "Open chat →"
   },
 
   "messaging": {

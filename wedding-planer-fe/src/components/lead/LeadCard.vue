@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 import type { Lead } from "@/types/lead.types";
 import LeadStatusBadge from "./LeadStatusBadge.vue";
+
+const { t, locale } = useI18n();
 
 const props = defineProps<{
   lead: Lead;
@@ -24,6 +27,15 @@ const budget = computed(() =>
     : null,
 );
 
+const formattedEventDate = computed(() => {
+  if (!props.lead.eventDate) return null;
+  return new Date(props.lead.eventDate).toLocaleDateString(locale.value, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+});
+
 const canAct = computed(
   () => props.role === "VENDOR" && props.lead.status === "NEW",
 );
@@ -39,7 +51,7 @@ const canAct = computed(
     </div>
 
     <div class="lead-meta">
-      <span v-if="lead.eventDate">📅 {{ lead.eventDate }}</span>
+      <span v-if="formattedEventDate">📅 {{ formattedEventDate }}</span>
       <span v-if="budget">💰 {{ budget }}</span>
       <span v-if="role === 'COUPLE'">{{ lead.vendorCategory }}</span>
     </div>
@@ -48,10 +60,10 @@ const canAct = computed(
 
     <div v-if="canAct" class="lead-actions" @click.stop>
       <button class="btn btn-accept" @click="emit('accept', lead.id)">
-        Accept
+        {{ t("leads.cardAccept") }}
       </button>
       <button class="btn btn-decline" @click="emit('decline', lead.id)">
-        Decline
+        {{ t("leads.cardDecline") }}
       </button>
     </div>
 
@@ -62,7 +74,7 @@ const canAct = computed(
       <span
         v-if="['IN_DISCUSSION', 'QUOTED'].includes(lead.status)"
         class="chat-hint"
-        >Open chat →</span
+        >{{ t("leads.openChat") }}</span
       >
     </div>
   </div>

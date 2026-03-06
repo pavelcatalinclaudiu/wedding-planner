@@ -1,31 +1,21 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 import type { LeadStatus } from "@/types/lead.types";
+
+const { t } = useI18n();
 
 const props = defineProps<{
   status: LeadStatus;
   perspective?: "COUPLE" | "VENDOR";
 }>();
 
-const vendorLabels: Record<LeadStatus, string> = {
-  NEW: "New",
-  VIEWED: "Viewed",
-  IN_DISCUSSION: "In Discussion",
-  QUOTED: "Offer Sent",
-  BOOKED: "Booked",
-  DECLINED: "Declined",
-};
-
-const coupleLabels: Record<LeadStatus, string> = {
-  ...vendorLabels,
-  QUOTED: "Offer Received",
-};
-
-const label = computed(() =>
-  props.perspective === "COUPLE"
-    ? coupleLabels[props.status]
-    : vendorLabels[props.status],
-);
+const label = computed(() => {
+  if (props.perspective === "COUPLE" && props.status === "QUOTED") {
+    return t("leads.statuses.QUOTED_COUPLE");
+  }
+  return t(`leads.statuses.${props.status}`, props.status);
+});
 </script>
 
 <template>
