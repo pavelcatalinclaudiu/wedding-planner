@@ -1,17 +1,19 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { vendorApi } from "@/api/vendor.api";
 import type { VendorDeepAnalytics } from "@/types/vendor.types";
 
 const data = ref<VendorDeepAnalytics | null>(null);
 const loading = ref(true);
 const error = ref("");
+const { t } = useI18n();
 
 onMounted(async () => {
   try {
     data.value = (await vendorApi.getDeepAnalytics()).data;
   } catch {
-    error.value = "Could not load analytics.";
+    error.value = t("errors.serverError");
   } finally {
     loading.value = false;
   }
@@ -45,11 +47,19 @@ const funnelStages = computed(() => {
   const f = data.value?.leadFunnel;
   if (!f) return [];
   return [
-    { label: "New / Viewed", value: f.newLeads, color: "#6c8ebf" },
-    { label: "In Discussion", value: f.inDiscussion, color: "#82b366" },
-    { label: "Quoted", value: f.quoted, color: "#d4a017" },
-    { label: "Booked", value: f.booked, color: "#27ae60" },
-    { label: "Declined", value: f.declined, color: "#e84040" },
+    {
+      label: t("leads.filterNew") + " / " + t("leads.filterViewed"),
+      value: f.newLeads,
+      color: "#6c8ebf",
+    },
+    {
+      label: t("leads.filterInDiscussion"),
+      value: f.inDiscussion,
+      color: "#82b366",
+    },
+    { label: t("leads.filterOfferSent"), value: f.quoted, color: "#d4a017" },
+    { label: t("leads.filterBooked"), value: f.booked, color: "#27ae60" },
+    { label: t("leads.filterDeclined"), value: f.declined, color: "#e84040" },
   ];
 });
 
@@ -79,20 +89,18 @@ function ratingColor(r: number) {
 <template>
   <div class="analytics-view">
     <div class="page-header">
-      <h2>Analytics</h2>
-      <p class="subtitle">
-        Historical trends and pipeline depth — the numbers behind your Overview.
-      </p>
+      <h2>{{ t("vendor.analytics.title") }}</h2>
+      <p class="subtitle">{{ t("vendor.analytics.subtitle") }}</p>
     </div>
 
-    <div v-if="loading" class="state-msg">Loading…</div>
+    <div v-if="loading" class="state-msg">{{ t("common.loading") }}</div>
     <div v-else-if="error" class="state-msg err">{{ error }}</div>
 
     <template v-else-if="data">
       <!-- ── 1. Revenue trend ─────────────────────────────────────────────── -->
       <section class="card">
-        <h3 class="card-title">Revenue — Last 12 Months</h3>
-        <p class="card-sub">Actual booking value confirmed each month</p>
+        <h3 class="card-title">{{ t("vendor.analytics.revenueTitle") }}</h3>
+        <p class="card-sub">{{ t("vendor.analytics.revenueSub") }}</p>
         <div class="bar-chart">
           <div
             v-for="m in data.revenueByMonth"
@@ -111,7 +119,7 @@ function ratingColor(r: number) {
           </div>
         </div>
         <p class="chart-note">
-          Total:
+          {{ t("vendor.analytics.revenueTotal") }}
           <strong
             >{{
               formatRevenue(
@@ -120,20 +128,18 @@ function ratingColor(r: number) {
             }}
             RON</strong
           >
-          across
+          {{ t("common.of") }}
           <strong
-            >{{
-              data.revenueByMonth.reduce((s, m) => s + m.bookings, 0)
-            }}
-            bookings</strong
+            >{{ data.revenueByMonth.reduce((s, m) => s + m.bookings, 0) }}
+            {{ t("vendor.analytics.revenueBookings") }}</strong
           >
         </p>
       </section>
 
       <!-- ── 2. Lead funnel ──────────────────────────────────────────────── -->
       <section class="card">
-        <h3 class="card-title">Lead Pipeline</h3>
-        <p class="card-sub">Where your enquiries end up</p>
+        <h3 class="card-title">{{ t("vendor.analytics.funnelTitle") }}</h3>
+        <p class="card-sub">{{ t("vendor.analytics.funnelSub") }}</p>
         <div class="funnel">
           <div
             v-for="stage in funnelStages"
@@ -157,16 +163,15 @@ function ratingColor(r: number) {
           </div>
         </div>
         <p class="chart-note">
-          Total leads: <strong>{{ funnelTotal }}</strong>
+          {{ t("vendor.analytics.funnelTotal") }}
+          <strong>{{ funnelTotal }}</strong>
         </p>
       </section>
 
       <!-- ── 3. Booking peaks ────────────────────────────────────────────── -->
       <section class="card">
-        <h3 class="card-title">Wedding Month Distribution</h3>
-        <p class="card-sub">
-          How your confirmed bookings' event dates fall across the year
-        </p>
+        <h3 class="card-title">{{ t("vendor.analytics.peaksTitle") }}</h3>
+        <p class="card-sub">{{ t("vendor.analytics.peaksSub") }}</p>
         <div class="bar-chart peak-chart">
           <div
             v-for="p in data.bookingPeaks"
@@ -185,8 +190,8 @@ function ratingColor(r: number) {
 
       <!-- ── 4. Rating trend ─────────────────────────────────────────────── -->
       <section class="card">
-        <h3 class="card-title">Rating by Quarter</h3>
-        <p class="card-sub">How your average score has moved over time</p>
+        <h3 class="card-title">{{ t("vendor.analytics.ratingTitle") }}</h3>
+        <p class="card-sub">{{ t("vendor.analytics.ratingSub") }}</p>
         <div class="rating-table">
           <div
             v-for="q in data.ratingByQuarter"
@@ -199,8 +204,8 @@ function ratingColor(r: number) {
             </span>
             <span class="q-count">{{
               q.reviewCount
-                ? `${q.reviewCount} review${q.reviewCount !== 1 ? "s" : ""}`
-                : "no reviews"
+                ? `${q.reviewCount} ${q.reviewCount !== 1 ? t("vendor.analytics.reviewPlural") : t("vendor.analytics.reviewSingular")}`
+                : t("vendor.analytics.noReviewsLabel")
             }}</span>
           </div>
         </div>

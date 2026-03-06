@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 
+const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 
@@ -15,8 +17,8 @@ const intentQuery = computed(() =>
   <div class="auth-page">
     <div class="auth-card register-choice">
       <div class="auth-logo">Eternelle</div>
-      <h1 class="auth-title">Join Eternelle</h1>
-      <p class="auth-subtitle">Tell us about yourself</p>
+      <h1 class="auth-title">{{ t("auth.register.title") }}</h1>
+      <p class="auth-subtitle">{{ t("auth.register.subtitle") }}</p>
 
       <div class="role-cards">
         <button
@@ -24,20 +26,19 @@ const intentQuery = computed(() =>
           @click="router.push(`/register/couple${intentQuery}`)"
         >
           <span class="role-icon">💍</span>
-          <h2>I'm getting married</h2>
-          <p>Plan your wedding, manage vendors, and celebrate your day.</p>
+          <h2>{{ t("auth.register.coupleCard.title") }}</h2>
+          <p>{{ t("auth.register.coupleCard.description") }}</p>
         </button>
         <button class="role-card" @click="router.push('/register/vendor')">
           <span class="role-icon">🎉</span>
-          <h2>I'm a vendor</h2>
-          <p>
-            Grow your business and connect with couples planning their big day.
-          </p>
+          <h2>{{ t("auth.register.vendorCard.title") }}</h2>
+          <p>{{ t("auth.register.vendorCard.description") }}</p>
         </button>
       </div>
 
       <p class="auth-links">
-        Already have an account? <RouterLink to="/login">Sign in</RouterLink>
+        {{ t("auth.register.alreadyHaveAccount") }}
+        <RouterLink to="/login">{{ t("auth.register.signIn") }}</RouterLink>
       </p>
     </div>
   </div>

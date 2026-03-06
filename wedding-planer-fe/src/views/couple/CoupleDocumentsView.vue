@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { coupleApi } from "@/api/couple.api";
 
+const { t } = useI18n();
 const apiBase = import.meta.env.VITE_API_BASE_URL as string; // e.g. http://localhost:8080/api
 
 const documents = ref<
@@ -54,9 +56,9 @@ onMounted(fetchDocs);
 <template>
   <div class="docs-view">
     <div class="docs-header">
-      <h2>Documents</h2>
+      <h2>{{ t("documents.title") }}</h2>
       <button class="upload-btn" @click="fileInputRef?.click()">
-        + Upload
+        + {{ t("documents.upload") }}
       </button>
       <input
         ref="fileInputRef"
@@ -67,11 +69,13 @@ onMounted(fetchDocs);
       />
     </div>
 
-    <div v-if="uploading" class="upload-progress">Uploading…</div>
+    <div v-if="uploading" class="upload-progress">
+      {{ t("documents.uploading") }}
+    </div>
 
-    <div v-if="loading" class="loading">Loading documents…</div>
+    <div v-if="loading" class="loading">{{ t("documents.loading") }}</div>
     <div v-else-if="documents.length === 0" class="empty">
-      No documents uploaded yet.
+      {{ t("documents.noDocuments") }}
     </div>
     <div v-else class="doc-list">
       <div v-for="doc in documents" :key="doc.id" class="doc-row">

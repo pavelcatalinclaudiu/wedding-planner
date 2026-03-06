@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { computed, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { useVideoCallsStore } from "@/stores/videoCalls.store";
 import VideoCallCard from "@/components/video/VideoCallCard.vue";
 import ScheduleCallModal from "@/components/video/ScheduleCallModal.vue";
 
+const { t } = useI18n();
 const videoStore = useVideoCallsStore();
 
 onMounted(() => videoStore.fetchCalls());
@@ -41,12 +43,12 @@ async function onCallScheduled() {
 <template>
   <div class="calls-view">
     <div class="calls-header">
-      <h2>Video Calls</h2>
+      <h2>{{ t("videoCalls.title") }}</h2>
     </div>
 
     <!-- Upcoming / active calls -->
     <section v-if="upcomingCalls.length" class="calls-section">
-      <h3 class="section-title">Upcoming</h3>
+      <h3 class="section-title">{{ t("videoCalls.upcoming") }}</h3>
       <div class="cards-grid">
         <VideoCallCard
           v-for="call in upcomingCalls"
@@ -61,7 +63,7 @@ async function onCallScheduled() {
 
     <!-- Past calls -->
     <section v-if="pastCalls.length" class="calls-section">
-      <h3 class="section-title">Past Calls</h3>
+      <h3 class="section-title">{{ t("videoCalls.pastCalls") }}</h3>
       <div class="past-list">
         <div v-for="call in pastCalls" :key="call.id" class="past-row">
           <div class="past-info">
@@ -77,13 +79,9 @@ async function onCallScheduled() {
 
     <!-- Empty state -->
     <div v-if="!videoStore.calls.length" class="empty">
-      <p>No video calls scheduled yet.</p>
+      <p>{{ t("videoCalls.noCalls") }}</p>
       <p class="empty-hint">
-        Go to
-        <RouterLink to="/couple/enquiries" class="link"
-          >My Enquiries</RouterLink
-        >
-        and select a vendor to schedule a call.
+        {{ t("videoCalls.goToEnquiries") }}
       </p>
     </div>
 

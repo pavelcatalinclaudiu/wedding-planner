@@ -1,8 +1,14 @@
 ﻿<script setup lang="ts">
 import { ref, computed } from "vue";
 import { useRoute } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { useAuthStore } from "@/stores/auth.store";
 import { useAuthRedirect } from "@/composables/useAuthRedirect";
+
+const { t } = useI18n();
+const route = useRoute();
+const authStore = useAuthStore();
+const { getEnquiryIntent, redirectAfterAuth } = useAuthRedirect();
 
 const route = useRoute();
 const authStore = useAuthStore();
@@ -60,42 +66,40 @@ async function handleLogin() {
           {{ !intent.vendorPhotoUrl ? intent.vendorName[0] : "" }}
         </div>
         <div class="intent-text">
-          <span class="intent-label">You were about to contact</span>
+          <span class="intent-label">{{ t("auth.login.aboutToContact") }}</span>
           <span class="intent-name">{{ intent.vendorName }}</span>
           <span class="intent-meta">
             {{ intent.vendorCategory?.replace(/_/g, " ") }} ·
             {{ intent.vendorCity }}
           </span>
         </div>
-        <span class="intent-badge">✦ Enquiry saved</span>
+        <span class="intent-badge">{{ t("auth.login.enquirySaved") }}</span>
       </div>
 
       <h1 class="auth-title">
-        {{ intent ? "Log in to send your enquiry" : "Welcome back" }}
+        {{ intent ? t("auth.login.titleWithIntent") : t("auth.login.title") }}
       </h1>
       <p class="auth-subtitle">
         {{
-          intent
-            ? "Your message will be sent automatically after you log in."
-            : "Plan your perfect day"
+          intent ? t("auth.login.subtitleWithIntent") : t("auth.login.subtitle")
         }}
       </p>
 
       <form @submit.prevent="handleLogin" class="auth-form">
         <div class="field">
-          <label for="email">Email</label>
+          <label for="email">{{ t("auth.login.email") }}</label>
           <input
             id="email"
             v-model="email"
             type="email"
-            placeholder="you@example.com"
+            :placeholder="t('auth.login.emailPlaceholder')"
             autocomplete="email"
             required
           />
         </div>
 
         <div class="field">
-          <label for="password">Password</label>
+          <label for="password">{{ t("auth.login.password") }}</label>
           <div class="password-wrapper">
             <input
               id="password"
@@ -110,7 +114,7 @@ async function handleLogin() {
               class="toggle-password"
               @click="showPassword = !showPassword"
             >
-              {{ showPassword ? "Hide" : "Show" }}
+              {{ showPassword ? t("auth.login.hide") : t("auth.login.show") }}
             </button>
           </div>
         </div>
@@ -118,14 +122,19 @@ async function handleLogin() {
         <p v-if="error" class="error-msg">{{ error }}</p>
 
         <button type="submit" class="btn-primary" :disabled="loading">
-          {{ loading ? "Signing in…" : "Sign in" }}
+          {{ loading ? t("common.loading") : t("auth.login.submit") }}
         </button>
       </form>
 
       <div class="auth-links">
-        <RouterLink to="/reset-password">Forgot password?</RouterLink>
+        <RouterLink to="/reset-password">{{
+          t("auth.login.forgotPassword")
+        }}</RouterLink>
         <span>·</span>
-        <RouterLink :to="registerLink">Create account</RouterLink>
+        <RouterLink :to="registerLink"
+          >{{ t("auth.login.noAccount") }}
+          {{ t("auth.login.register") }}</RouterLink
+        >
       </div>
     </div>
   </div>

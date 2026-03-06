@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { useAuthStore } from "@/stores/auth.store";
 import { useVendorStore } from "@/stores/vendor.store";
 import { useLeadsStore } from "@/stores/leads.store";
 import { useMessagesStore } from "@/stores/messages.store";
 import { useSidebar } from "@/composables/useSidebar";
+import { setLocale } from "@/i18n";
 
+const { t, locale } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
@@ -18,34 +21,79 @@ const { sidebarOpen, close } = useSidebar();
 const unreadCount = computed(() => messagesStore.totalUnread());
 const newLeadsCount = computed(() => leadsStore.newLeadsCount);
 
-const navItems = [
+const navItems = computed(() => [
   {
-    section: "Business",
+    section: t("nav.vendor.sections.business"),
     items: [
-      { label: "Overview", path: "/vendor/overview", icon: "⊞" },
-      { label: "Inbox", path: "/vendor/leads", icon: "◈", badge: "leads" },
-      { label: "Availability", path: "/vendor/calendar", icon: "◎" },
-      { label: "Video Calls", path: "/vendor/calls", icon: "⊙" },
+      {
+        label: t("nav.vendor.items.overview"),
+        path: "/vendor/overview",
+        icon: "⊞",
+      },
+      {
+        label: t("nav.vendor.items.inbox"),
+        path: "/vendor/leads",
+        icon: "◈",
+        badge: "leads",
+      },
+      {
+        label: t("nav.vendor.items.availability"),
+        path: "/vendor/calendar",
+        icon: "◎",
+      },
+      {
+        label: t("nav.vendor.items.videoCalls"),
+        path: "/vendor/calls",
+        icon: "⊙",
+      },
     ],
   },
   {
-    section: "Profile",
+    section: t("nav.vendor.sections.profile"),
     items: [
-      { label: "Portfolio", path: "/vendor/portfolio", icon: "★" },
-      { label: "Reviews", path: "/vendor/reviews", icon: "✦" },
-      { label: "Partner Network", path: "/vendor/network", icon: "⊗" },
-      { label: "Group Chat", path: "/vendor/group-chat", icon: "⊙" },
+      {
+        label: t("nav.vendor.items.portfolio"),
+        path: "/vendor/portfolio",
+        icon: "★",
+      },
+      {
+        label: t("nav.vendor.items.reviews"),
+        path: "/vendor/reviews",
+        icon: "✦",
+      },
+      {
+        label: t("nav.vendor.items.partnerNetwork"),
+        path: "/vendor/network",
+        icon: "⊗",
+      },
+      {
+        label: t("nav.vendor.items.groupChat"),
+        path: "/vendor/group-chat",
+        icon: "⊙",
+      },
     ],
   },
   {
-    section: "Account",
+    section: t("nav.vendor.sections.account"),
     items: [
-      { label: "Analytics", path: "/vendor/analytics", icon: "≋" },
-      { label: "Subscription", path: "/vendor/subscription", icon: "◇" },
-      { label: "My Profile", path: "/vendor/profile", icon: "◉" },
+      {
+        label: t("nav.vendor.items.analytics"),
+        path: "/vendor/analytics",
+        icon: "≋",
+      },
+      {
+        label: t("nav.vendor.items.subscription"),
+        path: "/vendor/subscription",
+        icon: "◇",
+      },
+      {
+        label: t("nav.vendor.items.myProfile"),
+        path: "/vendor/profile",
+        icon: "◉",
+      },
     ],
   },
-];
+]);
 
 function isActive(path: string) {
   return route.path.startsWith(path);
@@ -66,6 +114,10 @@ onMounted(() => {
 function logout() {
   authStore.logout();
   router.push("/login");
+}
+
+function switchLang() {
+  setLocale(locale.value === "ro" ? "en" : "ro");
 }
 </script>
 
@@ -117,7 +169,12 @@ function logout() {
       </div>
     </div>
 
-    <button class="logout-btn" @click="logout">Sign out</button>
+    <button class="lang-btn" @click="switchLang" :title="t('lang.switch')">
+      {{ locale === "ro" ? "🇬🇧 EN" : "🇷🇴 RO" }}
+    </button>
+    <button class="logout-btn" @click="logout">
+      {{ t("common.signOut") }}
+    </button>
   </nav>
 </template>
 
@@ -241,7 +298,7 @@ function logout() {
   text-align: center;
 }
 .logout-btn {
-  margin: 16px 24px 0;
+  margin: 8px 24px 0;
   padding: 8px;
   background: none;
   border: 1.5px solid var(--color-border);
@@ -256,6 +313,24 @@ function logout() {
 .logout-btn:hover {
   border-color: var(--color-error);
   color: var(--color-error);
+}
+.lang-btn {
+  margin: 16px 24px 0;
+  padding: 7px;
+  background: none;
+  border: 1.5px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    color 0.2s;
+  text-align: center;
+}
+.lang-btn:hover {
+  border-color: var(--color-gold);
+  color: var(--color-gold);
 }
 @media (max-width: 767px) {
   .sidebar {

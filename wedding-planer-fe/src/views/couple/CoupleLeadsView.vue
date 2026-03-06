@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { useLeads } from "@/composables/useLeads";
 import { useConversation } from "@/composables/useConversation";
 import { useOffer } from "@/composables/useOffer";
@@ -12,6 +13,8 @@ import OfferCard from "@/components/lead/OfferCard.vue";
 import CallBanner from "@/components/video/CallBanner.vue";
 import ScheduleCallModal from "@/components/video/ScheduleCallModal.vue";
 import type { Lead } from "@/types/lead.types";
+
+const { t } = useI18n();
 
 const { leads, loading, fetchCoupleLeads } = useLeads();
 const { conversation, messages, sending, loadForLead, send } =
@@ -49,10 +52,10 @@ const revisionRequested = computed(
 );
 
 function requestOfferLabel() {
-  if (revisionRequested.value) return "✓ Revision Requested";
+  if (revisionRequested.value) return t("leads.revisionRequested");
   return hasPendingOffer.value
-    ? "Request Different Offer"
-    : "Request New Offer";
+    ? t("leads.requestDifferentOffer")
+    : t("leads.requestNewOffer");
 }
 
 function formatOfferPrice(price: number) {
@@ -149,12 +152,12 @@ async function onCallScheduled(leadId: string) {
     <!-- Sidebar list -->
     <aside class="lead-panel">
       <div class="panel-header">
-        <h2>My Enquiries</h2>
+        <h2>{{ t("leads.title") }}</h2>
       </div>
 
-      <div v-if="loading" class="loading">Loading…</div>
+      <div v-if="loading" class="loading">{{ t("common.loading") }}</div>
       <div v-else-if="leads.length === 0" class="empty">
-        You haven't contacted any vendors yet.
+        {{ t("leads.noLeads") }}
       </div>
       <div v-else class="lead-list">
         <LeadCard
@@ -172,7 +175,7 @@ async function onCallScheduled(leadId: string) {
     <main class="detail-panel">
       <template v-if="!selectedLead">
         <div class="placeholder">
-          <p>Select an enquiry to view the conversation and offers.</p>
+          <p>{{ t("leads.selectEnquiry") }}</p>
         </div>
       </template>
 
@@ -202,7 +205,7 @@ async function onCallScheduled(leadId: string) {
               class="btn-video"
               @click="openScheduleModal"
             >
-              📅 Schedule Call
+              📅 {{ t("leads.scheduleCall") }}
             </button>
             <CallBanner
               v-else
@@ -220,14 +223,14 @@ async function onCallScheduled(leadId: string) {
             :class="{ active: activeTab === 'chat' }"
             @click="activeTab = 'chat'"
           >
-            💬 Chat
+            💬 {{ t("leads.chatTab") }}
           </button>
           <button
             class="tab-btn"
             :class="{ active: activeTab === 'offers' }"
             @click="activeTab = 'offers'"
           >
-            📋 Offers
+            📋 {{ t("leads.offersTab") }}
             <span v-if="offers.length" class="tab-badge">{{
               offers.length
             }}</span>
@@ -242,7 +245,7 @@ async function onCallScheduled(leadId: string) {
           "
           class="pending-notice"
         >
-          <p>Your enquiry is waiting for the vendor to respond.</p>
+          <p>{{ t("leads.waitingForVendor") }}</p>
         </div>
 
         <!-- Chat tab -->
@@ -253,7 +256,9 @@ async function onCallScheduled(leadId: string) {
             :class="latestOffer.status.toLowerCase()"
           >
             <div class="offer-banner-info">
-              <span class="offer-banner-label">Latest offer</span>
+              <span class="offer-banner-label">{{
+                t("leads.latestOffer")
+              }}</span>
               <strong class="offer-banner-price">{{
                 formatOfferPrice(latestOffer.price)
               }}</strong>
@@ -275,7 +280,7 @@ async function onCallScheduled(leadId: string) {
                 {{ requestOfferLabel() }}
               </button>
               <button class="offer-banner-link" @click="activeTab = 'offers'">
-                View all →
+                {{ t("leads.viewAll") }} →
               </button>
             </div>
           </div>
@@ -293,7 +298,7 @@ async function onCallScheduled(leadId: string) {
         <template v-else-if="activeTab === 'offers'">
           <div class="offers-panel">
             <div class="offers-panel-header">
-              <h4>Offers from vendor</h4>
+              <h4>{{ t("leads.offersFromVendor") }}</h4>
               <button
                 v-if="conversation && !hasAcceptedOffer"
                 class="btn-request-offer"
@@ -305,7 +310,7 @@ async function onCallScheduled(leadId: string) {
               </button>
             </div>
             <div v-if="!offers.length" class="offers-empty">
-              No offers sent yet.
+              {{ t("leads.noOffers") }}
             </div>
             <div class="offers-list">
               <OfferCard

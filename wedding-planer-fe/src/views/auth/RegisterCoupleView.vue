@@ -1,10 +1,12 @@
 ﻿<script setup lang="ts">
 import { ref, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { useAuthStore } from "@/stores/auth.store";
 import { coupleApi } from "@/api/couple.api";
 import { useAuthRedirect } from "@/composables/useAuthRedirect";
 
+const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
@@ -69,7 +71,8 @@ async function handleSubmit() {
     redirectAfterAuth("COUPLE");
   } catch (e: unknown) {
     const err = e as { response?: { data?: { message?: string } } };
-    error.value = err.response?.data?.message ?? "Registration failed.";
+    error.value =
+      err.response?.data?.message ?? t("auth.registerCouple.errorFailed");
   } finally {
     loading.value = false;
   }
@@ -94,14 +97,14 @@ async function handleSubmit() {
           {{ !intent.vendorPhotoUrl ? intent.vendorName[0] : "" }}
         </div>
         <div class="intent-text">
-          <span class="intent-label">Complete your account to contact</span>
+          <span class="intent-label">{{ t("auth.login.aboutToContact") }}</span>
           <span class="intent-name">{{ intent.vendorName }}</span>
           <span class="intent-meta">
             {{ intent.vendorCategory?.replace(/_/g, " ") }} ·
             {{ intent.vendorCity }}
           </span>
         </div>
-        <span class="intent-badge">✦ Enquiry saved</span>
+        <span class="intent-badge">{{ t("auth.login.enquirySaved") }}</span>
       </div>
 
       <div class="step-indicator">
@@ -112,10 +115,10 @@ async function handleSubmit() {
 
       <!-- Step 1 -->
       <template v-if="step === 1">
-        <h1 class="auth-title">Create your account</h1>
+        <h1 class="auth-title">{{ t("auth.registerCouple.title") }}</h1>
         <form @submit.prevent="nextStep" class="auth-form">
           <div class="field">
-            <label>Email</label>
+            <label>{{ t("auth.registerCouple.emailLabel") }}</label>
             <input
               v-model="email"
               type="email"
@@ -124,7 +127,7 @@ async function handleSubmit() {
             />
           </div>
           <div class="field">
-            <label>Password</label>
+            <label>{{ t("auth.registerCouple.passwordLabel") }}</label>
             <div class="password-wrapper">
               <input
                 v-model="password"
@@ -137,12 +140,12 @@ async function handleSubmit() {
                 class="toggle-password"
                 @click="showPassword = !showPassword"
               >
-                {{ showPassword ? "Hide" : "Show" }}
+                {{ showPassword ? t("auth.login.hide") : t("auth.login.show") }}
               </button>
             </div>
           </div>
           <div class="field">
-            <label>Confirm password</label>
+            <label>{{ t("auth.registerCouple.confirmPasswordLabel") }}</label>
             <input
               v-model="confirmPassword"
               :type="showPassword ? 'text' : 'password'"
@@ -151,16 +154,18 @@ async function handleSubmit() {
             />
           </div>
           <p v-if="error" class="error-msg">{{ error }}</p>
-          <button type="submit" class="btn-primary">Continue</button>
+          <button type="submit" class="btn-primary">
+            {{ t("auth.registerCouple.next") }}
+          </button>
         </form>
       </template>
 
       <!-- Step 2 -->
       <template v-else>
-        <h1 class="auth-title">Your wedding details</h1>
+        <h1 class="auth-title">{{ t("auth.registerCouple.stepProfile") }}</h1>
         <form @submit.prevent="handleSubmit" class="auth-form">
           <div class="field">
-            <label>Partner 1 name</label>
+            <label>{{ t("auth.registerCouple.partner1Label") }}</label>
             <input
               v-model="partner1Name"
               type="text"
@@ -169,7 +174,7 @@ async function handleSubmit() {
             />
           </div>
           <div class="field">
-            <label>Partner 2 name</label>
+            <label>{{ t("auth.registerCouple.partner2Label") }}</label>
             <input
               v-model="partner2Name"
               type="text"
@@ -178,20 +183,20 @@ async function handleSubmit() {
             />
           </div>
           <div class="field">
-            <label>Wedding date</label>
+            <label>{{ t("auth.registerCouple.weddingDateLabel") }}</label>
             <input v-model="weddingDate" type="date" required />
           </div>
           <div class="field">
-            <label>Wedding location</label>
+            <label>{{ t("auth.registerCouple.weddingLocationLabel") }}</label>
             <input
               v-model="weddingLocation"
               type="text"
-              placeholder="City, Country"
+              placeholder="Oraș, Țară"
             />
           </div>
           <div class="field-row">
             <div class="field">
-              <label>Est. guest count</label>
+              <label>{{ t("auth.registerCouple.guestCountLabel") }}</label>
               <input
                 v-model.number="estimatedGuestCount"
                 type="number"
@@ -199,24 +204,29 @@ async function handleSubmit() {
               />
             </div>
             <div class="field">
-              <label>Total budget (€)</label>
+              <label>{{ t("auth.registerCouple.budgetLabel") }}</label>
               <input v-model.number="totalBudget" type="number" min="0" />
             </div>
           </div>
           <p v-if="error" class="error-msg">{{ error }}</p>
           <div class="btn-row">
             <button type="button" class="btn-secondary" @click="step = 1">
-              Back
+              {{ t("auth.registerCouple.back") }}
             </button>
             <button type="submit" class="btn-primary" :disabled="loading">
-              {{ loading ? "Creating…" : "Create account" }}
+              {{
+                loading ? t("common.loading") : t("auth.registerCouple.submit")
+              }}
             </button>
           </div>
         </form>
       </template>
 
       <p class="auth-links">
-        Already have an account? <RouterLink to="/login">Sign in</RouterLink>
+        {{ t("auth.registerCouple.alreadyHaveAccount") }}
+        <RouterLink to="/login">{{
+          t("auth.registerCouple.signIn")
+        }}</RouterLink>
       </p>
     </div>
   </div>

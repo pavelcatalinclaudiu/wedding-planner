@@ -1,9 +1,11 @@
 ﻿<script setup lang="ts">
 import { ref, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { coupleApi } from "@/api/couple.api";
 import type { WeddingWebsite } from "@/types/couple.types";
 import { useCoupleStore } from "@/stores/couple.store";
 
+const { t } = useI18n();
 const coupleStore = useCoupleStore();
 const website = ref<WeddingWebsite | null>(null);
 const saving = ref(false);
@@ -43,12 +45,12 @@ const previewUrl = () =>
 
 <template>
   <div class="website-view">
-    <h2>Wedding Website</h2>
-    <p class="subtitle">Share your love story and RSVP link with guests.</p>
+    <h2>{{ t("website.title") }}</h2>
+    <p class="subtitle">{{ t("website.subtitle") }}</p>
 
     <div class="form-card">
       <div class="field">
-        <label>URL Slug</label>
+        <label>{{ t("website.urlSlug") }}</label>
         <div class="slug-input-group">
           <span class="slug-prefix">eternelle.ro/wedding/</span>
           <input v-model="form.slug" class="input" placeholder="your-names" />
@@ -59,7 +61,7 @@ const previewUrl = () =>
       </div>
 
       <div class="field">
-        <label>Hero Message</label>
+        <label>{{ t("website.heroMessage") }}</label>
         <input
           v-model="form.heroMessage"
           class="input"
@@ -68,7 +70,7 @@ const previewUrl = () =>
       </div>
 
       <div class="field">
-        <label>Our Story</label>
+        <label>{{ t("website.ourStory") }}</label>
         <textarea
           v-model="form.story"
           class="input textarea"
@@ -79,12 +81,18 @@ const previewUrl = () =>
 
       <label class="toggle-field">
         <input type="checkbox" v-model="form.published" />
-        <span>Website is published and visible to guests</span>
+        <span>{{ t("website.publishedLabel") }}</span>
       </label>
 
       <div class="form-actions">
         <button class="save-btn" :disabled="saving" @click="save">
-          {{ saving ? "Saving…" : saved ? "✓ Saved!" : "Save Changes" }}
+          {{
+            saving
+              ? t("website.saving")
+              : saved
+                ? t("website.savedMsg")
+                : t("common.save")
+          }}
         </button>
       </div>
     </div>

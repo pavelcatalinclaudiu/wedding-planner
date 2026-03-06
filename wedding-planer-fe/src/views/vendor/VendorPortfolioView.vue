@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { useVendorStore } from "@/stores/vendor.store";
 import { vendorApi } from "@/api/vendor.api";
 import { useFileUpload } from "@/composables/useFileUpload";
 import type { VendorPhoto } from "@/types/vendor.types";
+
+const { t } = useI18n();
 
 const vendorStore = useVendorStore();
 const { upload, uploading, progress } = useFileUpload();
@@ -29,9 +32,9 @@ onMounted(() => vendorStore.fetchMyProfile());
 <template>
   <div class="portfolio-view">
     <div class="port-header">
-      <h2>Portfolio</h2>
+      <h2>{{ t("vendor.portfolio.title") }}</h2>
       <button class="upload-btn" @click="fileInputRef?.click()">
-        + Upload Photos
+        + {{ t("vendor.portfolio.addPhoto") }}
       </button>
       <input
         ref="fileInputRef"
@@ -44,11 +47,11 @@ onMounted(() => vendorStore.fetchMyProfile());
     </div>
 
     <div v-if="uploading" class="upload-progress">
-      Uploading… {{ progress }}%
+      {{ t("vendor.portfolio.uploading") }} {{ progress }}%
     </div>
 
     <div v-if="photos.length === 0" class="empty">
-      Upload photos to build your portfolio.
+      {{ t("vendor.portfolio.noPhotos") }}
     </div>
     <div v-else class="photo-grid">
       <div v-for="photo in photos" :key="photo.id" class="photo-item">

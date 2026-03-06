@@ -1,5 +1,6 @@
 ﻿<script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { useGuestsStore } from "@/stores/guests.store";
 import { guestsApi } from "@/api/guests.api";
 import { useDebounce } from "@/composables/useDebounce";
@@ -12,6 +13,7 @@ import type {
   RsvpStatus,
 } from "@/types/couple.types";
 
+const { t } = useI18n();
 const store = useGuestsStore();
 
 // -- Tabs ------------------------------------------------------------------
@@ -236,21 +238,21 @@ function exportCsv() {
 }
 
 // -- Labels ----------------------------------------------------------------
-const rsvpLabel: Record<string, string> = {
-  CONFIRMED: "Confirmed",
-  DECLINED: "Declined",
-  PENDING: "Pending",
-  MAYBE: "Maybe",
-};
-const dietaryLabel: Record<string, string> = {
-  NONE: "None",
-  VEGAN: "Vegan",
-  VEGETARIAN: "Vegetarian",
-  GLUTEN_FREE: "Gluten Free",
-  HALAL: "Halal",
-  KOSHER: "Kosher",
-  OTHER: "Other",
-};
+const rsvpLabel = computed<Record<string, string>>(() => ({
+  CONFIRMED: t("guests.statuses.CONFIRMED"),
+  DECLINED: t("guests.statuses.DECLINED"),
+  PENDING: t("guests.statuses.PENDING"),
+  MAYBE: t("guests.statuses.MAYBE"),
+}));
+const dietaryLabel = computed<Record<string, string>>(() => ({
+  NONE: t("guests.meals.NONE"),
+  VEGAN: t("guests.meals.VEGAN"),
+  VEGETARIAN: t("guests.meals.VEGETARIAN"),
+  GLUTEN_FREE: t("guests.meals.GLUTEN_FREE"),
+  HALAL: t("guests.meals.HALAL"),
+  KOSHER: t("guests.meals.KOSHER"),
+  OTHER: t("guests.meals.OTHER"),
+}));
 
 // -- Table Planner ---------------------------------------------------------
 const tableNames = computed(() => {
@@ -272,15 +274,17 @@ const newTableName = ref("");
   <div class="guests-view">
     <!-- Page header -->
     <div class="page-header">
-      <h2>Guest List</h2>
+      <h2>{{ t("guests.title") }}</h2>
       <div class="header-actions">
         <button class="btn-outline" @click="showImport = true">
-          &#8679; Import CSV
+          &#8679; {{ t("guests.importCsv") }}
         </button>
         <button class="btn-outline" @click="exportCsv">
-          &#8681; Export CSV
+          &#8681; {{ t("guests.exportCsv") }}
         </button>
-        <button class="btn-primary" @click="openAdd">+ Add Guest</button>
+        <button class="btn-primary" @click="openAdd">
+          + {{ t("guests.addGuest") }}
+        </button>
       </div>
     </div>
 
@@ -288,27 +292,27 @@ const newTableName = ref("");
     <div v-if="store.stats" class="stats-bar">
       <div class="stat">
         <span class="stat-num">{{ store.stats.total }}</span>
-        <span class="stat-label">Total</span>
+        <span class="stat-label">{{ t("guests.total") }}</span>
       </div>
       <div class="stat confirmed">
         <span class="stat-num">{{ store.stats.confirmed }}</span>
-        <span class="stat-label">Confirmed</span>
+        <span class="stat-label">{{ t("guests.confirmed") }}</span>
       </div>
       <div class="stat declined">
         <span class="stat-num">{{ store.stats.declined }}</span>
-        <span class="stat-label">Declined</span>
+        <span class="stat-label">{{ t("guests.declined") }}</span>
       </div>
       <div class="stat pending">
         <span class="stat-num">{{ store.stats.pending }}</span>
-        <span class="stat-label">Pending</span>
+        <span class="stat-label">{{ t("guests.pending") }}</span>
       </div>
       <div class="stat maybe">
         <span class="stat-num">{{ store.stats.maybe }}</span>
-        <span class="stat-label">Maybe</span>
+        <span class="stat-label">{{ t("guests.maybe") }}</span>
       </div>
       <div class="progress-wrap" v-if="store.stats.estimatedCapacity > 0">
         <div class="progress-label">
-          Capacity: {{ store.stats.confirmed }} /
+          {{ t("guests.capacity") }}: {{ store.stats.confirmed }} /
           {{ store.stats.estimatedCapacity }}
         </div>
         <div class="progress-bar">
@@ -338,7 +342,7 @@ const newTableName = ref("");
         :class="{ active: activeTab === 'list' }"
         @click="activeTab = 'list'"
       >
-        Guest List
+        {{ t("guests.title") }}
       </button>
       <button
         :class="{ active: activeTab === 'songs' }"
@@ -347,13 +351,13 @@ const newTableName = ref("");
           store.fetchSongs();
         "
       >
-        Song Requests
+        {{ t("guests.songRequests") }}
       </button>
       <button
         :class="{ active: activeTab === 'tables' }"
         @click="activeTab = 'tables'"
       >
-        Table Planner
+        {{ t("guests.tablePlanner") }}
       </button>
     </div>
 
@@ -363,42 +367,50 @@ const newTableName = ref("");
       <div class="filter-bar">
         <input
           v-model="search"
-          placeholder="Search name / email / table..."
+          :placeholder="t('guests.searchPlaceholder')"
           class="search-input"
         />
 
         <select v-model="filterRsvp">
-          <option value="">All RSVP</option>
-          <option value="CONFIRMED">Confirmed</option>
-          <option value="DECLINED">Declined</option>
-          <option value="PENDING">Pending</option>
-          <option value="MAYBE">Maybe</option>
+          <option value="">{{ t("guests.allRsvp") }}</option>
+          <option value="CONFIRMED">
+            {{ t("guests.statuses.CONFIRMED") }}
+          </option>
+          <option value="DECLINED">{{ t("guests.statuses.DECLINED") }}</option>
+          <option value="PENDING">{{ t("guests.statuses.PENDING") }}</option>
+          <option value="MAYBE">{{ t("guests.statuses.MAYBE") }}</option>
         </select>
 
         <select v-model="filterSide">
-          <option value="">All Sides</option>
-          <option value="BRIDE">Bride's side</option>
-          <option value="GROOM">Groom's side</option>
-          <option value="BOTH">Both</option>
+          <option value="">{{ t("guests.allSides") }}</option>
+          <option value="BRIDE">{{ t("guests.sideOptions.bride") }}</option>
+          <option value="GROOM">{{ t("guests.sideOptions.groom") }}</option>
+          <option value="BOTH">{{ t("guests.sideOptions.both") }}</option>
         </select>
 
         <select v-model="filterGroup">
-          <option value="">All Groups</option>
-          <option value="FAMILY">Family</option>
-          <option value="FRIENDS">Friends</option>
-          <option value="COLLEAGUES">Colleagues</option>
-          <option value="OTHER">Other</option>
+          <option value="">{{ t("guests.allGroups") }}</option>
+          <option value="FAMILY">{{ t("guests.groupOptions.family") }}</option>
+          <option value="FRIENDS">
+            {{ t("guests.groupOptions.friends") }}
+          </option>
+          <option value="COLLEAGUES">
+            {{ t("guests.groupOptions.colleagues") }}
+          </option>
+          <option value="OTHER">{{ t("guests.groupOptions.other") }}</option>
         </select>
 
         <select v-model="filterDiet">
-          <option value="">All Dietary</option>
-          <option value="NONE">None</option>
-          <option value="VEGAN">Vegan</option>
-          <option value="VEGETARIAN">Vegetarian</option>
-          <option value="GLUTEN_FREE">Gluten Free</option>
-          <option value="HALAL">Halal</option>
-          <option value="KOSHER">Kosher</option>
-          <option value="OTHER">Other</option>
+          <option value="">{{ t("guests.allDietary") }}</option>
+          <option value="NONE">{{ t("guests.meals.NONE") }}</option>
+          <option value="VEGAN">{{ t("guests.meals.VEGAN") }}</option>
+          <option value="VEGETARIAN">{{ t("guests.meals.VEGETARIAN") }}</option>
+          <option value="GLUTEN_FREE">
+            {{ t("guests.meals.GLUTEN_FREE") }}
+          </option>
+          <option value="HALAL">{{ t("guests.meals.HALAL") }}</option>
+          <option value="KOSHER">{{ t("guests.meals.KOSHER") }}</option>
+          <option value="OTHER">{{ t("guests.meals.OTHER") }}</option>
         </select>
 
         <span class="filter-count"
@@ -409,34 +421,34 @@ const newTableName = ref("");
       </div>
 
       <!-- Table -->
-      <div v-if="store.loading" class="loading">Loading...</div>
+      <div v-if="store.loading" class="loading">{{ t("common.loading") }}</div>
       <div v-else-if="sorted.length === 0" class="empty">
-        No guests match your filters.
+        {{ t("guests.noMatch") }}
       </div>
       <div v-else class="table-wrap">
         <table class="guest-table">
           <thead>
             <tr>
               <th @click="sort('firstName')" class="sortable">
-                Name{{ sortHeader("firstName") }}
+                {{ t("guests.name") }}{{ sortHeader("firstName") }}
               </th>
               <th @click="sort('rsvpStatus')" class="sortable">
-                RSVP{{ sortHeader("rsvpStatus") }}
+                {{ t("guests.rsvpStatus") }}{{ sortHeader("rsvpStatus") }}
               </th>
               <th @click="sort('side')" class="sortable">
-                Side{{ sortHeader("side") }}
+                {{ t("guests.side") }}{{ sortHeader("side") }}
               </th>
               <th @click="sort('guestGroup')" class="sortable">
-                Group{{ sortHeader("guestGroup") }}
+                {{ t("guests.group") }}{{ sortHeader("guestGroup") }}
               </th>
               <th @click="sort('dietary')" class="sortable">
-                Dietary{{ sortHeader("dietary") }}
+                {{ t("guests.dietary") }}{{ sortHeader("dietary") }}
               </th>
               <th @click="sort('tableAssignment')" class="sortable">
-                Table{{ sortHeader("tableAssignment") }}
+                {{ t("guests.table") }}{{ sortHeader("tableAssignment") }}
               </th>
-              <th>+1</th>
-              <th>Actions</th>
+              <th>{{ t("guests.plusOne") }}</th>
+              <th>{{ t("guests.actions") }}</th>
             </tr>
           </thead>
           <tbody>
@@ -499,14 +511,14 @@ const newTableName = ref("");
               </td>
               <td class="actions">
                 <button class="icon-btn" title="Edit" @click="openEdit(g)">
-                  Edit
+                  {{ t("common.edit") }}
                 </button>
                 <button
                   class="icon-btn del"
                   title="Delete"
                   @click="confirmDelete(g)"
                 >
-                  Del
+                  {{ t("common.delete") }}
                 </button>
               </td>
             </tr>
@@ -518,7 +530,7 @@ const newTableName = ref("");
     <!-- ============ SONG REQUESTS TAB ============ -->
     <template v-if="activeTab === 'songs'">
       <div v-if="store.songs.length === 0" class="empty">
-        No song requests yet.
+        {{ t("guests.noSongRequests") }}
       </div>
       <ul v-else class="songs-list">
         <li v-for="song in store.songs" :key="song" class="song-item">
@@ -533,14 +545,13 @@ const newTableName = ref("");
         <div class="planner-add">
           <input
             v-model="newTableName"
-            placeholder="New table name..."
+            :placeholder="t('guests.newTablePlaceholder')"
             class="fi"
           />
         </div>
 
         <div v-if="tableNames.length === 0" class="empty">
-          No tables assigned yet. Use the Table column in the Guest List tab to
-          assign guests.
+          {{ t("guests.noTablesAssigned") }}
         </div>
 
         <div v-for="table in tableNames" :key="table" class="table-card">
@@ -566,7 +577,7 @@ const newTableName = ref("");
           class="table-card unassigned"
         >
           <h4 class="table-card-title">
-            Unassigned
+            {{ t("guests.unassigned") }}
             <span class="muted"
               >({{
                 store.guests.filter((g) => !g.tableAssignment).length
@@ -588,23 +599,27 @@ const newTableName = ref("");
     <!-- ============ ADD / EDIT MODAL ============ -->
     <div v-if="showModal" class="modal-overlay" @click.self="showModal = false">
       <div class="modal">
-        <h3>{{ editTarget ? "Edit Guest" : "Add Guest" }}</h3>
+        <h3>{{ editTarget ? t("guests.editGuest") : t("guests.addGuest") }}</h3>
 
         <div class="modal-grid">
           <label>
-            First Name *
+            {{ t("guests.firstName") }} *
             <input
               v-model="form.firstName"
               class="fi"
-              placeholder="First name"
+              :placeholder="t('guests.firstName')"
             />
           </label>
           <label>
-            Last Name
-            <input v-model="form.lastName" class="fi" placeholder="Last name" />
+            {{ t("guests.lastName") }}
+            <input
+              v-model="form.lastName"
+              class="fi"
+              :placeholder="t('guests.lastName')"
+            />
           </label>
           <label>
-            Email
+            {{ t("guests.email") }}
             <input
               v-model="form.email"
               class="fi"
@@ -613,7 +628,7 @@ const newTableName = ref("");
             />
           </label>
           <label>
-            Phone
+            {{ t("guests.phone") }}
             <input
               v-model="form.phone"
               class="fi"
@@ -622,47 +637,65 @@ const newTableName = ref("");
           </label>
 
           <label>
-            Side
+            {{ t("guests.side") }}
             <select v-model="form.side" class="fi">
-              <option value="BOTH">Both</option>
-              <option value="BRIDE">Bride's side</option>
-              <option value="GROOM">Groom's side</option>
+              <option value="BOTH">{{ t("guests.sideOptions.both") }}</option>
+              <option value="BRIDE">{{ t("guests.sideOptions.bride") }}</option>
+              <option value="GROOM">{{ t("guests.sideOptions.groom") }}</option>
             </select>
           </label>
           <label>
-            Group
+            {{ t("guests.group") }}
             <select v-model="form.guestGroup" class="fi">
-              <option value="FAMILY">Family</option>
-              <option value="FRIENDS">Friends</option>
-              <option value="COLLEAGUES">Colleagues</option>
-              <option value="OTHER">Other</option>
+              <option value="FAMILY">
+                {{ t("guests.groupOptions.family") }}
+              </option>
+              <option value="FRIENDS">
+                {{ t("guests.groupOptions.friends") }}
+              </option>
+              <option value="COLLEAGUES">
+                {{ t("guests.groupOptions.colleagues") }}
+              </option>
+              <option value="OTHER">
+                {{ t("guests.groupOptions.other") }}
+              </option>
             </select>
           </label>
 
           <label>
-            RSVP Status
+            {{ t("guests.rsvpStatus") }}
             <select v-model="form.rsvpStatus" class="fi">
-              <option value="PENDING">Pending</option>
-              <option value="CONFIRMED">Confirmed</option>
-              <option value="DECLINED">Declined</option>
-              <option value="MAYBE">Maybe</option>
+              <option value="PENDING">
+                {{ t("guests.statuses.PENDING") }}
+              </option>
+              <option value="CONFIRMED">
+                {{ t("guests.statuses.CONFIRMED") }}
+              </option>
+              <option value="DECLINED">
+                {{ t("guests.statuses.DECLINED") }}
+              </option>
+              <option value="MAYBE">{{ t("guests.statuses.MAYBE") }}</option>
             </select>
           </label>
           <label>
-            Dietary
+            {{ t("guests.dietary") }}
             <select v-model="form.dietary" class="fi">
-              <option value="NONE">None</option>
-              <option value="VEGAN">Vegan</option>
-              <option value="VEGETARIAN">Vegetarian</option>
-              <option value="GLUTEN_FREE">Gluten Free</option>
-              <option value="HALAL">Halal</option>
-              <option value="KOSHER">Kosher</option>
-              <option value="OTHER">Other</option>
+              <option value="NONE">{{ t("guests.meals.NONE") }}</option>
+              <option value="VEGAN">{{ t("guests.meals.VEGAN") }}</option>
+              <option value="VEGETARIAN">
+                {{ t("guests.meals.VEGETARIAN") }}
+              </option>
+              <option value="GLUTEN_FREE">
+                {{ t("guests.meals.GLUTEN_FREE") }}
+              </option>
+              <option value="HALAL">{{ t("guests.meals.HALAL") }}</option>
+              <option value="KOSHER">{{ t("guests.meals.KOSHER") }}</option>
+              <option value="OTHER">{{ t("guests.meals.OTHER") }}</option>
             </select>
           </label>
 
           <label style="grid-column: span 2">
-            Dietary Notes
+            {{ t("guests.dietaryNotes") }}
             <input
               v-model="form.dietaryNotes"
               class="fi"
@@ -671,7 +704,7 @@ const newTableName = ref("");
           </label>
 
           <label>
-            Table Assignment
+            {{ t("guests.tableAssignment") }}
             <input
               v-model="form.tableAssignment"
               class="fi"
@@ -679,7 +712,7 @@ const newTableName = ref("");
             />
           </label>
           <label>
-            Song Request
+            {{ t("guests.songRequest") }}
             <input
               v-model="form.songRequest"
               class="fi"
@@ -688,7 +721,7 @@ const newTableName = ref("");
           </label>
 
           <label style="grid-column: span 2">
-            Notes
+            {{ t("guests.notes") }}
             <textarea
               v-model="form.notes"
               class="fi"
@@ -699,10 +732,10 @@ const newTableName = ref("");
 
           <label class="checkbox-label">
             <input type="checkbox" v-model="form.plusOne" />
-            Bringing a +1
+            {{ t("guests.bringingPlusOne") }}
           </label>
           <label v-if="form.plusOne">
-            +1 Name
+            {{ t("guests.plusOneName") }}
             <input
               v-model="form.plusOneName"
               class="fi"
@@ -712,18 +745,26 @@ const newTableName = ref("");
 
           <label class="checkbox-label">
             <input type="checkbox" v-model="form.isChildGuest" />
-            Child guest
+            {{ t("guests.childGuest") }}
           </label>
         </div>
 
         <div class="modal-footer">
-          <button class="btn-outline" @click="showModal = false">Cancel</button>
+          <button class="btn-outline" @click="showModal = false">
+            {{ t("common.cancel") }}
+          </button>
           <button
             class="btn-primary"
             :disabled="saving || !form.firstName?.trim()"
             @click="saveGuest"
           >
-            {{ saving ? "Saving..." : editTarget ? "Update" : "Add Guest" }}
+            {{
+              saving
+                ? t("guests.saving")
+                : editTarget
+                  ? t("guests.update")
+                  : t("guests.addGuest")
+            }}
           </button>
         </div>
       </div>
@@ -736,10 +777,9 @@ const newTableName = ref("");
       @click.self="showImport = false"
     >
       <div class="modal">
-        <h3>Import Guests from CSV</h3>
+        <h3>{{ t("guests.importTitle") }}</h3>
         <p class="import-hint">
-          Format: <code>FirstName, LastName, Email, Phone</code> &mdash; one
-          guest per line. The header row is optional and will be skipped.
+          {{ t("guests.importHint") }}
         </p>
         <textarea
           v-model="csvText"
@@ -748,7 +788,7 @@ const newTableName = ref("");
           placeholder="John,Doe,john@example.com,+40700000000"
         />
         <div v-if="importCount !== null" class="import-success">
-          &#10003; {{ importCount }} guests imported successfully.
+          &#10003; {{ t("guests.importSuccess", { count: importCount }) }}
         </div>
         <div class="modal-footer">
           <button
@@ -758,14 +798,14 @@ const newTableName = ref("");
               importCount = null;
             "
           >
-            Close
+            {{ t("common.close") }}
           </button>
           <button
             class="btn-primary"
             :disabled="importing || !csvText.trim()"
             @click="runImport"
           >
-            {{ importing ? "Importing..." : "Import" }}
+            {{ importing ? t("guests.importing") : t("guests.importCsv") }}
           </button>
         </div>
       </div>

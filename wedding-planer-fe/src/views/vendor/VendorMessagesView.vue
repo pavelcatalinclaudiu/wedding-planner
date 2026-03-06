@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { useMessagesStore } from "@/stores/messages.store";
 import type { Thread } from "@/types/message.types";
 import ThreadList from "@/components/messaging/ThreadList.vue";
 import MessageWindow from "@/components/messaging/MessageWindow.vue";
+
+const { t } = useI18n();
 
 const route = useRoute();
 const messagesStore = useMessagesStore();
@@ -54,7 +57,9 @@ watch(selectedThreadId, async (id) => {
         :couple-wedding-date="selectedThread?.coupleWeddingDate"
         :couple-location="selectedThread?.coupleLocation"
       />
-      <div v-else class="no-thread">Select a conversation</div>
+      <div v-else class="no-thread">
+        {{ t("messaging.selectConversation") }}
+      </div>
     </div>
   </div>
 </template>

@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { reviewsApi } from "@/api/reviews.api";
 import RatingStars from "@/components/ui/RatingStars.vue";
 import type { Review } from "@/api/reviews.api";
+
+const { t } = useI18n();
 
 const reviews = ref<Review[]>([]);
 const loading = ref(false);
@@ -29,9 +32,11 @@ async function submitReply(reviewId: string) {
 
 <template>
   <div class="reviews-view">
-    <h2>Reviews</h2>
-    <div v-if="loading" class="loading">Loading…</div>
-    <div v-else-if="reviews.length === 0" class="empty">No reviews yet.</div>
+    <h2>{{ t("vendor.reviews.title") }}</h2>
+    <div v-if="loading" class="loading">{{ t("common.loading") }}</div>
+    <div v-else-if="reviews.length === 0" class="empty">
+      {{ t("vendor.reviews.noReviews") }}
+    </div>
     <div v-else class="review-list">
       <div v-for="review in reviews" :key="review.id" class="review-card">
         <div class="review-header">
@@ -45,13 +50,14 @@ async function submitReply(reviewId: string) {
         </div>
         <p class="review-text">{{ review.comment }}</p>
         <div v-if="review.vendorReply" class="vendor-reply">
-          <strong>Your reply:</strong> {{ review.vendorReply }}
+          <strong>{{ t("vendor.reviews.reply") }}:</strong>
+          {{ review.vendorReply }}
         </div>
         <div v-else class="reply-form">
           <textarea
             v-model="replyText[review.id]"
             class="reply-input"
-            placeholder="Write a reply…"
+            :placeholder="t('vendor.reviews.respondToReview')"
             rows="2"
           />
           <button
@@ -59,7 +65,7 @@ async function submitReply(reviewId: string) {
             :disabled="replying[review.id] || !replyText[review.id]?.trim()"
             @click="submitReply(review.id)"
           >
-            Reply
+            {{ t("vendor.reviews.respondToReview") }}
           </button>
         </div>
       </div>

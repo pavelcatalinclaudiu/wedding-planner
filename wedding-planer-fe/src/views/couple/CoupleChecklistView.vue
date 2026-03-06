@@ -3,11 +3,11 @@
     <!-- Top Header Bar -->
     <div class="page-header">
       <div class="header-left">
-        <h1>Wedding Checklist</h1>
-        <p class="subtitle">Stay on track for your perfect day</p>
+        <h1>{{ t("checklist.pageTitle") }}</h1>
+        <p class="subtitle">{{ t("checklist.subtitle") }}</p>
       </div>
       <button class="btn-primary" @click="openAdd">
-        <span class="btn-icon">+</span> Add Task
+        <span class="btn-icon">+</span> {{ t("checklist.addTask") }}
       </button>
     </div>
 
@@ -30,7 +30,7 @@
           </svg>
           <div class="ring-label">
             <span class="ring-pct">{{ globalPct }}%</span>
-            <span class="ring-sub">Complete</span>
+            <span class="ring-sub">{{ t("checklist.complete") }}</span>
           </div>
         </div>
 
@@ -38,33 +38,33 @@
         <div class="stat-grid">
           <div class="stat-card stat-done">
             <span class="stat-value">{{ checklistStore.done }}</span>
-            <span class="stat-name">Done</span>
+            <span class="stat-name">{{ t("checklist.stats.done") }}</span>
           </div>
           <div class="stat-card stat-pending">
             <span class="stat-value">{{
               checklistStore.total - checklistStore.done
             }}</span>
-            <span class="stat-name">Pending</span>
+            <span class="stat-name">{{ t("checklist.stats.pending") }}</span>
           </div>
           <div
             class="stat-card stat-overdue"
             :class="{ 'stat-alert': checklistStore.overdue > 0 }"
           >
             <span class="stat-value">{{ checklistStore.overdue }}</span>
-            <span class="stat-name">Overdue</span>
+            <span class="stat-name">{{ t("checklist.stats.overdue") }}</span>
           </div>
           <div
             class="stat-card stat-urgent"
             :class="{ 'stat-alert-amber': checklistStore.urgent > 0 }"
           >
             <span class="stat-value">{{ checklistStore.urgent }}</span>
-            <span class="stat-name">Due Soon</span>
+            <span class="stat-name">{{ t("checklist.stats.dueSoon") }}</span>
           </div>
         </div>
 
         <!-- Filter Nav -->
         <nav class="sidebar-nav">
-          <p class="nav-label">Filter</p>
+          <p class="nav-label">{{ t("checklist.filterLabel") }}</p>
           <button
             v-for="tab in tabs"
             :key="tab.key"
@@ -86,7 +86,7 @@
           "
           class="celebration-card"
         >
-          🎉 All tasks complete!
+          🎉 {{ t("checklist.completedMsg") }}
         </div>
       </aside>
 
@@ -95,15 +95,17 @@
         <!-- Loading -->
         <div v-if="checklistStore.loading" class="loading-state">
           <div class="spinner"></div>
-          <p>Loading checklist…</p>
+          <p>{{ t("checklist.loading") }}</p>
         </div>
 
         <!-- Empty -->
         <div v-else-if="checklistStore.total === 0" class="empty-state">
           <div class="empty-icon">📋</div>
-          <h3>No tasks yet</h3>
-          <p>Start adding tasks to plan your perfect wedding.</p>
-          <button class="btn-primary" @click="openAdd">Add First Task</button>
+          <h3>{{ t("checklist.noTasks") }}</h3>
+          <p>{{ t("checklist.startAdding") }}</p>
+          <button class="btn-primary" @click="openAdd">
+            {{ t("checklist.addFirstTask") }}
+          </button>
         </div>
 
         <!-- Groups -->
@@ -167,7 +169,7 @@
                       {{ dueDateLabel(item) }}
                     </span>
                     <span v-if="(item as any).notes" class="notes-chip">
-                      📝 Note
+                      📝 {{ t("checklist.noteLabel") }}
                     </span>
                   </div>
                 </div>
@@ -185,7 +187,7 @@
                 </div>
               </div>
               <div v-if="groupItems(period).length === 0" class="empty-group">
-                No tasks in this period
+                {{ t("checklist.noTasksInPeriod") }}
               </div>
             </div>
           </div>
@@ -198,48 +200,58 @@
       <div v-if="modal.open" class="modal-overlay" @click.self="closeModal">
         <div class="modal">
           <div class="modal-header">
-            <h2>{{ modal.isEdit ? "Edit Task" : "Add Task" }}</h2>
+            <h2>
+              {{
+                modal.isEdit ? t("checklist.editTask") : t("checklist.addTask")
+              }}
+            </h2>
             <button class="close-btn" @click="closeModal">✕</button>
           </div>
           <div class="modal-body">
             <div class="form-field">
-              <label>Task Label *</label>
+              <label>{{ t("checklist.taskTitle") }} *</label>
               <input
                 v-model="modal.form.label"
                 type="text"
-                placeholder="e.g. Book the venue"
+                :placeholder="t('checklist.taskTitle')"
               />
             </div>
             <div class="form-field">
-              <label>Time Period</label>
+              <label>{{ t("checklist.timePeriod") }}</label>
               <select v-model="modal.form.timePeriod">
-                <option value="">— General —</option>
+                <option value="">{{ t("checklist.generalPeriod") }}</option>
                 <option v-for="p in TIME_PERIODS" :key="p" :value="p">
                   {{ p }}
                 </option>
               </select>
             </div>
             <div class="form-field">
-              <label>Due Date</label>
+              <label>{{ t("checklist.dueDate") }}</label>
               <input v-model="modal.form.dueDate" type="date" />
             </div>
             <div class="form-field">
-              <label>Notes</label>
+              <label>{{ t("checklist.taskNote") }}</label>
               <textarea
                 v-model="modal.form.notes"
                 rows="3"
-                placeholder="Optional notes…"
+                :placeholder="t('checklist.optionalNotes')"
               ></textarea>
             </div>
           </div>
           <div class="modal-footer">
-            <button class="btn-secondary" @click="closeModal">Cancel</button>
+            <button class="btn-secondary" @click="closeModal">
+              {{ t("common.cancel") }}
+            </button>
             <button
               class="btn-primary"
               :disabled="!modal.form.label.trim()"
               @click="saveModal"
             >
-              {{ modal.isEdit ? "Save Changes" : "Add Task" }}
+              {{
+                modal.isEdit
+                  ? t("checklist.saveChanges")
+                  : t("checklist.addTask")
+              }}
             </button>
           </div>
         </div>
@@ -250,11 +262,13 @@
 
 <script setup lang="ts">
 import { ref, computed, reactive, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { useChecklistStore } from "@/stores/checklist.store";
 import { useConfirm } from "@/composables/useConfirm";
 import type { ChecklistItem } from "@/types/couple.types";
 import { format, isBefore, addDays, parseISO } from "date-fns";
 
+const { t } = useI18n();
 const checklistStore = useChecklistStore();
 
 const TIME_PERIODS = [
@@ -266,12 +280,12 @@ const TIME_PERIODS = [
   "Wedding Week",
 ];
 
-const tabs = [
-  { key: "all", label: "All", icon: "☰" },
-  { key: "pending", label: "Pending", icon: "⏳" },
-  { key: "overdue", label: "Overdue", icon: "🔴" },
-  { key: "done", label: "Done", icon: "✅" },
-];
+const tabs = computed(() => [
+  { key: "all", label: t("checklist.filters.all"), icon: "☰" },
+  { key: "pending", label: t("checklist.filters.pending"), icon: "⏳" },
+  { key: "overdue", label: t("checklist.filters.overdue"), icon: "🔴" },
+  { key: "done", label: t("checklist.filters.done"), icon: "✅" },
+]);
 
 const activeTab = ref("all");
 const collapsedGroups = reactive(new Set<string>());

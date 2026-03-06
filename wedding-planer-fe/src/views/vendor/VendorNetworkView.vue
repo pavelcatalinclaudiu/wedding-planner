@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import { networkApi } from "@/api/network.api";
 import type { VendorPartner } from "@/types/vendor.types";
 
@@ -14,6 +15,7 @@ const showDropdown = ref(false);
 const adding = ref(false);
 const error = ref("");
 let searchTimer: ReturnType<typeof setTimeout> | null = null;
+const { t } = useI18n();
 
 onMounted(async () => {
   loading.value = true;
@@ -54,7 +56,7 @@ async function addById(partnerId: string) {
     searchQuery.value = "";
     showDropdown.value = false;
   } catch (e: any) {
-    error.value = e?.response?.data?.message ?? "Could not add partner";
+    error.value = e?.response?.data?.message ?? t("vendor.network.couldNotAdd");
   } finally {
     adding.value = false;
   }
@@ -71,7 +73,7 @@ async function addByName() {
     searchQuery.value = "";
     showDropdown.value = false;
   } catch (e: any) {
-    error.value = e?.response?.data?.message ?? "Could not add partner";
+    error.value = e?.response?.data?.message ?? t("vendor.network.couldNotAdd");
   } finally {
     adding.value = false;
   }
@@ -104,11 +106,8 @@ function initials(name: string) {
 
 <template>
   <div class="network-view">
-    <h2>Partner Network</h2>
-    <p class="subtitle">
-      Add vendors you work with. Partners are shown on your public profile so
-      couples can discover your trusted collaborators.
-    </p>
+    <h2>{{ t("vendor.network.title") }}</h2>
+    <p class="subtitle">{{ t("vendor.network.subtitle") }}</p>
 
     <!-- ── Add partner ── -->
     <div class="add-section">
@@ -116,14 +115,16 @@ function initials(name: string) {
         <input
           v-model="searchQuery"
           class="search-input"
-          placeholder="Search vendor by name, or type any name to add…"
+          :placeholder="t('vendor.network.searchPlaceholder')"
           autocomplete="off"
           @focus="showDropdown = searchQuery.trim().length >= 2"
           @blur="closeDropdown"
         />
         <!-- Dropdown -->
         <div v-if="showDropdown" class="dropdown">
-          <div v-if="searching" class="dd-loading">Searching…</div>
+          <div v-if="searching" class="dd-loading">
+            {{ t("vendor.network.searching") }}
+          </div>
           <template v-else>
             <button
               v-for="r in searchResults"
@@ -152,24 +153,26 @@ function initials(name: string) {
                   ></span
                 >
               </div>
-              <span class="dd-platform-badge">On platform</span>
+              <span class="dd-platform-badge">{{
+                t("vendor.network.onPlatform")
+              }}</span>
             </button>
 
             <div
               v-if="!searchResults.length && !searching"
               class="dd-no-results"
             >
-              No vendors found on platform.
+              {{ t("vendor.network.notOnPlatform") }}
             </div>
 
             <!-- Always offer add-by-name option -->
             <button class="dd-item dd-item-name" @mousedown.prevent="addByName">
               <div class="dd-avatar dd-avatar-name">＋</div>
               <div class="dd-info">
-                <span class="dd-name"
-                  >Add "{{ searchQuery.trim() }}" as a partner</span
-                >
-                <span class="dd-meta">Not linked to a platform profile</span>
+                <span class="dd-name">{{
+                  t("vendor.network.addAsPartner", { name: searchQuery.trim() })
+                }}</span>
+                <span class="dd-meta">{{ t("vendor.network.notLinked") }}</span>
               </div>
             </button>
           </template>
@@ -179,13 +182,10 @@ function initials(name: string) {
     </div>
 
     <!-- ── Partner list ── -->
-    <div v-if="loading" class="loading">Loading…</div>
+    <div v-if="loading" class="loading">{{ t("common.loading") }}</div>
     <div v-else-if="partners.length === 0" class="empty">
-      <p>No partners added yet.</p>
-      <p class="empty-hint">
-        Search for a vendor on the platform, or type any business name to add
-        them.
-      </p>
+      <p>{{ t("vendor.network.noPartners") }}</p>
+      <p class="empty-hint">{{ t("vendor.network.noPartnersHint") }}</p>
     </div>
     <div v-else class="partner-list">
       <div v-for="p in partners" :key="p.id" class="partner-card">
@@ -202,7 +202,9 @@ function initials(name: string) {
         <div class="pc-info">
           <div class="pc-name-row">
             <span class="pc-name">{{ p.partnerName }}</span>
-            <span v-if="p.onPlatform" class="pc-badge">On platform</span>
+            <span v-if="p.onPlatform" class="pc-badge">{{
+              t("vendor.network.onPlatform")
+            }}</span>
           </div>
           <span v-if="p.partnerCategory || p.partnerCity" class="pc-meta">
             {{ categoryLabel(p.partnerCategory)
@@ -210,7 +212,11 @@ function initials(name: string) {
             >{{ p.partnerCity }}
           </span>
         </div>
-        <button class="pc-remove" title="Remove partner" @click="remove(p.id)">
+        <button
+          class="pc-remove"
+          :title="t('vendor.network.removePartner')"
+          @click="remove(p.id)"
+        >
           ✕
         </button>
       </div>

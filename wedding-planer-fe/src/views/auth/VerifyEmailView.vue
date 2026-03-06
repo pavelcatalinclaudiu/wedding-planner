@@ -1,10 +1,12 @@
 ﻿<script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { useAuthStore } from "@/stores/auth.store";
 
 const route = useRoute();
 const authStore = useAuthStore();
+const { t } = useI18n();
 
 const status = ref<"loading" | "success" | "error">("loading");
 const error = ref("");
@@ -13,7 +15,7 @@ onMounted(async () => {
   const token = route.query.token as string;
   if (!token) {
     status.value = "error";
-    error.value = "No verification token found.";
+    error.value = t("auth.verifyEmail.noToken");
     return;
   }
   try {
@@ -22,7 +24,7 @@ onMounted(async () => {
   } catch (e: unknown) {
     const err = e as { response?: { data?: { message?: string } } };
     status.value = "error";
-    error.value = err.response?.data?.message ?? "Verification failed.";
+    error.value = err.response?.data?.message ?? t("auth.verifyEmail.verificationFailed");
   }
 });
 
@@ -45,22 +47,22 @@ async function resend() {
 
       <div v-if="status === 'loading'" class="state-msg">
         <div class="spinner" />
-        <p>Verifying your email…</p>
+        <p>{{ t("auth.verifyEmail.verifying") }}</p>
       </div>
 
       <div v-else-if="status === 'success'" class="state-msg success">
         <span class="icon">✓</span>
-        <h2>Email verified!</h2>
-        <p>Your account is now active.</p>
-        <RouterLink to="/login" class="btn-primary">Go to login</RouterLink>
+        <h2>{{ t("auth.verifyEmail.verified") }}</h2>
+        <p>{{ t("auth.verifyEmail.active") }}</p>
+        <RouterLink to="/login" class="btn-primary">{{ t("auth.verifyEmail.goToLogin") }}</RouterLink>
       </div>
 
       <div v-else class="state-msg error">
         <span class="icon">✕</span>
-        <h2>Verification failed</h2>
+        <h2>{{ t("auth.verifyEmail.failed") }}</h2>
         <p>{{ error }}</p>
         <button class="btn-secondary" @click="resend">
-          Resend verification email
+          {{ t("auth.verifyEmail.resendBtn") }}
         </button>
         <RouterLink to="/login" class="btn-link">Back to login</RouterLink>
       </div>

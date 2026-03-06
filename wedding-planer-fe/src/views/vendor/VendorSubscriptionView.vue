@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { subscriptionsApi } from "@/api/subscriptions.api";
 import type { Subscription } from "@/api/subscriptions.api";
 
@@ -7,6 +8,7 @@ const subscription = ref<Subscription | null>(null);
 const loading = ref(false);
 const checkingOut = ref(false);
 const cancelConfirm = ref(false);
+const { t, tm } = useI18n();
 
 onMounted(async () => {
   loading.value = true;
@@ -39,52 +41,39 @@ async function cancel() {
   subscription.value = await subscriptionsApi.get();
   cancelConfirm.value = false;
 }
-
-const planFeatures = {
-  BASIC: ["Up to 3 active deals", "Portfolio — 10 photos", "Standard listing"],
-  PRO: [
-    "Unlimited active deals",
-    "Unlimited portfolio",
-    "Featured listing",
-    "Analytics dashboard",
-    "Priority support",
-  ],
-  ELITE: [
-    "Everything in Pro",
-    "Verified badge",
-    "Partner network access",
-    "Dedicated account manager",
-  ],
-};
 </script>
 
 <template>
   <div class="subscription-view">
-    <h2>Subscription</h2>
+    <h2>{{ t("vendor.subscription.title") }}</h2>
 
-    <div v-if="loading" class="loading">Loading…</div>
+    <div v-if="loading" class="loading">{{ t("common.loading") }}</div>
 
     <div v-else-if="subscription?.status === 'ACTIVE'" class="current-plan">
-      <div class="plan-badge">{{ subscription.plan }} Plan</div>
+      <div class="plan-badge">
+        {{ subscription.plan }} {{ t("vendor.subscription.plan") }}
+      </div>
       <p class="plan-renews">
-        Renews:
+        {{ t("vendor.subscription.renews") }}
         {{ new Date(subscription.currentPeriodEnd).toLocaleDateString() }}
       </p>
-      <button class="portal-btn" @click="openPortal">Manage Billing</button>
+      <button class="portal-btn" @click="openPortal">
+        {{ t("vendor.subscription.manageBilling") }}
+      </button>
       <button
         v-if="!cancelConfirm"
         class="cancel-link"
         @click="cancelConfirm = true"
       >
-        Cancel subscription
+        {{ t("vendor.subscription.cancel") }}
       </button>
       <div v-if="cancelConfirm" class="cancel-confirm">
-        <p>
-          Are you sure? You'll lose access at the end of the billing period.
-        </p>
-        <button class="confirm-cancel-btn" @click="cancel">Yes, cancel</button>
+        <p>{{ t("vendor.subscription.cancelConfirm") }}</p>
+        <button class="confirm-cancel-btn" @click="cancel">
+          {{ t("vendor.subscription.yesCancel") }}
+        </button>
         <button class="keep-btn" @click="cancelConfirm = false">
-          Keep subscription
+          {{ t("vendor.subscription.keep") }}
         </button>
       </div>
     </div>
@@ -96,11 +85,15 @@ const planFeatures = {
         class="plan-card"
         :class="{ featured: plan === 'PRO' }"
       >
-        <div v-if="plan === 'PRO'" class="featured-badge">Most Popular</div>
+        <div v-if="plan === 'PRO'" class="featured-badge">
+          {{ t("vendor.subscription.mostPopular") }}
+        </div>
         <h3>{{ plan }}</h3>
         <ul class="feature-list">
           <li
-            v-for="f in planFeatures[plan as keyof typeof planFeatures]"
+            v-for="f in tm(
+              'vendor.subscription.' + plan.toLowerCase() + 'Features',
+            ) as string[]"
             :key="f"
           >
             ✓ {{ f }}
@@ -111,7 +104,11 @@ const planFeatures = {
           :disabled="checkingOut"
           @click="checkout(plan)"
         >
-          {{ plan === "BASIC" ? "Get Started Free" : `Upgrade to ${plan}` }}
+          {{
+            plan === "BASIC"
+              ? t("vendor.subscription.getStartedFree")
+              : t("vendor.subscription.upgradeTo", { plan })
+          }}
         </button>
       </div>
     </div>

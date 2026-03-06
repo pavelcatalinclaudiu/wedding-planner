@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { messagesApi } from "@/api/messages.api";
 import { useMessagesStore } from "@/stores/messages.store";
 import type { Thread } from "@/types/message.types";
 import GroupChat from "@/components/messaging/GroupChat.vue";
 
+const { t } = useI18n();
 const messagesStore = useMessagesStore();
 const threads = ref<Thread[]>([]);
 const activeThreadId = ref<string | null>(null);
@@ -33,7 +35,7 @@ onMounted(async () => {
       activeThreadId.value = data[0].id;
     }
   } catch (e) {
-    error.value = "Could not load group chats.";
+    error.value = t("messaging.groupChatError");
   } finally {
     loading.value = false;
   }
@@ -61,30 +63,34 @@ function formatDate(iso?: string) {
 <template>
   <div class="vendor-group-chat">
     <div class="page-header">
-      <h2>Group Chats</h2>
-      <p class="subtitle">Planning conversations with your couples.</p>
+      <h2>{{ t("messaging.groupChat") }}</h2>
+      <p class="subtitle">{{ t("messaging.groupChatSubtitle") }}</p>
     </div>
 
-    <div v-if="loading" class="state-msg">Loading…</div>
+    <div v-if="loading" class="state-msg">{{ t("common.loading") }}</div>
     <div v-else-if="error" class="state-msg error">{{ error }}</div>
 
     <div v-else class="chat-layout">
       <!-- ── Thread list ──────────────────────────────────────────── -->
       <aside class="thread-list">
         <button
-          v-for="t in threads"
-          :key="t.id"
+          v-for="thread in threads"
+          :key="thread.id"
           class="thread-item"
-          :class="{ active: t.id === activeThreadId }"
-          @click="selectThread(t.id)"
+          :class="{ active: thread.id === activeThreadId }"
+          @click="selectThread(thread.id)"
         >
-          <div class="ti-name">{{ t.name ?? "Group Chat" }}</div>
-          <div class="ti-last">{{ t.lastMessage ?? "No messages yet" }}</div>
+          <div class="ti-name">
+            {{ thread.name ?? t("messaging.groupChat") }}
+          </div>
+          <div class="ti-last">
+            {{ thread.lastMessage ?? t("messaging.noMessages") }}
+          </div>
           <div class="ti-meta">
-            <span v-if="t.unreadCount" class="ti-badge">{{
-              t.unreadCount
+            <span v-if="thread.unreadCount" class="ti-badge">{{
+              thread.unreadCount
             }}</span>
-            <span class="ti-date">{{ formatDate(t.lastMessageAt) }}</span>
+            <span class="ti-date">{{ formatDate(thread.lastMessageAt) }}</span>
           </div>
         </button>
       </aside>
@@ -97,11 +103,10 @@ function formatDate(iso?: string) {
           @left="onLeft"
         />
         <div v-else class="empty">
-          Select a conversation to start messaging.
-          <span v-if="threads.length === 0"
-            >You haven't been added to any group chats yet — this happens
-            automatically when a couple books you.</span
-          >
+          {{ t("messaging.selectConversation") }}
+          <span v-if="threads.length === 0">{{
+            t("messaging.groupChatEmpty")
+          }}</span>
         </div>
       </div>
     </div>

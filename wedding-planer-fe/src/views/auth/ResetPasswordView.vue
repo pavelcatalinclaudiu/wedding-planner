@@ -1,8 +1,10 @@
 ﻿<script setup lang="ts">
 import { ref, computed } from "vue";
 import { useRoute } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { useAuthStore } from "@/stores/auth.store";
 
+const { t } = useI18n();
 const route = useRoute();
 const authStore = useAuthStore();
 
@@ -25,8 +27,7 @@ async function requestReset() {
     await authStore.requestPasswordReset(email.value);
     success.value = true;
   } catch {
-    error.value =
-      "Could not send reset email. Check the address and try again.";
+    error.value = t("auth.resetPassword.errorRequest");
   } finally {
     loading.value = false;
   }
@@ -34,11 +35,11 @@ async function requestReset() {
 
 async function setNewPassword() {
   if (!password.value || !confirmPassword.value) {
-    error.value = "Fill in all fields.";
+    error.value = t("auth.resetPassword.errorFillFields");
     return;
   }
   if (password.value !== confirmPassword.value) {
-    error.value = "Passwords do not match.";
+    error.value = t("auth.resetPassword.errorMismatch");
     return;
   }
   loading.value = true;
@@ -47,7 +48,7 @@ async function setNewPassword() {
     await authStore.resetPassword(token.value!, password.value);
     success.value = true;
   } catch {
-    error.value = "Reset link may have expired. Request a new one.";
+    error.value = t("auth.resetPassword.errorExpired");
   } finally {
     loading.value = false;
   }
@@ -61,14 +62,14 @@ async function setNewPassword() {
 
       <!-- Request mode -->
       <template v-if="!isResetMode">
-        <h1 class="auth-title">Reset your password</h1>
+        <h1 class="auth-title">{{ t("auth.resetPassword.titleRequest") }}</h1>
         <template v-if="!success">
           <p class="auth-subtitle">
-            Enter your email and we'll send you a link.
+            {{ t("auth.resetPassword.subtitleRequest") }}
           </p>
           <form @submit.prevent="requestReset" class="auth-form">
             <div class="field">
-              <label>Email</label>
+              <label>{{ t("auth.resetPassword.emailLabel") }}</label>
               <input
                 v-model="email"
                 type="email"
@@ -78,27 +79,27 @@ async function setNewPassword() {
             </div>
             <p v-if="error" class="error-msg">{{ error }}</p>
             <button type="submit" class="btn-primary" :disabled="loading">
-              {{ loading ? "Sending…" : "Send reset link" }}
+              {{
+                loading
+                  ? t("common.loading")
+                  : t("auth.resetPassword.submitRequest")
+              }}
             </button>
           </form>
         </template>
         <div v-else class="success-state">
           <span class="icon">✉️</span>
-          <p>
-            Check your inbox — we've sent a reset link to
-            <strong>{{ email }}</strong
-            >.
-          </p>
+          <p>{{ t("auth.resetPassword.successRequest") }}</p>
         </div>
       </template>
 
       <!-- Set new password mode -->
       <template v-else>
-        <h1 class="auth-title">Set new password</h1>
+        <h1 class="auth-title">{{ t("auth.resetPassword.titleReset") }}</h1>
         <template v-if="!success">
           <form @submit.prevent="setNewPassword" class="auth-form">
             <div class="field">
-              <label>New password</label>
+              <label>{{ t("auth.resetPassword.passwordLabel") }}</label>
               <div class="password-wrapper">
                 <input
                   v-model="password"
@@ -111,12 +112,14 @@ async function setNewPassword() {
                   class="toggle-password"
                   @click="showPassword = !showPassword"
                 >
-                  {{ showPassword ? "Hide" : "Show" }}
+                  {{
+                    showPassword ? t("auth.login.hide") : t("auth.login.show")
+                  }}
                 </button>
               </div>
             </div>
             <div class="field">
-              <label>Confirm new password</label>
+              <label>{{ t("auth.resetPassword.confirmPasswordLabel") }}</label>
               <input
                 v-model="confirmPassword"
                 :type="showPassword ? 'text' : 'password'"
@@ -126,18 +129,27 @@ async function setNewPassword() {
             </div>
             <p v-if="error" class="error-msg">{{ error }}</p>
             <button type="submit" class="btn-primary" :disabled="loading">
-              {{ loading ? "Saving…" : "Update password" }}
+              {{
+                loading
+                  ? t("common.loading")
+                  : t("auth.resetPassword.submitReset")
+              }}
             </button>
           </form>
         </template>
         <div v-else class="success-state">
           <span class="icon">✓</span>
-          <p>Password updated! <RouterLink to="/login">Sign in</RouterLink></p>
+          <p>
+            {{ t("auth.resetPassword.successReset") }}
+            <RouterLink to="/login">{{ t("common.signIn") }}</RouterLink>
+          </p>
         </div>
       </template>
 
       <p class="auth-links">
-        <RouterLink to="/login">← Back to login</RouterLink>
+        <RouterLink to="/login"
+          >← {{ t("auth.resetPassword.backToLogin") }}</RouterLink
+        >
       </p>
     </div>
   </div>

@@ -1,12 +1,14 @@
 ﻿<script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { vendorApi } from "@/api/vendor.api";
 import VendorCard from "@/components/vendor/VendorCard.vue";
 import PublicNavbar from "@/components/public/PublicNavbar.vue";
 import type { VendorProfile } from "@/types/vendor.types";
 
 const router = useRouter();
+const { t } = useI18n();
 
 const search = ref("");
 const city = ref("");
@@ -14,41 +16,53 @@ const featuredVendors = ref<VendorProfile[]>([]);
 const loadingFeatured = ref(false);
 const featuredScrollRef = ref<HTMLElement | null>(null);
 
-const categories = [
-  { key: "PHOTOGRAPHER", label: "Photographers", icon: "📷" },
-  { key: "VIDEOGRAPHER", label: "Videographers", icon: "🎥" },
-  { key: "VENUE", label: "Venues", icon: "🏛️" },
-  { key: "FLORIST", label: "Florists", icon: "💐" },
-  { key: "CATERER", label: "Caterers", icon: "🍽️" },
-  { key: "CAKE", label: "Cake & Pastry", icon: "🎂" },
-  { key: "BAND", label: "Live Music", icon: "🎸" },
-  { key: "DJ", label: "DJs", icon: "🎧" },
-  { key: "MAKEUP_ARTIST", label: "Makeup Artists", icon: "💄" },
-  { key: "PLANNER", label: "Planners", icon: "📋" },
-];
+const categories = computed(() => [
+  {
+    key: "PHOTOGRAPHER",
+    label: t("landing.categories.labels.PHOTOGRAPHER"),
+    icon: "📷",
+  },
+  {
+    key: "VIDEOGRAPHER",
+    label: t("landing.categories.labels.VIDEOGRAPHER"),
+    icon: "🎥",
+  },
+  { key: "VENUE", label: t("landing.categories.labels.VENUE"), icon: "🏛️" },
+  { key: "FLORIST", label: t("landing.categories.labels.FLORIST"), icon: "💐" },
+  { key: "CATERER", label: t("landing.categories.labels.CATERER"), icon: "🍽️" },
+  { key: "CAKE", label: t("landing.categories.labels.CAKE"), icon: "🎂" },
+  { key: "BAND", label: t("landing.categories.labels.BAND"), icon: "🎸" },
+  { key: "DJ", label: t("landing.categories.labels.DJ"), icon: "🎧" },
+  {
+    key: "MAKEUP_ARTIST",
+    label: t("landing.categories.labels.MAKEUP_ARTIST"),
+    icon: "💄",
+  },
+  { key: "PLANNER", label: t("landing.categories.labels.PLANNER"), icon: "📋" },
+]);
 
-const steps = [
+const steps = computed(() => [
   {
     n: "01",
-    title: "Search",
-    body: "Browse hundreds of vetted vendors across Romania — filter by city, category, price and rating.",
+    title: t("landing.howItWorks.steps.search.title"),
+    body: t("landing.howItWorks.steps.search.body"),
   },
   {
     n: "02",
-    title: "Explore & Compare",
-    body: "View full portfolios, read real reviews, check packages and availability in one place.",
+    title: t("landing.howItWorks.steps.explore.title"),
+    body: t("landing.howItWorks.steps.explore.body"),
   },
   {
     n: "03",
-    title: "Send an Enquiry",
-    body: "Message vendors instantly. Your wedding details are shared automatically so they can quote you accurately.",
+    title: t("landing.howItWorks.steps.enquire.title"),
+    body: t("landing.howItWorks.steps.enquire.body"),
   },
   {
     n: "04",
-    title: "Book with Confidence",
-    body: "Get proposals, compare quotes and confirm your team — all through your Eternelle dashboard.",
+    title: t("landing.howItWorks.steps.book.title"),
+    body: t("landing.howItWorks.steps.book.body"),
   },
-];
+]);
 
 const testimonials = [
   {
@@ -74,23 +88,23 @@ const testimonials = [
   },
 ];
 
-const whyItems = [
+const whyItems = computed(() => [
   {
     icon: "✦",
-    title: "Verified Professionals",
-    body: "Every vendor on Eternelle is manually reviewed. You only see quality, experienced professionals.",
+    title: t("landing.why.items.verified.title"),
+    body: t("landing.why.items.verified.body"),
   },
   {
     icon: "★",
-    title: "Real Reviews",
-    body: "Authentic reviews from real couples — no fake testimonials, no paid placements.",
+    title: t("landing.why.items.reviews.title"),
+    body: t("landing.why.items.reviews.body"),
   },
   {
     icon: "📬",
-    title: "Instant Messaging",
-    body: "Enquire directly within the platform. All your conversations, quotes and bookings in one dashboard.",
+    title: t("landing.why.items.messaging.title"),
+    body: t("landing.why.items.messaging.body"),
   },
-];
+]);
 
 function search_go() {
   router.push({
@@ -142,11 +156,10 @@ onMounted(async () => {
         <div class="hero-overlay" />
       </div>
       <div class="hero-content">
-        <p class="hero-eyebrow">✦ Romania's #1 Wedding Vendor Platform</p>
-        <h1 class="hero-heading">Your perfect wedding<br />starts here</h1>
+        <p class="hero-eyebrow">✦ Eternelle — {{ t("brand.tagline") }}</p>
+        <h1 class="hero-heading">{{ t("landing.hero.title") }}</h1>
         <p class="hero-sub">
-          Discover photographers, venues, florists and 200+ more categories.<br />
-          Enquire instantly and book with confidence.
+          {{ t("landing.hero.subtitle") }}
         </p>
         <form class="hero-search" @submit.prevent="search_go">
           <div class="hs-field">
@@ -155,7 +168,7 @@ onMounted(async () => {
               v-model="search"
               class="hs-input"
               type="text"
-              placeholder="Photographer, venue, caterer…"
+              :placeholder="t('landing.hero.searchPlaceholder')"
             />
           </div>
           <div class="hs-sep" />
@@ -165,13 +178,15 @@ onMounted(async () => {
               v-model="city"
               class="hs-input"
               type="text"
-              placeholder="City (e.g. București)"
+              :placeholder="t('landing.hero.cityPlaceholder')"
             />
           </div>
-          <button class="hs-btn" type="submit">Find Vendors</button>
+          <button class="hs-btn" type="submit">
+            {{ t("landing.hero.searchBtn") }}
+          </button>
         </form>
         <p class="hero-hint">
-          Trusted by <strong>2 400+</strong> couples across Romania
+          Trusted by <strong>2 400+</strong> {{ t("landing.hero.trustedBy") }}
         </p>
       </div>
     </section>
@@ -179,9 +194,9 @@ onMounted(async () => {
     <!-- ── Category Grid ── -->
     <section class="section category-section">
       <div class="container">
-        <h2 class="section-title">Browse by category</h2>
+        <h2 class="section-title">{{ t("landing.categories.title") }}</h2>
         <p class="section-sub">
-          Everything you need for your perfect day, in one place.
+          {{ t("landing.categories.subtitle") }}
         </p>
         <div class="category-grid">
           <button
@@ -195,7 +210,7 @@ onMounted(async () => {
           </button>
         </div>
         <button class="browse-all-btn" @click="router.push('/vendors')">
-          Browse all categories →
+          {{ t("landing.categories.browseAll") }}
         </button>
       </div>
     </section>
@@ -203,9 +218,9 @@ onMounted(async () => {
     <!-- ── How It Works ── -->
     <section class="section hiw-section">
       <div class="container">
-        <h2 class="section-title">How Eternelle works</h2>
+        <h2 class="section-title">{{ t("landing.howItWorks.title") }}</h2>
         <p class="section-sub">
-          From discovery to booking in four simple steps.
+          {{ t("landing.howItWorks.subtitle") }}
         </p>
         <div class="hiw-grid">
           <div v-for="step in steps" :key="step.n" class="hiw-card">
@@ -225,12 +240,14 @@ onMounted(async () => {
       <div class="container">
         <div class="section-header-row">
           <div>
-            <h2 class="section-title">Featured vendors</h2>
+            <h2 class="section-title">{{ t("landing.featured.title") }}</h2>
             <p class="section-sub">
-              Hand-picked professionals ready to make your day unforgettable.
+              {{ t("landing.featured.subtitle") }}
             </p>
           </div>
-          <RouterLink to="/vendors" class="see-all-link">See all →</RouterLink>
+          <RouterLink to="/vendors" class="see-all-link"
+            >{{ t("landing.featured.viewAll") }} →</RouterLink
+          >
         </div>
         <div class="featured-carousel">
           <button
@@ -264,7 +281,7 @@ onMounted(async () => {
     <!-- ── Why Eternelle ── -->
     <section class="section why-section">
       <div class="container">
-        <h2 class="section-title center">Why couples choose Eternelle</h2>
+        <h2 class="section-title center">{{ t("landing.why.title") }}</h2>
         <div class="why-grid">
           <div v-for="item in whyItems" :key="item.title" class="why-card">
             <span class="why-icon">{{ item.icon }}</span>
@@ -278,15 +295,21 @@ onMounted(async () => {
     <!-- ── Testimonials ── -->
     <section class="section testimonials-section">
       <div class="container">
-        <h2 class="section-title center">Couples love Eternelle</h2>
+        <h2 class="section-title center">
+          {{ t("landing.testimonials.title") }}
+        </h2>
         <div class="testi-grid">
-          <div v-for="t in testimonials" :key="t.couple" class="testi-card">
-            <p class="testi-quote">"{{ t.quote }}"</p>
+          <div
+            v-for="testi in testimonials"
+            :key="testi.couple"
+            class="testi-card"
+          >
+            <p class="testi-quote">"{{ testi.quote }}"</p>
             <div class="testi-author">
-              <div class="testi-avatar">{{ t.initials }}</div>
+              <div class="testi-avatar">{{ testi.initials }}</div>
               <div>
-                <p class="testi-name">{{ t.couple }}</p>
-                <p class="testi-loc">{{ t.location }}</p>
+                <p class="testi-name">{{ testi.couple }}</p>
+                <p class="testi-loc">{{ testi.location }}</p>
               </div>
             </div>
           </div>
@@ -298,14 +321,13 @@ onMounted(async () => {
     <section class="vendor-banner">
       <div class="container vendor-banner-inner">
         <div>
-          <h2 class="vb-title">Are you a wedding professional?</h2>
+          <h2 class="vb-title">{{ t("landing.hero.forVendors") }}</h2>
           <p class="vb-sub">
-            Join 600+ vendors on Eternelle and reach thousands of couples actively
-            planning their weddings.
+            {{ t("landing.vendorBanner.sub") }}
           </p>
         </div>
         <RouterLink to="/register/vendor" class="vb-btn"
-          >List Your Business →</RouterLink
+          >{{ t("landing.hero.joinVendors") }} →</RouterLink
         >
       </div>
     </section>
@@ -317,23 +339,30 @@ onMounted(async () => {
           <div class="footer-brand">
             <p class="footer-logo">Eternelle</p>
             <p class="footer-tagline">
-              Romania's premier wedding vendor platform. Making every wedding
-              unforgettable.
+              {{ t("landing.footer.tagline") }}
             </p>
           </div>
           <div class="footer-col">
-            <p class="footer-col-title">For Couples</p>
-            <RouterLink to="/vendors">Find Vendors</RouterLink>
-            <RouterLink to="/register/couple">Create Account</RouterLink>
-            <RouterLink to="/login">Log In</RouterLink>
+            <p class="footer-col-title">{{ t("landing.footer.forCouples") }}</p>
+            <RouterLink to="/vendors">{{
+              t("landing.footer.findVendors")
+            }}</RouterLink>
+            <RouterLink to="/register/couple">{{
+              t("landing.footer.createAccount")
+            }}</RouterLink>
+            <RouterLink to="/login">{{ t("common.signIn") }}</RouterLink>
           </div>
           <div class="footer-col">
-            <p class="footer-col-title">For Vendors</p>
-            <RouterLink to="/register/vendor">Join Eternelle</RouterLink>
-            <RouterLink to="/vendor/dashboard">Dashboard</RouterLink>
+            <p class="footer-col-title">{{ t("landing.footer.forVendors") }}</p>
+            <RouterLink to="/register/vendor">{{
+              t("landing.footer.joinEternelle")
+            }}</RouterLink>
+            <RouterLink to="/vendor/dashboard">{{
+              t("landing.footer.dashboard")
+            }}</RouterLink>
           </div>
           <div class="footer-col">
-            <p class="footer-col-title">Categories</p>
+            <p class="footer-col-title">{{ t("landing.footer.categories") }}</p>
             <button
               v-for="cat in categories.slice(0, 5)"
               :key="cat.key"
@@ -345,7 +374,10 @@ onMounted(async () => {
           </div>
         </div>
         <div class="footer-bottom">
-          <p>© {{ new Date().getFullYear() }} Eternelle. All rights reserved.</p>
+          <p>
+            © {{ new Date().getFullYear() }} Eternelle.
+            {{ t("landing.footer.rights") }}
+          </p>
         </div>
       </div>
     </footer>

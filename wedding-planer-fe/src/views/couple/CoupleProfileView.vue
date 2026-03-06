@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { useCoupleStore } from "@/stores/couple.store";
 
+const { t } = useI18n();
 const coupleStore = useCoupleStore();
 const saving = ref(false);
 const saved = ref(false);
@@ -37,7 +39,7 @@ async function save() {
     saved.value = true;
     setTimeout(() => (saved.value = false), 2500);
   } catch (e: any) {
-    error.value = e?.response?.data?.message ?? "Could not save profile.";
+    error.value = e?.response?.data?.message ?? t("profile.couple.saveError");
   } finally {
     saving.value = false;
   }
@@ -47,17 +49,17 @@ async function save() {
 <template>
   <div class="profile-view">
     <div class="pv-header">
-      <h2 class="pv-title">My Profile</h2>
+      <h2 class="pv-title">{{ t("profile.couple.title") }}</h2>
       <p class="pv-sub">
-        Update your wedding details and personal information.
+        {{ t("profile.couple.subtitle") }}
       </p>
     </div>
 
     <div class="form-card">
-      <p class="section-label">Partners</p>
+      <p class="section-label">{{ t("profile.couple.partnersSection") }}</p>
       <div class="form-grid">
         <div class="field">
-          <label>Partner 1 Name</label>
+          <label>{{ t("profile.couple.partner1") }}</label>
           <input
             v-model="form.partner1Name"
             class="input"
@@ -65,7 +67,7 @@ async function save() {
           />
         </div>
         <div class="field">
-          <label>Partner 2 Name</label>
+          <label>{{ t("profile.couple.partner2") }}</label>
           <input
             v-model="form.partner2Name"
             class="input"
@@ -74,22 +76,24 @@ async function save() {
         </div>
       </div>
 
-      <p class="section-label" style="margin-top: 24px">Wedding Details</p>
+      <p class="section-label" style="margin-top: 24px">
+        {{ t("profile.couple.weddingDetailsSection") }}
+      </p>
       <div class="form-grid">
         <div class="field">
-          <label>Wedding Date</label>
+          <label>{{ t("profile.couple.weddingDate") }}</label>
           <input v-model="form.weddingDate" type="date" class="input" />
         </div>
         <div class="field">
-          <label>Wedding Location</label>
+          <label>{{ t("profile.couple.location") }}</label>
           <input
             v-model="form.weddingLocation"
             class="input"
-            placeholder="City, Venue"
+            :placeholder="t('profile.couple.locationPlaceholder')"
           />
         </div>
         <div class="field">
-          <label>Estimated Guest Count</label>
+          <label>{{ t("profile.couple.guestCount") }}</label>
           <input
             v-model.number="form.estimatedGuestCount"
             type="number"
@@ -98,7 +102,7 @@ async function save() {
           />
         </div>
         <div class="field">
-          <label>Total Budget (RON)</label>
+          <label>{{ t("profile.couple.budget") }}</label>
           <input
             v-model.number="form.totalBudget"
             type="number"
@@ -113,7 +117,13 @@ async function save() {
 
       <div class="form-actions">
         <button class="save-btn" :disabled="saving" @click="save">
-          {{ saving ? "Saving…" : saved ? "✓ Saved!" : "Save Changes" }}
+          {{
+            saving
+              ? t("profile.couple.saving")
+              : saved
+                ? t("profile.couple.savedMsg")
+                : t("profile.couple.saveChanges")
+          }}
         </button>
       </div>
     </div>

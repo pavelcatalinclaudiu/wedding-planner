@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { videoCallsApi } from "@/api/videoCalls.api";
 import { bookingsApi } from "@/api/bookings.api";
 import CalendarGrid from "@/components/ui/CalendarGrid.vue";
@@ -13,6 +14,8 @@ import {
 } from "date-fns";
 import type { VideoCall, Booking } from "@/types/lead.types";
 import { useChecklistStore } from "@/stores/checklist.store";
+
+const { t } = useI18n();
 
 const calls = ref<VideoCall[]>([]);
 const bookings = ref<Booking[]>([]);
@@ -129,9 +132,9 @@ function isTaskOverdue(dateStr: string) {
     <!-- Header -->
     <div class="cv-header">
       <div>
-        <h2 class="cv-title">Your Calendar</h2>
+        <h2 class="cv-title">{{ t("calendar.pageTitle") }}</h2>
         <p class="cv-sub">
-          Bookings, video calls and checklist tasks at a glance.
+          {{ t("calendar.subtitle") }}
         </p>
       </div>
     </div>
@@ -142,21 +145,21 @@ function isTaskOverdue(dateStr: string) {
         <span class="cv-stat-icon">💍</span>
         <div>
           <p class="cv-stat-val">{{ bookings.length }}</p>
-          <p class="cv-stat-label">Wedding Bookings</p>
+          <p class="cv-stat-label">{{ t("calendar.weddingBookings") }}</p>
         </div>
       </div>
       <div class="cv-stat cv-stat--call">
         <span class="cv-stat-icon">📹</span>
         <div>
           <p class="cv-stat-val">{{ upcomingCalls.length }}</p>
-          <p class="cv-stat-label">Upcoming Calls</p>
+          <p class="cv-stat-label">{{ t("calendar.upcomingCalls") }}</p>
         </div>
       </div>
       <div class="cv-stat cv-stat--task">
         <span class="cv-stat-icon">✅</span>
         <div>
           <p class="cv-stat-val">{{ upcomingTasks.length }}</p>
-          <p class="cv-stat-label">Pending Tasks</p>
+          <p class="cv-stat-label">{{ t("calendar.pendingTasks") }}</p>
         </div>
       </div>
     </div>
@@ -164,7 +167,7 @@ function isTaskOverdue(dateStr: string) {
     <div class="cv-body">
       <!-- Calendar column -->
       <div class="cv-calendar-col">
-        <div v-if="loading" class="cv-loading">Loading…</div>
+        <div v-if="loading" class="cv-loading">{{ t("common.loading") }}</div>
         <CalendarGrid
           v-else
           :blocked-dates="[]"
@@ -175,13 +178,13 @@ function isTaskOverdue(dateStr: string) {
         />
         <div class="cv-legend">
           <span class="legend-pip legend-pip--booking"></span
-          ><span class="legend-lbl">Wedding</span>
+          ><span class="legend-lbl">{{ t("calendar.legend.booking") }}</span>
           <span class="legend-pip legend-pip--call"></span
-          ><span class="legend-lbl">Video Call</span>
+          ><span class="legend-lbl">{{ t("calendar.legend.call") }}</span>
           <span class="legend-pip legend-pip--task"></span
-          ><span class="legend-lbl">Task</span>
+          ><span class="legend-lbl">{{ t("calendar.legend.task") }}</span>
           <span class="legend-pip legend-pip--overdue"></span
-          ><span class="legend-lbl">Overdue</span>
+          ><span class="legend-lbl">{{ t("calendar.legend.overdue") }}</span>
         </div>
       </div>
 
@@ -194,7 +197,7 @@ function isTaskOverdue(dateStr: string) {
             @click="activeTab = 'bookings'"
           >
             <span class="tab-pip tab-pip--booking"></span>
-            Bookings
+            {{ t("calendar.tabs.bookings") }}
             <span class="tab-badge">{{ bookings.length }}</span>
           </button>
           <button
@@ -203,7 +206,7 @@ function isTaskOverdue(dateStr: string) {
             @click="activeTab = 'calls'"
           >
             <span class="tab-pip tab-pip--call"></span>
-            Calls
+            {{ t("calendar.tabs.calls") }}
             <span class="tab-badge">{{ upcomingCalls.length }}</span>
           </button>
           <button
@@ -212,7 +215,7 @@ function isTaskOverdue(dateStr: string) {
             @click="activeTab = 'tasks'"
           >
             <span class="tab-pip tab-pip--task"></span>
-            Tasks
+            {{ t("calendar.tabs.tasks") }}
             <span
               class="tab-badge"
               :class="{
@@ -228,12 +231,14 @@ function isTaskOverdue(dateStr: string) {
         <div class="panel-body">
           <!-- Bookings tab -->
           <template v-if="activeTab === 'bookings'">
-            <div v-if="loading" class="bk-loading">Loading…</div>
+            <div v-if="loading" class="bk-loading">
+              {{ t("common.loading") }}
+            </div>
             <div v-else-if="bookings.length === 0" class="bk-empty">
               <span class="bk-empty-icon">💍</span>
-              <p>No confirmed bookings yet.</p>
+              <p>{{ t("calendar.noBookings") }}</p>
               <p class="bk-empty-sub">
-                Accept a vendor's offer to confirm a date.
+                {{ t("calendar.noBookingsSub") }}
               </p>
             </div>
             <ul v-else class="bk-list">
@@ -251,26 +256,32 @@ function isTaskOverdue(dateStr: string) {
                     {{ bookingYear(b.weddingDate!) }}
                   </p>
                 </div>
-                <span class="bk-status status-confirmed">Booked</span>
+                <span class="bk-status status-confirmed">{{
+                  t("common.booked")
+                }}</span>
               </li>
             </ul>
           </template>
 
           <!-- Calls tab -->
           <template v-else-if="activeTab === 'calls'">
-            <div v-if="loading" class="bk-loading">Loading…</div>
+            <div v-if="loading" class="bk-loading">
+              {{ t("common.loading") }}
+            </div>
             <div
               v-else-if="upcomingCalls.length === 0 && pastCalls.length === 0"
               class="bk-empty"
             >
               <span class="bk-empty-icon">📹</span>
-              <p>No video calls yet.</p>
+              <p>{{ t("videoCalls.noCalls") }}</p>
               <p class="bk-empty-sub">
-                Schedule a call from an enquiry conversation.
+                {{ t("calendar.noCallsSub") }}
               </p>
             </div>
             <template v-else>
-              <p v-if="upcomingCalls.length" class="section-label">Upcoming</p>
+              <p v-if="upcomingCalls.length" class="section-label">
+                {{ t("calendar.upcoming") }}
+              </p>
               <ul class="bk-list">
                 <li
                   v-for="call in upcomingCalls"
@@ -301,10 +312,10 @@ function isTaskOverdue(dateStr: string) {
                   >
                     {{
                       call.status === "PENDING"
-                        ? "Pending"
+                        ? t("common.pending")
                         : call.status === "IN_PROGRESS"
                           ? "Live"
-                          : "Confirmed"
+                          : t("common.confirmed")
                     }}
                   </span>
                 </li>
@@ -314,7 +325,7 @@ function isTaskOverdue(dateStr: string) {
                   class="section-label section-label--muted"
                   style="margin-top: 16px"
                 >
-                  Recent
+                  {{ t("calendar.past") }}
                 </p>
                 <ul class="bk-list">
                   <li
@@ -343,7 +354,9 @@ function isTaskOverdue(dateStr: string) {
                       "
                     >
                       {{
-                        call.status === "CANCELLED" ? "Cancelled" : "Completed"
+                        call.status === "CANCELLED"
+                          ? t("common.cancelled")
+                          : t("common.completed")
                       }}
                     </span>
                   </li>
@@ -354,11 +367,13 @@ function isTaskOverdue(dateStr: string) {
 
           <!-- Tasks tab -->
           <template v-else>
-            <div v-if="loading" class="bk-loading">Loading…</div>
+            <div v-if="loading" class="bk-loading">
+              {{ t("common.loading") }}
+            </div>
             <div v-else-if="upcomingTasks.length === 0" class="bk-empty">
               <span class="bk-empty-icon">✅</span>
-              <p>No pending tasks with a due date.</p>
-              <p class="bk-empty-sub">Add due dates on your checklist.</p>
+              <p>{{ t("calendar.pendingTasks") }}.</p>
+              <p class="bk-empty-sub">{{ t("checklist.addTask") }}.</p>
             </div>
             <ul v-else class="bk-list">
               <li v-for="task in upcomingTasks" :key="task.id" class="bk-item">
@@ -387,7 +402,11 @@ function isTaskOverdue(dateStr: string) {
                       : 'status-task'
                   "
                 >
-                  {{ isTaskOverdue(task.dueDate!) ? "Overdue" : "Pending" }}
+                  {{
+                    isTaskOverdue(task.dueDate!)
+                      ? t("checklist.stats.overdue")
+                      : t("common.pending")
+                  }}
                 </span>
               </li>
             </ul>

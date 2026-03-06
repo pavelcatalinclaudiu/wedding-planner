@@ -7,12 +7,15 @@ import {
   differenceInDays,
   parseISO,
 } from "date-fns";
+import { useI18n } from "vue-i18n";
 import { useCoupleStore } from "@/stores/couple.store";
 import { useLeadsStore } from "@/stores/leads.store";
 import { useChecklistStore } from "@/stores/checklist.store";
 import { useBudgetStore } from "@/stores/budget.store";
 import { useGuestsStore } from "@/stores/guests.store";
 import { useMessagesStore } from "@/stores/messages.store";
+
+const { t, locale } = useI18n();
 
 const coupleStore = useCoupleStore();
 const leadsStore = useLeadsStore();
@@ -51,11 +54,14 @@ const daysToGo = computed(() => {
 
 const formattedWeddingDate = computed(() => {
   if (!weddingDate.value) return "";
-  return new Date(weddingDate.value).toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+  return new Date(weddingDate.value).toLocaleDateString(
+    locale.value === "ro" ? "ro-RO" : "en-GB",
+    {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    },
+  );
 });
 
 // ── Widgets ────────────────────────────────────────────────────────────────
@@ -93,13 +99,19 @@ const upcomingTasks = computed(() => {
 });
 
 function dueDateLabel(item: { done: boolean; dueDate?: string }): string {
-  if (item.done) return "Done";
+  if (item.done) return t("common.completed");
   if (!item.dueDate) return "";
   const diff = differenceInCalendarDays(parseISO(item.dueDate), new Date());
-  if (diff < 0) return `Overdue`;
-  if (diff === 0) return "Due today";
-  if (diff <= 7) return `Due in ${diff} day${diff === 1 ? "" : "s"}`;
-  return `Due ${new Date(item.dueDate).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}`;
+  if (diff < 0) return t("checklist.filters.overdue");
+  if (diff === 0) return locale.value === "ro" ? "Scadent azi" : "Due today";
+  if (diff <= 7)
+    return locale.value === "ro"
+      ? `În ${diff} ${diff === 1 ? "zi" : "zile"}`
+      : `Due in ${diff} day${diff === 1 ? "" : "s"}`;
+  return new Date(item.dueDate).toLocaleDateString(
+    locale.value === "ro" ? "ro-RO" : "en-GB",
+    { day: "numeric", month: "short" },
+  );
 }
 
 function dueDateUrgent(item: { done: boolean; dueDate?: string }): boolean {
@@ -134,10 +146,10 @@ function statusBadgeClass(status: string): string {
 }
 
 function statusLabel(status: string): string {
-  if (status === "BOOKED") return "Booked";
-  if (status === "IN_DISCUSSION") return "Pending";
-  if (status === "QUOTED") return "Quoted";
-  return "Contacted";
+  if (status === "BOOKED") return t("common.booked");
+  if (status === "IN_DISCUSSION") return t("common.pending");
+  if (status === "QUOTED") return locale.value === "ro" ? "Cotat" : "Quoted";
+  return locale.value === "ro" ? "Contactat" : "Contacted";
 }
 
 const teamLeads = computed(() =>
@@ -193,12 +205,15 @@ function timeAgo(dateStr?: string): string {
   if (!dateStr) return "";
   const date = parseISO(dateStr);
   const mins = differenceInMinutes(new Date(), date);
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 60)
+    return locale.value === "ro" ? `acum ${mins}m` : `${mins}m ago`;
   const hrs = differenceInHours(new Date(), date);
-  if (hrs < 24) return `${hrs}h ago`;
+  if (hrs < 24) return locale.value === "ro" ? `acum ${hrs}h` : `${hrs}h ago`;
   const days = differenceInDays(new Date(), date);
-  if (days === 1) return "Yesterday";
-  return `${days} days ago`;
+  if (days === 1) return locale.value === "ro" ? "Ieri" : "Yesterday";
+  return locale.value === "ro"
+    ? `acum ${days} ${days === 1 ? "zi" : "zile"}`
+    : `${days} day${days === 1 ? "" : "s"} ago`;
 }
 </script>
 
@@ -207,14 +222,14 @@ function timeAgo(dateStr?: string): string {
     <!-- ── Hero Banner ──────────────────────────────────────────── -->
     <div class="hero-banner">
       <div class="hero-left">
-        <p class="hero-welcome">Welcome back</p>
+        <p class="hero-welcome">{{ t("overview.welcomeBack") }}</p>
         <h1 class="hero-title">
           <span class="hero-names"
             >{{ partner1
             }}<template v-if="partner2"> &amp; {{ partner2 }}</template
             >'s</span
           ><br />
-          <span class="hero-subtitle">Perfect Day</span>
+          <span class="hero-subtitle">{{ t("overview.perfectDay") }}</span>
         </h1>
         <p class="hero-meta">
           <span v-if="weddingLocation" class="hero-meta-item"
@@ -230,7 +245,7 @@ function timeAgo(dateStr?: string): string {
       </div>
       <div v-if="daysToGo !== null" class="hero-countdown">
         <span class="countdown-number">{{ daysToGo }}</span>
-        <span class="countdown-label">Days to go</span>
+        <span class="countdown-label">{{ t("overview.daysToGo") }}</span>
       </div>
     </div>
 
@@ -240,32 +255,38 @@ function timeAgo(dateStr?: string): string {
         <div class="widget-top">
           <span class="widget-value">{{ tasksDone }}/{{ tasksTotal }}</span>
         </div>
-        <p class="widget-label">Tasks complete</p>
+        <p class="widget-label">{{ t("overview.widgets.tasksComplete") }}</p>
         <p v-if="checklistStore.urgent > 0" class="widget-hint urgent-hint">
-          ⚠ {{ checklistStore.urgent }} due soon
+          ⚠ {{ checklistStore.urgent }} {{ t("overview.widgets.dueSoon") }}
         </p>
-        <p v-else class="widget-hint">on track</p>
+        <p v-else class="widget-hint">{{ t("overview.widgets.onTrack") }}</p>
       </div>
       <div class="widget">
         <div class="widget-top">
           <span class="widget-value">{{ formatEur(budgetSpent) }}</span>
         </div>
-        <p class="widget-label">Budget spent</p>
-        <p class="widget-hint">{{ formatEur(budgetRemaining) }} remaining</p>
+        <p class="widget-label">{{ t("overview.widgets.budgetSpent") }}</p>
+        <p class="widget-hint">
+          {{ formatEur(budgetRemaining) }} {{ t("overview.widgets.remaining") }}
+        </p>
       </div>
       <div class="widget">
         <div class="widget-top">
           <span class="widget-value">{{ guestsConfirmed }}</span>
         </div>
-        <p class="widget-label">Guests confirmed</p>
-        <p class="widget-hint">{{ guestsPending }} awaiting RSVP</p>
+        <p class="widget-label">{{ t("overview.widgets.guestsConfirmed") }}</p>
+        <p class="widget-hint">
+          {{ guestsPending }} {{ t("overview.widgets.awaitingRsvp") }}
+        </p>
       </div>
       <div class="widget">
         <div class="widget-top">
           <span class="widget-value">{{ vendorsBooked }}</span>
         </div>
-        <p class="widget-label">Vendors booked</p>
-        <p class="widget-hint">{{ vendorsPendingReply }} pending reply</p>
+        <p class="widget-label">{{ t("overview.widgets.vendorsBooked") }}</p>
+        <p class="widget-hint">
+          {{ vendorsPendingReply }} {{ t("overview.widgets.pendingReply") }}
+        </p>
       </div>
     </div>
 
@@ -274,12 +295,14 @@ function timeAgo(dateStr?: string): string {
       <!-- Upcoming Tasks -->
       <section class="card tasks-card">
         <div class="card-header">
-          <h3>Upcoming Tasks</h3>
-          <RouterLink to="/couple/checklist" class="view-all"
-            >View all</RouterLink
-          >
+          <h3>{{ t("overview.upcomingTasks") }}</h3>
+          <RouterLink to="/couple/checklist" class="view-all">{{
+            t("common.view_all")
+          }}</RouterLink>
         </div>
-        <div v-if="upcomingTasks.length === 0" class="empty">No tasks yet.</div>
+        <div v-if="upcomingTasks.length === 0" class="empty">
+          {{ t("overview.noTasks") }}
+        </div>
         <ul v-else class="task-list">
           <li
             v-for="task in upcomingTasks"
@@ -305,12 +328,14 @@ function timeAgo(dateStr?: string): string {
       <!-- Wedding Team -->
       <section class="card team-card">
         <div class="card-header">
-          <h3>My Wedding Team</h3>
-          <RouterLink to="/couple/enquiries" class="view-all"
-            >View all</RouterLink
-          >
+          <h3>{{ t("overview.myTeam") }}</h3>
+          <RouterLink to="/couple/enquiries" class="view-all">{{
+            t("common.view_all")
+          }}</RouterLink>
         </div>
-        <div v-if="teamLeads.length === 0" class="empty">No vendors yet.</div>
+        <div v-if="teamLeads.length === 0" class="empty">
+          {{ t("overview.noVendors") }}
+        </div>
         <ul v-else class="team-list">
           <li v-for="lead in teamLeads" :key="lead.id" class="team-item">
             <span class="team-icon">{{
@@ -332,13 +357,15 @@ function timeAgo(dateStr?: string): string {
       <!-- Budget Overview -->
       <section class="card budget-card">
         <div class="card-header">
-          <h3>Budget Overview</h3>
-          <RouterLink to="/couple/budget" class="view-all">Details</RouterLink>
+          <h3>{{ t("overview.budgetOverview") }}</h3>
+          <RouterLink to="/couple/budget" class="view-all">{{
+            t("common.view_all")
+          }}</RouterLink>
         </div>
         <div class="budget-total">
           <span class="budget-spent-num">{{ formatEur(budgetSpent) }}</span>
           <span class="budget-total-label">
-            spent of {{ formatEur(budgetTotal) }} total budget</span
+            {{ t("overview.spentOf", { total: formatEur(budgetTotal) }) }}</span
           >
         </div>
         <div class="budget-progress-wrap">
@@ -370,19 +397,19 @@ function timeAgo(dateStr?: string): string {
             <span class="budget-cat-amount">{{ formatEur(amount) }}</span>
           </li>
         </ul>
-        <div v-else class="empty">No budget items yet.</div>
+        <div v-else class="empty">{{ t("overview.noBudgetItems") }}</div>
       </section>
 
       <!-- Recent Messages -->
       <section class="card messages-card">
         <div class="card-header">
-          <h3>Recent Messages</h3>
-          <RouterLink to="/couple/messages" class="view-all"
-            >View all</RouterLink
-          >
+          <h3>{{ t("overview.recentMessages") }}</h3>
+          <RouterLink to="/couple/messages" class="view-all">{{
+            t("common.view_all")
+          }}</RouterLink>
         </div>
         <div v-if="recentThreads.length === 0" class="empty">
-          No messages yet.
+          {{ t("overview.noMessages") }}
         </div>
         <ul v-else class="message-list">
           <li

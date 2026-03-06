@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { coupleApi } from "@/api/couple.api";
 import type { WeddingWebsite } from "@/types/couple.types";
 
 const route = useRoute();
+const { t } = useI18n();
 const website = ref<WeddingWebsite | null>(null);
 const loading = ref(false);
 const notFound = ref(false);
@@ -25,10 +27,10 @@ onMounted(async () => {
 
 <template>
   <div class="wedding-website">
-    <div v-if="loading" class="loading">Loading…</div>
+    <div v-if="loading" class="loading">{{ t("common.loading") }}</div>
     <div v-else-if="notFound" class="not-found">
-      <h2>Wedding website not found</h2>
-      <p>This link may have expired or been removed.</p>
+      <h2>{{ t("website.notFound") }}</h2>
+      <p>{{ t("website.notFoundDesc") }}</p>
     </div>
     <template v-else-if="website">
       <div class="site-hero">
@@ -50,24 +52,23 @@ onMounted(async () => {
 
       <div class="site-body">
         <section v-if="website.story" class="site-section">
-          <h2>Our Story</h2>
+          <h2>{{ t("website.ourStorySection") }}</h2>
           <p class="story-text">{{ website.story }}</p>
         </section>
 
         <section class="rsvp-section">
-          <h2>RSVP</h2>
+          <h2>{{ t("website.rsvpSection") }}</h2>
           <p>
-            We'd love to celebrate with you. Please let us know if you can make
-            it.
+            {{ t("website.rsvpDesc") }}
           </p>
           <RouterLink :to="`/rsvp/${route.params.slug}`" class="rsvp-btn"
-            >RSVP Now</RouterLink
+            >{{ t("website.rsvpBtn") }}</RouterLink
           >
         </section>
       </div>
 
       <footer class="site-footer">
-        <p>Made with ♡ on <strong>Eternelle</strong></p>
+        <p>{{ t("website.madeWith") }} <strong>Eternelle</strong></p>
       </footer>
     </template>
   </div>

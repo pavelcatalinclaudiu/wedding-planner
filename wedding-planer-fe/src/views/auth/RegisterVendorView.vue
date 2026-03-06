@@ -1,10 +1,12 @@
 ﻿<script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { useAuthStore } from "@/stores/auth.store";
 import { vendorApi } from "@/api/vendor.api";
 import type { VendorCategory } from "@/types/vendor.types";
 
+const { t } = useI18n();
 const router = useRouter();
 const authStore = useAuthStore();
 
@@ -25,25 +27,28 @@ const city = ref("");
 const description = ref("");
 const basePrice = ref<number | undefined>(undefined);
 
-const categories: { value: VendorCategory; label: string }[] = [
-  { value: "PHOTOGRAPHER", label: "Photography" },
-  { value: "VIDEOGRAPHER", label: "Videography" },
-  { value: "VENUE", label: "Venue" },
-  { value: "CATERER", label: "Catering" },
-  { value: "FLORIST", label: "Florals" },
-  { value: "BAND", label: "Live Band" },
-  { value: "DJ", label: "DJ" },
-  { value: "CAKE", label: "Cake" },
-  { value: "MAKEUP_ARTIST", label: "Makeup Artist" },
-  { value: "HAIR_STYLIST", label: "Hair Stylist" },
-  { value: "OFFICIANT", label: "Officiant" },
-  { value: "PLANNER", label: "Wedding Planner" },
-  { value: "TRANSPORTATION", label: "Transportation" },
-  { value: "LIGHTING", label: "Lighting" },
-  { value: "INVITATION_STATIONERY", label: "Invitations & Stationery" },
-  { value: "JEWELRY", label: "Jewelry" },
-  { value: "OTHER", label: "Other" },
-];
+const categories = computed<{ value: VendorCategory; label: string }[]>(() => [
+  { value: "PHOTOGRAPHER", label: t("categories.PHOTOGRAPHER") },
+  { value: "VIDEOGRAPHER", label: t("categories.VIDEOGRAPHER") },
+  { value: "VENUE", label: t("categories.VENUE") },
+  { value: "CATERER", label: t("categories.CATERER") },
+  { value: "FLORIST", label: t("categories.FLORIST") },
+  { value: "BAND", label: t("categories.BAND") },
+  { value: "DJ", label: t("categories.DJ") },
+  { value: "CAKE", label: t("categories.CAKE") },
+  { value: "MAKEUP_ARTIST", label: t("categories.MAKEUP_ARTIST") },
+  { value: "HAIR_STYLIST", label: t("categories.HAIR_STYLIST") },
+  { value: "OFFICIANT", label: t("categories.OFFICIANT") },
+  { value: "PLANNER", label: t("categories.PLANNER") },
+  { value: "TRANSPORTATION", label: t("categories.TRANSPORTATION") },
+  { value: "LIGHTING", label: t("categories.LIGHTING") },
+  {
+    value: "INVITATION_STATIONERY",
+    label: t("categories.INVITATION_STATIONERY"),
+  },
+  { value: "JEWELRY", label: t("categories.JEWELRY") },
+  { value: "OTHER", label: t("categories.OTHER") },
+]);
 
 function nextStep() {
   error.value = "";
@@ -81,7 +86,8 @@ async function handleSubmit() {
     router.push("/vendor/overview");
   } catch (e: unknown) {
     const err = e as { response?: { data?: { message?: string } } };
-    error.value = err.response?.data?.message ?? "Registration failed.";
+    error.value =
+      err.response?.data?.message ?? t("auth.registerVendor.errorFailed");
   } finally {
     loading.value = false;
   }
@@ -99,10 +105,10 @@ async function handleSubmit() {
       </div>
 
       <template v-if="step === 1">
-        <h1 class="auth-title">Create your vendor account</h1>
+        <h1 class="auth-title">{{ t("auth.registerVendor.title") }}</h1>
         <form @submit.prevent="nextStep" class="auth-form">
           <div class="field">
-            <label>Email</label>
+            <label>{{ t("auth.registerVendor.emailLabel") }}</label>
             <input
               v-model="email"
               type="email"
@@ -111,7 +117,7 @@ async function handleSubmit() {
             />
           </div>
           <div class="field">
-            <label>Password</label>
+            <label>{{ t("auth.registerVendor.passwordLabel") }}</label>
             <div class="password-wrapper">
               <input
                 v-model="password"
@@ -124,12 +130,12 @@ async function handleSubmit() {
                 class="toggle-password"
                 @click="showPassword = !showPassword"
               >
-                {{ showPassword ? "Hide" : "Show" }}
+                {{ showPassword ? t("auth.login.hide") : t("auth.login.show") }}
               </button>
             </div>
           </div>
           <div class="field">
-            <label>Confirm password</label>
+            <label>{{ t("auth.registerVendor.confirmPasswordLabel") }}</label>
             <input
               v-model="confirmPassword"
               :type="showPassword ? 'text' : 'password'"
@@ -138,15 +144,17 @@ async function handleSubmit() {
             />
           </div>
           <p v-if="error" class="error-msg">{{ error }}</p>
-          <button type="submit" class="btn-primary">Continue</button>
+          <button type="submit" class="btn-primary">
+            {{ t("auth.registerVendor.next") }}
+          </button>
         </form>
       </template>
 
       <template v-else>
-        <h1 class="auth-title">Your business details</h1>
+        <h1 class="auth-title">{{ t("auth.registerVendor.stepBusiness") }}</h1>
         <form @submit.prevent="handleSubmit" class="auth-form">
           <div class="field">
-            <label>Business name</label>
+            <label>{{ t("auth.registerVendor.businessNameLabel") }}</label>
             <input
               v-model="businessName"
               type="text"
@@ -155,7 +163,7 @@ async function handleSubmit() {
             />
           </div>
           <div class="field">
-            <label>Category</label>
+            <label>{{ t("auth.registerVendor.categoryLabel") }}</label>
             <select v-model="category">
               <option v-for="c in categories" :key="c.value" :value="c.value">
                 {{ c.label }}
@@ -163,24 +171,24 @@ async function handleSubmit() {
             </select>
           </div>
           <div class="field">
-            <label>City</label>
+            <label>{{ t("auth.registerVendor.cityLabel") }}</label>
             <input
               v-model="city"
               type="text"
-              placeholder="Bucharest"
+              placeholder="București"
               required
             />
           </div>
           <div class="field">
-            <label>Description</label>
+            <label>{{ t("auth.registerVendor.descriptionLabel") }}</label>
             <textarea
               v-model="description"
               rows="3"
-              placeholder="A short bio about your business…"
+              :placeholder="t('vendor.profile.description')"
             />
           </div>
           <div class="field">
-            <label>Starting price (€)</label>
+            <label>{{ t("auth.registerVendor.basePriceLabel") }}</label>
             <input
               v-model.number="basePrice"
               type="number"
@@ -191,17 +199,22 @@ async function handleSubmit() {
           <p v-if="error" class="error-msg">{{ error }}</p>
           <div class="btn-row">
             <button type="button" class="btn-secondary" @click="step = 1">
-              Back
+              {{ t("auth.registerVendor.back") }}
             </button>
             <button type="submit" class="btn-primary" :disabled="loading">
-              {{ loading ? "Creating…" : "Create account" }}
+              {{
+                loading ? t("common.loading") : t("auth.registerVendor.submit")
+              }}
             </button>
           </div>
         </form>
       </template>
 
       <p class="auth-links">
-        Already have an account? <RouterLink to="/login">Sign in</RouterLink>
+        {{ t("auth.registerVendor.alreadyHaveAccount") }}
+        <RouterLink to="/login">{{
+          t("auth.registerVendor.signIn")
+        }}</RouterLink>
       </p>
     </div>
   </div>

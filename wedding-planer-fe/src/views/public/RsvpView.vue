@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useRoute } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { guestsApi } from "@/api/guests.api";
 
 const route = useRoute();
+const { t } = useI18n();
 
 const step = ref<"form" | "thanks" | "declined">("form");
 const loading = ref(false);
@@ -18,7 +20,7 @@ const form = ref({
 
 async function submit() {
   if (!form.value.name.trim()) {
-    error.value = "Please enter your name.";
+    error.value = t("rsvp.pleaseName");
     return;
   }
   loading.value = true;
@@ -34,7 +36,7 @@ async function submit() {
     step.value = form.value.attending ? "thanks" : "declined";
   } catch (e: any) {
     error.value =
-      e?.response?.data?.message ?? "Something went wrong. Please try again.";
+      e?.response?.data?.message ?? t("errors.serverError");
   } finally {
     loading.value = false;
   }
@@ -49,15 +51,15 @@ async function submit() {
 
       <div v-if="step === 'form'" class="rsvp-form">
         <p class="rsvp-subtitle">
-          Please let us know if you can make it to our special day.
+          {{ t("rsvp.rsvpSubtitle") }}
         </p>
 
         <div class="field">
-          <label>Your Full Name *</label>
+          <label>{{ t("rsvp.fullNameLabel") }}</label>
           <input v-model="form.name" class="input" placeholder="Jane Smith" />
         </div>
         <div class="field">
-          <label>Email</label>
+          <label>{{ t("rsvp.email") }}</label>
           <input
             v-model="form.email"
             type="email"
@@ -72,20 +74,20 @@ async function submit() {
             :class="{ selected: form.attending }"
             @click="form.attending = true"
           >
-            ✓ Joyfully Accepts
+            {{ t("rsvp.joyfullyAccepts") }}
           </button>
           <button
             class="choice-btn decline"
             :class="{ selected: !form.attending }"
             @click="form.attending = false"
           >
-            ✗ Regretfully Declines
+            {{ t("rsvp.regretfullyDeclines") }}
           </button>
         </div>
 
         <template v-if="form.attending">
           <div class="field">
-            <label>Dietary Requirements</label>
+            <label>{{ t("rsvp.dietaryLabel") }}</label>
             <input
               v-model="form.dietaryReqs"
               class="input"
@@ -94,28 +96,27 @@ async function submit() {
           </div>
           <label class="check-label">
             <input type="checkbox" v-model="form.plusOne" />
-            I'll be bringing a +1
+            {{ t("rsvp.plusOneLabel") }}
           </label>
         </template>
 
         <p v-if="error" class="error-msg">{{ error }}</p>
         <button class="submit-btn" :disabled="loading" @click="submit">
-          {{ loading ? "Sending…" : "Send RSVP" }}
+          {{ loading ? t("rsvp.sending") : t("rsvp.sendButton") }}
         </button>
       </div>
 
       <div v-else-if="step === 'thanks'" class="result-state">
         <div class="result-icon">🎉</div>
-        <h2>We can't wait to celebrate with you!</h2>
-        <p>Your RSVP has been received. See you at the wedding!</p>
+        <h2>{{ t("rsvp.celebrate") }}</h2>
+        <p>{{ t("rsvp.received") }}</p>
       </div>
 
       <div v-else class="result-state">
         <div class="result-icon">💌</div>
-        <h2>We'll miss you!</h2>
+        <h2>{{ t("rsvp.missYou") }}</h2>
         <p>
-          Thank you for letting us know. We hope to celebrate together another
-          time.
+          {{ t("rsvp.thanksForLetting") }}
         </p>
       </div>
     </div>

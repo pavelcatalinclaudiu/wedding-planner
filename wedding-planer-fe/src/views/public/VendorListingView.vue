@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { vendorApi } from "@/api/vendor.api";
 import { useDebounce } from "@/composables/useDebounce";
 import VendorCard from "@/components/vendor/VendorCard.vue";
@@ -9,6 +10,7 @@ import type { VendorProfile } from "@/types/vendor.types";
 
 const route = useRoute();
 const router = useRouter();
+const { t } = useI18n();
 
 const vendors = ref<VendorProfile[]>([]);
 const loading = ref(false);
@@ -27,25 +29,25 @@ const PAGE_SIZE = 24;
 const debouncedSearch = useDebounce(() => search.value, 500);
 const debouncedCity = useDebounce(() => city.value, 500);
 
-const categories = [
-  { key: "PHOTOGRAPHER", label: "Photographer" },
-  { key: "VIDEOGRAPHER", label: "Videographer" },
-  { key: "VENUE", label: "Venue" },
-  { key: "FLORIST", label: "Florist" },
-  { key: "CATERER", label: "Caterer" },
-  { key: "CAKE", label: "Cake & Pastry" },
-  { key: "BAND", label: "Live Music" },
-  { key: "DJ", label: "DJ" },
-  { key: "MAKEUP_ARTIST", label: "Makeup Artist" },
-  { key: "HAIR_STYLIST", label: "Hair Stylist" },
-  { key: "OFFICIANT", label: "Officiant" },
-  { key: "PLANNER", label: "Planner" },
-  { key: "TRANSPORTATION", label: "Transportation" },
-  { key: "LIGHTING", label: "Lighting" },
-  { key: "INVITATION_STATIONERY", label: "Invitations" },
-  { key: "JEWELRY", label: "Jewelry" },
-  { key: "OTHER", label: "Other" },
-];
+const categories = computed(() => [
+  { key: "PHOTOGRAPHER", label: t("categories.PHOTOGRAPHER") },
+  { key: "VIDEOGRAPHER", label: t("categories.VIDEOGRAPHER") },
+  { key: "VENUE", label: t("categories.VENUE") },
+  { key: "FLORIST", label: t("categories.FLORIST") },
+  { key: "CATERER", label: t("categories.CATERER") },
+  { key: "CAKE", label: t("categories.CAKE") },
+  { key: "BAND", label: t("categories.BAND") },
+  { key: "DJ", label: t("categories.DJ") },
+  { key: "MAKEUP_ARTIST", label: t("categories.MAKEUP_ARTIST") },
+  { key: "HAIR_STYLIST", label: t("categories.HAIR_STYLIST") },
+  { key: "OFFICIANT", label: t("categories.OFFICIANT") },
+  { key: "PLANNER", label: t("categories.PLANNER") },
+  { key: "TRANSPORTATION", label: t("categories.TRANSPORTATION") },
+  { key: "LIGHTING", label: t("categories.LIGHTING") },
+  { key: "INVITATION_STATIONERY", label: t("categories.INVITATION_STATIONERY") },
+  { key: "JEWELRY", label: t("categories.JEWELRY") },
+  { key: "OTHER", label: t("categories.OTHER") },
+]);
 
 const activeChips = computed(() => {
   const chips: { key: string; label: string }[] = [];
@@ -71,7 +73,7 @@ const activeChips = computed(() => {
   if (minRating.value)
     chips.push({ key: "rating", label: `★ ${minRating.value}+` });
   if (featuredOnly.value)
-    chips.push({ key: "featured", label: "Featured only" });
+    chips.push({ key: "featured", label: t("vendors.filterFeatured") });
   if (weddingDate.value)
     chips.push({ key: "date", label: `📅 ${weddingDate.value}` });
   return chips;
@@ -174,12 +176,12 @@ onMounted(fetchVendors);
     <!-- Hero bar -->
     <div class="listing-hero">
       <div class="lh-inner">
-        <h1 class="lh-title">Find your wedding vendors</h1>
+        <h1 class="lh-title">{{ t("vendors.heroTitle") }}</h1>
         <p class="lh-sub">
           {{
             loading
-              ? "Searching…"
-              : `${vendors.length} professionals across Romania`
+              ? t("vendors.loadingVendors")
+              : vendors.length + " " + t("vendors.professionals")
           }}
         </p>
         <div class="lh-search">
@@ -187,7 +189,7 @@ onMounted(fetchVendors);
           <input
             v-model="search"
             class="lh-input"
-            placeholder="Search by name or keyword…"
+            :placeholder="t('vendors.searchByKeyword')"
           />
         </div>
       </div>
@@ -197,13 +199,13 @@ onMounted(fetchVendors);
     <div class="listing-body">
       <!-- Sidebar -->
       <aside class="sidebar">
-        <p class="sidebar-title">Filters</p>
+        <p class="sidebar-title">{{ t("vendors.filtersTitle") }}</p>
 
         <div class="filter-group">
-          <p class="filter-label">Category</p>
+          <p class="filter-label">{{ t("vendors.filterCategory") }}</p>
           <label class="filter-radio">
             <input v-model="category" type="radio" value="" />
-            <span>All categories</span>
+            <span>{{ t("vendors.allCategories") }}</span>
           </label>
           <label v-for="cat in categories" :key="cat.key" class="filter-radio">
             <input v-model="category" type="radio" :value="cat.key" />
@@ -214,7 +216,7 @@ onMounted(fetchVendors);
         <hr class="filter-sep" />
 
         <div class="filter-group">
-          <p class="filter-label">City</p>
+          <p class="filter-label">{{ t("vendors.filterCity") }}</p>
           <input
             v-model="city"
             class="filter-input"
@@ -225,20 +227,20 @@ onMounted(fetchVendors);
         <hr class="filter-sep" />
 
         <div class="filter-group">
-          <p class="filter-label">Wedding date</p>
+          <p class="filter-label">{{ t("vendors.filterWeddingDate") }}</p>
           <input
             v-model="weddingDate"
             type="date"
             class="filter-input"
             :min="new Date().toISOString().slice(0, 10)"
           />
-          <p class="filter-hint">Show vendors available on this date</p>
+          <p class="filter-hint">{{ t("vendors.filterDateHint") }}</p>
         </div>
 
         <hr class="filter-sep" />
 
         <div class="filter-group">
-          <p class="filter-label">Price range (RON)</p>
+          <p class="filter-label">{{ t("vendors.filterPrice") }}</p>
           <div class="price-row">
             <input
               v-model.number="priceMin"
@@ -261,7 +263,7 @@ onMounted(fetchVendors);
         <hr class="filter-sep" />
 
         <div class="filter-group">
-          <p class="filter-label">Minimum rating</p>
+          <p class="filter-label">{{ t("vendors.filterRating") }}</p>
           <div class="star-btns">
             <button
               v-for="n in [0, 3, 4, 4.5]"
@@ -270,7 +272,7 @@ onMounted(fetchVendors);
               :class="{ active: minRating === n }"
               @click="minRating = n"
             >
-              <template v-if="n === 0">Any</template>
+              <template v-if="n === 0">{{ t("vendors.anyRating") }}</template>
               <template v-else>★ {{ n }}+</template>
             </button>
           </div>
@@ -281,7 +283,7 @@ onMounted(fetchVendors);
         <div class="filter-group">
           <label class="featured-toggle">
             <input v-model="featuredOnly" type="checkbox" />
-            <span class="toggle-label">Featured vendors only</span>
+            <span class="toggle-label">{{ t("vendors.filterFeatured") }}</span>
           </label>
         </div>
 
@@ -298,7 +300,7 @@ onMounted(fetchVendors);
             weddingDate = '';
           "
         >
-          Reset all filters
+          {{ t("vendors.resetFilters") }}
         </button>
       </aside>
 
@@ -307,21 +309,16 @@ onMounted(fetchVendors);
         <!-- Bar -->
         <div class="results-bar">
           <span class="results-count">
-            <span v-if="!loading"
-              >{{ vendors.length }} vendor{{
-                vendors.length !== 1 ? "s" : ""
-              }}
-              found</span
-            >
-            <span v-else>Searching…</span>
+            <span v-if="!loading">{{ vendors.length }} {{ t("vendors.professionals") }}</span>
+            <span v-else>{{ t("vendors.loadingVendors") }}</span>
           </span>
           <div class="sort-wrap">
-            <label class="sort-label">Sort:</label>
+            <label class="sort-label">{{ t("vendors.sortLabel") }}</label>
             <select v-model="sortBy" class="sort-select">
-              <option value="">Relevance</option>
-              <option value="price_asc">Price: Low to High</option>
-              <option value="price_desc">Price: High to Low</option>
-              <option value="rating">Top Rated</option>
+              <option value="">{{ t("vendors.sortRelevance") }}</option>
+              <option value="price_asc">{{ t("vendors.sortPriceLow") }}</option>
+              <option value="price_desc">{{ t("vendors.sortPriceHigh") }}</option>
+              <option value="rating">{{ t("vendors.sortTopRated") }}</option>
             </select>
           </div>
         </div>
@@ -340,13 +337,13 @@ onMounted(fetchVendors);
 
         <!-- Loading -->
         <div v-if="loading" class="pane-loading">
-          <span class="spinner" /><span>Looking for vendors…</span>
+          <span class="spinner" /><span>{{ t("vendors.loadingVendors") }}</span>
         </div>
 
         <!-- Empty -->
         <div v-else-if="vendors.length === 0" class="pane-empty">
           <p class="empty-icon">🔍</p>
-          <p>No vendors match your filters.</p>
+          <p>{{ t("vendors.noVendorsMatch") }}</p>
           <button
             class="clear-btn"
             @click="
@@ -355,7 +352,7 @@ onMounted(fetchVendors);
               search = '';
             "
           >
-            Clear search
+            {{ t("vendors.clearSearch") }}
           </button>
         </div>
 
@@ -374,9 +371,9 @@ onMounted(fetchVendors);
               updateURL();
             "
           >
-            &#8592; Prev
+            {{ t("vendors.prev") }}
           </button>
-          <span class="pg-info">Page {{ page }} of {{ totalPages }}</span>
+          <span class="pg-info">{{ t("vendors.pageOf", { page, total: totalPages }) }}</span>
           <button
             class="pg-btn"
             :disabled="page >= totalPages"
@@ -385,7 +382,7 @@ onMounted(fetchVendors);
               updateURL();
             "
           >
-            Next &#8594;
+            {{ t("vendors.next") }}
           </button>
         </div>
       </div>

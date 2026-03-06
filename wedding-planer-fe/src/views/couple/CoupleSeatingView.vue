@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
+import { useI18n } from "vue-i18n";
 import { coupleApi } from "@/api/couple.api";
 import type { SeatingLayout, Guest } from "@/types/couple.types";
 import { useGuestsStore } from "@/stores/guests.store";
 
+const { t } = useI18n();
 const guestsStore = useGuestsStore();
 const layout = ref<SeatingLayout | null>(null);
 const loading = ref(false);
@@ -29,21 +31,23 @@ onMounted(async () => {
 
 <template>
   <div class="seating-view">
-    <h2>Seating Arrangement</h2>
-    <p class="subtitle">Assign guests to tables for your reception.</p>
+    <h2>{{ t("seating.title") }}</h2>
+    <p class="subtitle">{{ t("seating.subtitle") }}</p>
 
-    <div v-if="loading" class="loading">Loading layout…</div>
+    <div v-if="loading" class="loading">{{ t("common.loading") }}</div>
     <div v-else-if="!layout || layout.tables.length === 0" class="empty">
-      No tables configured yet. Contact your venue coordinator to set up tables.
+      {{ t("seating.noTables") }}
     </div>
     <div v-else class="tables-grid">
       <div v-for="table in layout.tables" :key="table.id" class="table-card">
         <h4 class="table-name">{{ table.name }}</h4>
-        <p class="table-capacity">Capacity: {{ table.capacity }}</p>
+        <p class="table-capacity">
+          {{ t("seating.capacity") }}: {{ table.capacity }}
+        </p>
         <div class="seat-list">
           <div v-for="seat in table.seats" :key="seat" class="seat">
             <span v-if="seat">{{ seat }}</span>
-            <span v-else class="empty-seat">Empty</span>
+            <span v-else class="empty-seat">{{ t("seating.emptySeat") }}</span>
           </div>
         </div>
       </div>

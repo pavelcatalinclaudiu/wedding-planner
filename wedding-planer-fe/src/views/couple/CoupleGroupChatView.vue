@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { messagesApi } from "@/api/messages.api";
 import { useMessagesStore } from "@/stores/messages.store";
 import type { Thread } from "@/types/message.types";
 import GroupChat from "@/components/messaging/GroupChat.vue";
 
+const { t } = useI18n();
 const messagesStore = useMessagesStore();
 const thread = ref<Thread | null>(null);
 const loading = ref(true);
@@ -24,7 +26,7 @@ onMounted(async () => {
       Object.assign(existing, data);
     }
   } catch (e) {
-    error.value = "Could not load group chat.";
+    error.value = t("messaging.groupChatError");
   } finally {
     loading.value = false;
   }
@@ -33,17 +35,17 @@ onMounted(async () => {
 
 <template>
   <div class="group-chat-view">
-    <h2>Group Chat — Planning Team</h2>
+    <h2>{{ t("messaging.groupChatTitle") }}</h2>
     <p class="subtitle">
-      All your vendors and planning team in one conversation.
+      {{ t("messaging.groupChatSubtitle") }}
     </p>
 
     <div class="chat-wrapper">
-      <div v-if="loading" class="empty">Loading…</div>
+      <div v-if="loading" class="empty">{{ t("common.loading") }}</div>
       <div v-else-if="error" class="empty error">{{ error }}</div>
       <GroupChat v-else-if="thread" :thread-id="thread.id" />
       <div v-else class="empty">
-        Group chat will appear once you have confirmed vendors.
+        {{ t("messaging.groupChatEmpty") }}
       </div>
     </div>
   </div>

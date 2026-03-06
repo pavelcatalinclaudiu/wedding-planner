@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { vendorApi } from "@/api/vendor.api";
 import { videoCallsApi } from "@/api/videoCalls.api";
 import { useLeadsStore } from "@/stores/leads.store";
@@ -13,6 +14,7 @@ const calls = ref<VideoCall[]>([]);
 const loading = ref(false);
 const leadsStore = useLeadsStore();
 const activeTab = ref<"calls" | "bookings">("calls");
+const { t } = useI18n();
 
 async function fetchAvailability() {
   loading.value = true;
@@ -55,14 +57,14 @@ const upcomingBookings = computed<Lead[]>(() => {
     .sort((a, b) => compareAsc(parseISO(a.eventDate!), parseISO(b.eventDate!)));
 });
 
-const STATUS_LABELS: Record<string, string> = {
-  NEW: "New Enquiry",
-  VIEWED: "Viewed",
-  IN_DISCUSSION: "Chatting",
-  QUOTED: "Offer Sent",
-  BOOKED: "Booked",
-  DECLINED: "Declined",
-};
+const STATUS_LABELS = computed<Record<string, string>>(() => ({
+  NEW: t("vendor.calendar.statusNew"),
+  VIEWED: t("vendor.calendar.statusViewed"),
+  IN_DISCUSSION: t("vendor.calendar.statusChat"),
+  QUOTED: t("vendor.calendar.statusQuoted"),
+  BOOKED: t("vendor.calendar.statusBooked"),
+  DECLINED: t("vendor.calendar.statusDeclined"),
+}));
 
 const STATUS_CLASS: Record<string, string> = {
   NEW: "status-enquiry",
@@ -126,8 +128,8 @@ onMounted(async () => {
     <!-- Header -->
     <div class="cv-header">
       <div>
-        <h2 class="cv-title">Availability Calendar</h2>
-        <p class="cv-sub">Click a date to block or unblock it for bookings.</p>
+        <h2 class="cv-title">{{ t("vendor.calendar.title") }}</h2>
+        <p class="cv-sub">{{ t("vendor.calendar.subtitle") }}</p>
       </div>
     </div>
 
@@ -137,21 +139,23 @@ onMounted(async () => {
         <span class="cv-stat-icon">🚫</span>
         <div>
           <p class="cv-stat-val">{{ availability.length }}</p>
-          <p class="cv-stat-label">Blocked Dates</p>
+          <p class="cv-stat-label">{{ t("vendor.calendar.blockedDates") }}</p>
         </div>
       </div>
       <div class="cv-stat cv-stat--call">
         <span class="cv-stat-icon">📹</span>
         <div>
           <p class="cv-stat-val">{{ upcomingCalls.length }}</p>
-          <p class="cv-stat-label">Upcoming Calls</p>
+          <p class="cv-stat-label">{{ t("vendor.calendar.upcomingCalls") }}</p>
         </div>
       </div>
       <div class="cv-stat cv-stat--booking">
         <span class="cv-stat-icon">📅</span>
         <div>
           <p class="cv-stat-val">{{ upcomingBookings.length }}</p>
-          <p class="cv-stat-label">Upcoming Bookings</p>
+          <p class="cv-stat-label">
+            {{ t("vendor.calendar.upcomingBookings") }}
+          </p>
         </div>
       </div>
     </div>
@@ -159,7 +163,7 @@ onMounted(async () => {
     <div class="cv-body">
       <!-- Calendar column -->
       <div class="cv-calendar-col">
-        <div v-if="loading" class="cv-loading">Loading…</div>
+        <div v-if="loading" class="cv-loading">{{ t("common.loading") }}</div>
         <CalendarGrid
           v-else
           :blocked-dates="availability.map((a) => a.date)"
@@ -169,12 +173,16 @@ onMounted(async () => {
         />
         <div class="cv-legend">
           <span class="legend-pip legend-pip--booking"></span
-          ><span class="legend-lbl">Booked</span>
+          ><span class="legend-lbl">{{
+            t("vendor.calendar.legendBooked")
+          }}</span>
           <span class="legend-pip legend-pip--call"></span
-          ><span class="legend-lbl">Video Call</span>
+          ><span class="legend-lbl">{{ t("vendor.calendar.legendCall") }}</span>
           <span class="legend-pip legend-pip--blocked"></span
-          ><span class="legend-lbl">Blocked</span>
-          <span class="cv-hint">👆 Click any date to toggle availability</span>
+          ><span class="legend-lbl">{{
+            t("vendor.calendar.legendBlocked")
+          }}</span>
+          <span class="cv-hint">{{ t("vendor.calendar.toggleHint") }}</span>
         </div>
       </div>
 
@@ -187,7 +195,7 @@ onMounted(async () => {
             @click="activeTab = 'calls'"
           >
             <span class="tab-pip tab-pip--call"></span>
-            Calls
+            {{ t("vendor.calendar.tabCalls") }}
             <span class="tab-badge">{{ upcomingCalls.length }}</span>
           </button>
           <button
@@ -196,7 +204,7 @@ onMounted(async () => {
             @click="activeTab = 'bookings'"
           >
             <span class="tab-pip tab-pip--booking"></span>
-            Bookings
+            {{ t("vendor.calendar.tabBookings") }}
             <span class="tab-badge">{{ upcomingBookings.length }}</span>
           </button>
         </div>
@@ -206,9 +214,9 @@ onMounted(async () => {
           <template v-if="activeTab === 'calls'">
             <div v-if="upcomingCalls.length === 0" class="bk-empty">
               <span class="bk-empty-icon">📹</span>
-              <p>No upcoming video calls.</p>
+              <p>{{ t("vendor.calendar.noUpcomingCalls") }}</p>
               <p class="bk-empty-sub">
-                Schedule a call from an enquiry conversation.
+                {{ t("vendor.calendar.scheduleCallHint") }}
               </p>
             </div>
             <ul v-else class="bk-list">
@@ -231,7 +239,11 @@ onMounted(async () => {
                       : 'status-confirmed'
                   "
                 >
-                  {{ call.status === "PENDING" ? "Pending" : "Confirmed" }}
+                  {{
+                    call.status === "PENDING"
+                      ? t("vendor.calendar.pending")
+                      : t("vendor.calendar.confirmed")
+                  }}
                 </span>
               </li>
             </ul>
@@ -239,12 +251,14 @@ onMounted(async () => {
 
           <!-- Bookings tab -->
           <template v-else>
-            <div v-if="leadsStore.loading" class="bk-loading">Loading…</div>
+            <div v-if="leadsStore.loading" class="bk-loading">
+              {{ t("common.loading") }}
+            </div>
             <div v-else-if="upcomingBookings.length === 0" class="bk-empty">
               <span class="bk-empty-icon">📅</span>
-              <p>No upcoming bookings yet.</p>
+              <p>{{ t("vendor.calendar.noUpcomingBookings") }}</p>
               <p class="bk-empty-sub">
-                Bookings with a set wedding date will appear here.
+                {{ t("vendor.calendar.bookingsHint") }}
               </p>
             </div>
             <ul v-else class="bk-list">

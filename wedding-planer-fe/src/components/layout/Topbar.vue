@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 import { useAuthStore } from "@/stores/auth.store";
 import { useCoupleStore } from "@/stores/couple.store";
 import { useVendorStore } from "@/stores/vendor.store";
@@ -11,6 +12,7 @@ import DashboardSearchBar from "@/components/couple/DashboardSearchBar.vue";
 import { vendorApi } from "@/api/vendor.api";
 import { toRef } from "vue";
 
+const { t } = useI18n();
 defineProps<{ title: string }>();
 
 const { isDark, toggleDark } = useTheme();
@@ -36,7 +38,11 @@ const { days } = useCountdown(weddingDateRef);
 
 <template>
   <header class="topbar">
-    <button class="hamburger" @click="toggleSidebar" aria-label="Open menu">
+    <button
+      class="hamburger"
+      @click="toggleSidebar"
+      :aria-label="t('topbar.openMenu')"
+    >
       <span></span><span></span><span></span>
     </button>
     <h1 class="page-title">{{ title }}</h1>
@@ -47,7 +53,7 @@ const { days } = useCountdown(weddingDateRef);
     <div class="topbar-right">
       <div v-if="isCouple && days > 0" class="countdown-chip">
         <span class="countdown-icon">♡</span>
-        {{ days }} days to go
+        {{ t("topbar.daysToGo", { days }) }}
       </div>
       <div v-if="isVendor" class="chip-wrap">
         <div
@@ -56,24 +62,24 @@ const { days } = useCountdown(weddingDateRef);
           @click="toggleVisibility"
         >
           <span class="live-dot"></span>
-          {{ isLive ? "Profile Live" : "Profile Hidden" }}
+          {{ isLive ? t("topbar.profileLive") : t("topbar.profileHidden") }}
         </div>
         <div class="chip-tooltip">
           <template v-if="isLive">
-            <strong>Your profile is visible.</strong><br />
-            Couples can find you in search results and send enquiries.<br />
-            <em>Click to hide your profile.</em>
+            <strong>{{ t("topbar.profileLiveTooltip") }}</strong
+            ><br />
+            <em>{{ t("topbar.clickToHide") }}</em>
           </template>
           <template v-else>
-            <strong>Your profile is hidden.</strong><br />
-            You won't appear in any couple searches or listings.<br />
-            <em>Click to make your profile visible.</em>
+            <strong>{{ t("topbar.profileHiddenTooltip") }}</strong
+            ><br />
+            <em>{{ t("topbar.clickToShow") }}</em>
           </template>
         </div>
       </div>
       <button
         class="theme-toggle"
-        :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+        :title="isDark ? t('topbar.switchToLight') : t('topbar.switchToDark')"
         @click="toggleDark"
       >
         {{ isDark ? "☀" : "☽" }}

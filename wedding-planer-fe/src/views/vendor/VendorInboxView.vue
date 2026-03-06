@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { useLeads } from "@/composables/useLeads";
 import { useConversation } from "@/composables/useConversation";
 import { useOffer } from "@/composables/useOffer";
@@ -13,6 +14,7 @@ import CallBanner from "@/components/video/CallBanner.vue";
 import ScheduleCallModal from "@/components/video/ScheduleCallModal.vue";
 import type { Lead } from "@/types/lead.types";
 
+const { t } = useI18n();
 const { leads, loading, fetchVendorLeads, accept, decline } = useLeads();
 const { conversation, messages, sending, loadForLead, send } =
   useConversation();
@@ -50,9 +52,8 @@ const sendBlockReason = computed(() => {
     return new Date(o.expiresAt) > new Date();
   });
   if (!pending) return null;
-  if (!pending.expiresAt)
-    return "A pending offer is awaiting the couple's response.";
-  return `The current offer is pending until ${new Date(pending.expiresAt).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}.`;
+  if (!pending.expiresAt) return t("leads.pendingOfferAwaiting");
+  return `${t("leads.pendingOfferAwaiting")} ${new Date(pending.expiresAt).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}.`;
 });
 
 function formatOfferPrice(price: number) {
@@ -160,20 +161,24 @@ async function submitOffer() {
     <!-- Lead List Panel -->
     <aside class="lead-panel">
       <div class="panel-header">
-        <h2>Inbox</h2>
+        <h2>{{ t("leads.vendor.title") }}</h2>
         <select v-model="statusFilter" class="filter-select">
-          <option value="">All</option>
-          <option value="NEW">New</option>
-          <option value="VIEWED">Viewed</option>
-          <option value="IN_DISCUSSION">In Discussion</option>
-          <option value="QUOTED">Offer Sent</option>
-          <option value="BOOKED">Booked</option>
-          <option value="DECLINED">Declined</option>
+          <option value="">{{ t("leads.filterAll") }}</option>
+          <option value="NEW">{{ t("leads.filterNew") }}</option>
+          <option value="VIEWED">{{ t("leads.filterViewed") }}</option>
+          <option value="IN_DISCUSSION">
+            {{ t("leads.filterInDiscussion") }}
+          </option>
+          <option value="QUOTED">{{ t("leads.filterOfferSent") }}</option>
+          <option value="BOOKED">{{ t("leads.filterBooked") }}</option>
+          <option value="DECLINED">{{ t("leads.filterDeclined") }}</option>
         </select>
       </div>
 
-      <div v-if="loading" class="loading">Loading…</div>
-      <div v-else-if="filtered.length === 0" class="empty">No leads yet.</div>
+      <div v-if="loading" class="loading">{{ t("common.loading") }}</div>
+      <div v-else-if="filtered.length === 0" class="empty">
+        {{ t("leads.noLeads") }}
+      </div>
       <div v-else class="lead-list">
         <LeadCard
           v-for="lead in filtered"
@@ -192,7 +197,7 @@ async function submitOffer() {
     <main class="detail-panel">
       <template v-if="!selectedLead">
         <div class="placeholder">
-          <p>Select a lead to view the conversation and send an offer.</p>
+          <p>{{ t("leads.selectLead") }}</p>
         </div>
       </template>
 
@@ -222,7 +227,7 @@ async function submitOffer() {
               class="btn-video"
               @click="openScheduleModal"
             >
-              📅 Schedule Call
+              📅 {{ t("leads.scheduleCall") }}
             </button>
             <CallBanner
               v-else
@@ -240,14 +245,14 @@ async function submitOffer() {
             :class="{ active: activeTab === 'chat' }"
             @click="activeTab = 'chat'"
           >
-            💬 Chat
+            💬 {{ t("leads.chatTab") }}
           </button>
           <button
             class="tab-btn"
             :class="{ active: activeTab === 'offers' }"
             @click="activeTab = 'offers'"
           >
-            📋 Offers
+            📋 {{ t("leads.offersTab") }}
             <span v-if="offers.length" class="tab-badge">{{
               offers.length
             }}</span>
@@ -256,14 +261,14 @@ async function submitOffer() {
 
         <!-- New lead enquiry preview (no tabs) -->
         <div v-if="selectedLead.status === 'NEW'" class="enquiry-preview">
-          <p class="preview-label">Enquiry message:</p>
-          <p>{{ selectedLead.message || "(no message)" }}</p>
+          <p class="preview-label">{{ t("leads.enquiryMessage") }}</p>
+          <p>{{ selectedLead.message || t("leads.noMessage") }}</p>
           <div class="accept-actions">
             <button class="btn-accept" @click="onAccept(selectedLead.id)">
-              Accept &amp; Start Chat
+              {{ t("leads.acceptStartChat") }}
             </button>
             <button class="btn-decline" @click="onDecline(selectedLead.id)">
-              Decline
+              {{ t("leads.markDeclined") }}
             </button>
           </div>
         </div>
@@ -276,7 +281,9 @@ async function submitOffer() {
             :class="latestOffer.status.toLowerCase()"
           >
             <div class="offer-banner-info">
-              <span class="offer-banner-label">Latest offer</span>
+              <span class="offer-banner-label">{{
+                t("leads.latestOffer")
+              }}</span>
               <strong class="offer-banner-price">{{
                 formatOfferPrice(latestOffer.price)
               }}</strong>
@@ -288,7 +295,7 @@ async function submitOffer() {
               </span>
             </div>
             <button class="offer-banner-link" @click="activeTab = 'offers'">
-              View all →
+              {{ t("leads.viewAll") }} →
             </button>
           </div>
           <div v-if="conversation" class="conv-section">
@@ -305,7 +312,7 @@ async function submitOffer() {
         <template v-else-if="activeTab === 'offers'">
           <div class="offers-panel">
             <div class="offers-panel-header">
-              <h4>Offers</h4>
+              <h4>{{ t("leads.offersTab") }}</h4>
               <button
                 v-if="
                   canSendNewOffer &&
@@ -314,7 +321,11 @@ async function submitOffer() {
                 class="btn-send-offer"
                 @click="showOfferForm = !showOfferForm"
               >
-                {{ showOfferForm ? "Cancel" : "+ New Offer" }}
+                {{
+                  showOfferForm
+                    ? t("leads.cancelOffer")
+                    : `+ ${t("leads.newOffer")}`
+                }}
               </button>
             </div>
 
@@ -329,17 +340,17 @@ async function submitOffer() {
               class="offer-form-panel"
               @submit.prevent="submitOffer"
             >
-              <h5>New Offer</h5>
+              <h5>{{ t("leads.newOffer") }}</h5>
               <label
-                >Package details
+                >{{ t("leads.packageDetails") }}
                 <textarea
                   v-model="offerFormData.packageDetails"
                   rows="3"
-                  placeholder="Describe what's included…"
+                  :placeholder="t('leads.packagePlaceholder')"
                 />
               </label>
               <label
-                >Price (£)
+                >{{ t("leads.price") }}
                 <input
                   v-model="offerFormData.price"
                   type="number"
@@ -349,25 +360,25 @@ async function submitOffer() {
                 />
               </label>
               <label
-                >Expires on
+                >{{ t("leads.expiresOn") }}
                 <input v-model="offerFormData.expiresAt" type="date" />
               </label>
               <div class="offer-form-actions">
                 <button type="submit" class="btn-submit-offer">
-                  Send Offer
+                  {{ t("leads.sendOffer") }}
                 </button>
                 <button
                   type="button"
                   class="btn-cancel-offer"
                   @click="showOfferForm = false"
                 >
-                  Cancel
+                  {{ t("leads.cancelOffer") }}
                 </button>
               </div>
             </form>
 
             <div v-if="!offers.length" class="offers-empty">
-              No offers sent yet.
+              {{ t("leads.noOffers") }}
             </div>
             <div class="offers-list">
               <OfferCard

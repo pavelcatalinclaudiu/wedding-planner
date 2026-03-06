@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { useVendorStore } from "@/stores/vendor.store";
 import { useFileUpload } from "@/composables/useFileUpload";
 
 const vendorStore = useVendorStore();
 const { upload, uploading } = useFileUpload();
+const { t } = useI18n();
 const saving = ref(false);
 const saved = ref(false);
 const coverInputRef = ref<HTMLInputElement | null>(null);
@@ -76,7 +78,7 @@ async function uploadCover(e: Event) {
 
 <template>
   <div class="profile-view">
-    <h2>Vendor Profile</h2>
+    <h2>{{ t("vendor.profile.vendorTitle") }}</h2>
 
     <div class="cover-section">
       <div class="cover-img-wrap">
@@ -86,12 +88,14 @@ async function uploadCover(e: Event) {
           class="cover-img"
           alt="Cover"
         />
-        <div v-else class="cover-placeholder">No cover image</div>
+        <div v-else class="cover-placeholder">
+          {{ t("vendor.profile.noCover") }}
+        </div>
       </div>
 
       <div class="cover-actions">
         <button class="change-cover-btn" @click="coverInputRef?.click()">
-          Change Profile Picture
+          {{ t("vendor.profile.changeCover") }}
         </button>
         <input
           ref="coverInputRef"
@@ -106,11 +110,11 @@ async function uploadCover(e: Event) {
     <div class="form-card">
       <div class="form-grid">
         <div class="field">
-          <label>Business Name</label>
+          <label>{{ t("vendor.profile.businessName") }}</label>
           <input v-model="form.businessName" class="input" />
         </div>
         <div class="field">
-          <label>Category</label>
+          <label>{{ t("vendor.profile.category") }}</label>
           <select v-model="form.category" class="input">
             <option v-for="c in categories" :key="c" :value="c">
               {{ c.replace("_", " ") }}
@@ -118,15 +122,15 @@ async function uploadCover(e: Event) {
           </select>
         </div>
         <div class="field">
-          <label>City</label>
+          <label>{{ t("vendor.profile.city") }}</label>
           <input v-model="form.city" class="input" />
         </div>
         <div class="field">
-          <label>Base Price (RON)</label>
+          <label>{{ t("vendor.profile.basePrice") }}</label>
           <input v-model.number="form.basePrice" type="number" class="input" />
         </div>
         <div class="field full">
-          <label>Description</label>
+          <label>{{ t("vendor.profile.description") }}</label>
           <textarea
             v-model="form.description"
             class="input textarea"
@@ -134,22 +138,28 @@ async function uploadCover(e: Event) {
           />
         </div>
         <div class="field">
-          <label>Website</label>
+          <label>{{ t("vendor.profile.website") }}</label>
           <input v-model="form.website" class="input" placeholder="https://" />
         </div>
         <div class="field">
-          <label>Instagram</label>
+          <label>{{ t("vendor.profile.instagram") }}</label>
           <input v-model="form.instagram" class="input" placeholder="@handle" />
         </div>
         <div class="field">
-          <label>Facebook</label>
+          <label>{{ t("vendor.profile.facebook") }}</label>
           <input v-model="form.facebook" class="input" placeholder="Page URL" />
         </div>
       </div>
 
       <div class="form-actions">
         <button class="save-btn" :disabled="saving" @click="save">
-          {{ saving ? "Saving…" : saved ? "✓ Saved!" : "Save Profile" }}
+          {{
+            saving
+              ? t("vendor.profile.saving")
+              : saved
+                ? t("vendor.profile.saved")
+                : t("vendor.profile.save")
+          }}
         </button>
       </div>
     </div>

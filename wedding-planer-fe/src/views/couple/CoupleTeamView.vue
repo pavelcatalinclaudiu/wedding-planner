@@ -32,8 +32,8 @@ const emptySlots = computed(() =>
 
 <template>
   <div class="team-view">
-    <h2>Your Wedding Team</h2>
-    <p class="subtitle">All your confirmed vendors in one place.</p>
+    <h2>{{ t("team.title") }}</h2>
+    <p class="subtitle">{{ t("team.subtitle") }}</p>
 
     <!-- Confirmed vendors -->
     <div v-if="confirmedVendors.length" class="vendor-grid">
@@ -52,7 +52,7 @@ const emptySlots = computed(() =>
           </p>
         </div>
         <RouterLink :to="`/couple/enquiries`" class="view-link"
-          >View →</RouterLink
+          >{{ t("team.viewProfile") }} →</RouterLink
         >
       </div>
     </div>
@@ -62,8 +62,8 @@ const emptySlots = computed(() =>
       <p class="empty-section-title">
         {{
           confirmedVendors.length
-            ? "Still looking for…"
-            : "Start building your team"
+            ? t("team.stillLooking")
+            : t("team.startBuilding")
         }}
       </p>
       <div class="vendor-grid">
@@ -75,13 +75,13 @@ const emptySlots = computed(() =>
           <div class="slot-icon">{{ slot.icon }}</div>
           <div class="vendor-info">
             <p class="vendor-name">{{ slot.label }}</p>
-            <p class="vendor-category muted">Not yet booked</p>
+            <p class="vendor-category muted">{{ t("team.notYetBooked") }}</p>
           </div>
           <button
             class="find-btn"
             @click="router.push(`/vendors?category=${slot.key}`)"
           >
-            Find a {{ slot.label }} →
+            {{ t("team.findVendor", { label: slot.label }) }}
           </button>
         </div>
       </div>

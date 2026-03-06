@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { computed, onMounted } from "vue";
 import { storeToRefs } from "pinia";
+import { useI18n } from "vue-i18n";
 import { useVendorOverviewStore } from "@/stores/vendorOverview.store";
 import StatCard from "@/components/vendor/StatCard.vue";
 import MonthlyLeadsChart from "@/components/vendor/MonthlyLeadsChart.vue";
 import RecentLeadsWidget from "@/components/vendor/RecentLeadsWidget.vue";
 import UpcomingCallsWidget from "@/components/vendor/UpcomingCallsWidget.vue";
 import ProfilePerformanceWidget from "@/components/vendor/ProfilePerformanceWidget.vue";
+
+const { t, locale } = useI18n();
 
 const store = useVendorOverviewStore();
 const { data, loading } = storeToRefs(store);
@@ -15,13 +18,46 @@ onMounted(() => store.fetchOverview());
 
 function formatCurrency(value?: number): string {
   if (value == null) return "—";
-  return "€" + Math.round(value).toLocaleString("en");
+  return (
+    "€" +
+    Math.round(value).toLocaleString(locale.value === "ro" ? "ro-RO" : "en")
+  );
 }
 
 function formatNumber(value?: number): string {
   if (value == null) return "—";
-  return value.toLocaleString("en");
+  return value.toLocaleString(locale.value === "ro" ? "ro-RO" : "en");
 }
+
+const revenueSub = computed(() =>
+  data.value?.revenue
+    ? `${data.value.revenue.bookingCount} ${t("vendor.stats.confirmedBookings")}`
+    : "",
+);
+
+const leadsSub = computed(() =>
+  data.value?.leads
+    ? `${data.value.leads.today} ${t("vendor.stats.newToday")}`
+    : "",
+);
+
+const viewsSub = computed(() =>
+  data.value?.profileViews
+    ? `${data.value.profileViews.thisWeek} ${t("vendor.stats.thisWeek")}`
+    : "",
+);
+
+const ratingSub = computed(() =>
+  data.value?.avgRating
+    ? `${data.value.avgRating.reviewCount} ${t("vendor.stats.reviews")}`
+    : "",
+);
+
+const responseSub = computed(() =>
+  data.value?.responseRate
+    ? `${data.value.responseRate.repliedCount} ${t("common.of")} ${data.value.responseRate.totalEnquiries} ${t("vendor.stats.within24h")}`
+    : "",
+);
 </script>
 
 <template>
@@ -31,56 +67,48 @@ function formatNumber(value?: number): string {
       <StatCard
         emoji="💰"
         :primary="formatCurrency(data?.revenue?.current)"
-        label="Revenue booked"
+        :label="t('vendor.stats.revenueBooked')"
         :trend="data?.revenue?.trend"
         trend-format="currency"
-        trend-label="vs last month"
-        :sub="
-          data?.revenue ? `${data.revenue.bookingCount} confirmed bookings` : ''
-        "
+        :trend-label="t('vendor.stats.vsLastMonth')"
+        :sub="revenueSub"
         :loading="loading"
       />
       <StatCard
         emoji="📩"
         :primary="data?.leads ? String(data.leads.total) : '—'"
-        label="Total leads"
+        :label="t('vendor.stats.totalLeads')"
         :trend="data?.leads?.trend"
         trend-format="number"
-        trend-label="vs last month"
-        :sub="data?.leads ? `${data.leads.today} new today` : ''"
+        :trend-label="t('vendor.stats.vsLastMonth')"
+        :sub="leadsSub"
         :loading="loading"
       />
       <StatCard
         emoji="👁️"
         :primary="formatNumber(data?.profileViews?.total)"
-        label="Profile views"
+        :label="t('vendor.stats.profileViews')"
         :trend="data?.profileViews?.trendPercent"
         trend-format="percent"
-        trend-label="vs last week"
-        :sub="
-          data?.profileViews ? `${data.profileViews.thisWeek} this week` : ''
-        "
+        :trend-label="t('vendor.stats.vsLastWeek')"
+        :sub="viewsSub"
         :loading="loading"
       />
       <StatCard
         emoji="⭐"
         :primary="data?.avgRating ? String(data.avgRating.value) : '—'"
-        label="Average rating"
-        :sub="data?.avgRating ? `${data.avgRating.reviewCount} reviews` : ''"
+        :label="t('vendor.stats.avgRating')"
+        :sub="ratingSub"
         :loading="loading"
       />
       <StatCard
         emoji="⚡"
         :primary="data?.responseRate ? `${data.responseRate.percent}%` : '—'"
-        label="Response rate"
+        :label="t('vendor.stats.responseRate')"
         :trend="data?.responseRate?.trend"
         trend-format="percent-points"
-        trend-label="vs last 30 days"
-        :sub="
-          data?.responseRate
-            ? `${data.responseRate.repliedCount} of ${data.responseRate.totalEnquiries} within 24h`
-            : ''
-        "
+        :trend-label="t('vendor.stats.vsLast30Days')"
+        :sub="responseSub"
         :loading="loading"
         :color-by-value="true"
         :value="data?.responseRate?.percent"

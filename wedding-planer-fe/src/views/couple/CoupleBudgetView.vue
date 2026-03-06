@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { useBudgetStore } from "@/stores/budget.store";
 import { useConfirm } from "@/composables/useConfirm";
 import { useCoupleStore } from "@/stores/couple.store";
 import type { BudgetItem } from "@/types/couple.types";
 
+const { t } = useI18n();
 const budgetStore = useBudgetStore();
 const coupleStore = useCoupleStore();
 
@@ -192,11 +194,11 @@ function openEditModal(item: BudgetItem) {
 
 async function submitItem() {
   if (!addForm.value.name.trim()) {
-    addError.value = "Name is required.";
+    addError.value = t("budget.nameRequired");
     return;
   }
   if (!addForm.value.category.trim()) {
-    addError.value = "Category is required.";
+    addError.value = t("budget.categoryRequired");
     return;
   }
   saving.value = true;
@@ -209,7 +211,7 @@ async function submitItem() {
     }
     showAddModal.value = false;
   } catch {
-    addError.value = "Failed to save. Please try again.";
+    addError.value = t("budget.saveError");
   } finally {
     saving.value = false;
   }
@@ -248,20 +250,22 @@ function varianceClass(estimated: number, actual: number): string {
   <div class="budget-view">
     <!-- ── Header ─────────────────────────────────────────────────── -->
     <div class="page-header">
-      <h2>Budget Tracker</h2>
-      <button class="btn-primary" @click="openAddModal()">+ Add Item</button>
+      <h2>{{ t("budget.pageTitle") }}</h2>
+      <button class="btn-primary" @click="openAddModal()">
+        + {{ t("budget.addItem") }}
+      </button>
     </div>
 
     <!-- ── Overview Cards ─────────────────────────────────────────── -->
     <div class="overview-grid">
       <!-- Total Budget — editable -->
       <div class="ov-card ov-total">
-        <p class="ov-label">Total Budget</p>
+        <p class="ov-label">{{ t("budget.totalBudget") }}</p>
         <div v-if="!editingTotalBudget" class="ov-value-row">
           <span class="ov-value">{{ fmt(totalBudget) }}</span>
           <button
             class="edit-icon-btn"
-            title="Edit total budget"
+            :title="t('budget.editTotalBudget')"
             @click="startEditTotalBudget"
           >
             ✏️
@@ -281,27 +285,31 @@ function varianceClass(estimated: number, actual: number): string {
             :disabled="savingTotalBudget"
             @click="saveTotalBudget"
           >
-            {{ savingTotalBudget ? "…" : "Save" }}
+            {{ savingTotalBudget ? "…" : t("common.save") }}
           </button>
           <button class="btn-cancel-sm" @click="editingTotalBudget = false">
             ✕
           </button>
         </div>
-        <p class="ov-sub">your wedding budget cap</p>
+        <p class="ov-sub">{{ t("budget.budgetCap") }}</p>
       </div>
 
       <!-- Allocated -->
       <div class="ov-card">
-        <p class="ov-label">Allocated</p>
+        <p class="ov-label">{{ t("budget.allocated") }}</p>
         <span class="ov-value">{{ fmt(totalAllocated) }}</span>
-        <p class="ov-sub">across {{ budgetStore.items.length }} items</p>
+        <p class="ov-sub">
+          {{ t("budget.acrossItems", { count: budgetStore.items.length }) }}
+        </p>
       </div>
 
       <!-- Spent -->
       <div class="ov-card" :class="{ 'ov-danger': isOverBudget }">
-        <p class="ov-label">Spent</p>
+        <p class="ov-label">{{ t("budget.spent") }}</p>
         <span class="ov-value">{{ fmt(totalSpent) }}</span>
-        <p class="ov-sub">{{ spendPercent }}% of total budget</p>
+        <p class="ov-sub">
+          {{ t("budget.pctOfTotal", { pct: spendPercent }) }}
+        </p>
       </div>
 
       <!-- Remaining -->
@@ -309,10 +317,14 @@ function varianceClass(estimated: number, actual: number): string {
         class="ov-card"
         :class="totalRemaining < 0 ? 'ov-danger' : 'ov-good'"
       >
-        <p class="ov-label">Remaining</p>
+        <p class="ov-label">{{ t("budget.remaining") }}</p>
         <span class="ov-value">{{ fmt(Math.abs(totalRemaining)) }}</span>
         <p class="ov-sub">
-          {{ totalRemaining < 0 ? "over budget" : "left to spend" }}
+          {{
+            totalRemaining < 0
+              ? t("budget.overBudget")
+              : t("budget.leftToSpend")
+          }}
         </p>
       </div>
     </div>
@@ -326,7 +338,9 @@ function varianceClass(estimated: number, actual: number): string {
           :style="{ width: `${spendPercent}%` }"
         ></div>
       </div>
-      <span class="progress-label">{{ spendPercent }}% spent</span>
+      <span class="progress-label">{{
+        t("budget.pctSpent", { pct: spendPercent })
+      }}</span>
     </div>
 
     <!-- ── Smart Alerts ────────────────────────────────────────────── -->
@@ -348,10 +362,10 @@ function varianceClass(estimated: number, actual: number): string {
 
     <!-- ── Category Breakdown ─────────────────────────────────────── -->
     <section class="section">
-      <h3 class="section-title">Category Breakdown</h3>
+      <h3 class="section-title">{{ t("budget.categoryBreakdown") }}</h3>
 
       <div v-if="categoryGroups.length === 0" class="empty-state">
-        No budget items yet. Click <strong>+ Add Item</strong> to get started.
+        {{ t("budget.noExpenses") }}
       </div>
 
       <div v-else class="category-list">
@@ -453,11 +467,12 @@ function varianceClass(estimated: number, actual: number): string {
                         Number(item.actualCost),
                       )
                     "
-                    >{{ fmt(Number(item.actualCost)) }} actual</span
+                    >{{ fmt(Number(item.actualCost)) }}
+                    {{ t("budget.actual") }}</span
                   >
                 </div>
                 <span :class="item.isPaid ? 'badge-paid' : 'badge-unpaid'">
-                  {{ item.isPaid ? "Paid" : "Unpaid" }}
+                  {{ item.isPaid ? t("budget.paid") : t("budget.unpaid") }}
                 </span>
                 <button
                   class="icon-btn"
@@ -485,7 +500,7 @@ function varianceClass(estimated: number, actual: number): string {
       v-if="categoryGroups.length > 0 && (totalSpent > 0 || totalAllocated > 0)"
       class="section"
     >
-      <h3 class="section-title">Spending Breakdown</h3>
+      <h3 class="section-title">{{ t("budget.spendingBreakdown") }}</h3>
       <div class="breakdown-chart">
         <div
           v-for="group in categoryGroups"
@@ -529,26 +544,32 @@ function varianceClass(estimated: number, actual: number): string {
       >
         <div class="modal">
           <div class="modal-header">
-            <h3>{{ editingItem ? "Edit Budget Item" : "Add Budget Item" }}</h3>
+            <h3>
+              {{
+                editingItem
+                  ? t("budget.editItemModal")
+                  : t("budget.addItemModal")
+              }}
+            </h3>
             <button class="modal-close" @click="showAddModal = false">✕</button>
           </div>
 
           <div class="modal-body">
             <div class="field-row">
-              <label>Item name *</label>
+              <label>{{ t("budget.expenseTitle") }} *</label>
               <input
                 v-model="addForm.name"
                 class="fi"
-                placeholder="e.g. Venue deposit"
+                :placeholder="t('budget.expenseTitle')"
               />
             </div>
 
             <div class="field-row">
-              <label>Category *</label>
+              <label>{{ t("common.category") }} *</label>
               <input
                 v-model="addForm.category"
                 class="fi"
-                placeholder="e.g. Venue"
+                :placeholder="t('common.category')"
                 list="cat-suggestions"
               />
               <datalist id="cat-suggestions">
@@ -557,7 +578,7 @@ function varianceClass(estimated: number, actual: number): string {
             </div>
 
             <div class="field-row">
-              <label>Vendor name</label>
+              <label>{{ t("budget.vendor") }}</label>
               <input
                 v-model="addForm.vendorName"
                 class="fi"
@@ -567,7 +588,7 @@ function varianceClass(estimated: number, actual: number): string {
 
             <div class="field-row-2">
               <div class="field-row">
-                <label>Budgeted (€) *</label>
+                <label>{{ t("budget.budgeted") }} *</label>
                 <input
                   v-model.number="addForm.estimatedCost"
                   type="number"
@@ -577,29 +598,29 @@ function varianceClass(estimated: number, actual: number): string {
                 />
               </div>
               <div class="field-row">
-                <label>Actual cost (€)</label>
+                <label>{{ t("budget.actualCost") }}</label>
                 <input
                   v-model.number="addForm.actualCost"
                   type="number"
                   min="0"
                   class="fi"
-                  placeholder="Leave blank if unknown"
+                  :placeholder="t('budget.blankIfUnknown')"
                 />
               </div>
             </div>
 
             <div class="field-row">
-              <label>Notes</label>
+              <label>{{ t("budget.notes") }}</label>
               <input
                 v-model="addForm.notes"
                 class="fi"
-                placeholder="Optional notes…"
+                :placeholder="t('budget.optionalNotes')"
               />
             </div>
 
             <label class="check-row">
               <input type="checkbox" v-model="addForm.isPaid" />
-              Mark as paid
+              {{ t("budget.markAsPaid") }}
             </label>
 
             <p v-if="addError" class="form-error">{{ addError }}</p>
@@ -607,11 +628,15 @@ function varianceClass(estimated: number, actual: number): string {
 
           <div class="modal-footer">
             <button class="btn-ghost" @click="showAddModal = false">
-              Cancel
+              {{ t("common.cancel") }}
             </button>
             <button class="btn-primary" :disabled="saving" @click="submitItem">
               {{
-                saving ? "Saving…" : editingItem ? "Save Changes" : "Add Item"
+                saving
+                  ? t("guests.saving")
+                  : editingItem
+                    ? t("budget.saveChanges")
+                    : t("budget.addItem")
               }}
             </button>
           </div>

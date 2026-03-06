@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { useAuthStore } from "@/stores/auth.store";
 import { useCoupleStore } from "@/stores/couple.store";
 import { useLeadsStore } from "@/stores/leads.store";
 import { useMessagesStore } from "@/stores/messages.store";
 import { useSidebar } from "@/composables/useSidebar";
+import { setLocale } from "@/i18n";
 
+const { t, locale } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
@@ -18,44 +21,94 @@ const { sidebarOpen, close } = useSidebar();
 const activeLeadsCount = computed(() => leadsStore.activeLeads.length);
 const unreadCount = computed(() => messagesStore.totalUnread());
 
-const navItems = [
+const navItems = computed(() => [
   {
-    section: "Planning",
+    section: t("nav.couple.sections.planning"),
     items: [
-      { label: "Overview", path: "/couple/overview", icon: "⊞" },
       {
-        label: "My Enquiries",
+        label: t("nav.couple.items.overview"),
+        path: "/couple/overview",
+        icon: "⊞",
+      },
+      {
+        label: t("nav.couple.items.myEnquiries"),
         path: "/couple/enquiries",
         icon: "◈",
         badge: "enquiries",
       },
-      { label: "Checklist", path: "/couple/checklist", icon: "✓" },
-      { label: "Budget Tracker", path: "/couple/budget", icon: "€" },
-      { label: "Guest List", path: "/couple/guests", icon: "♟" },
+      {
+        label: t("nav.couple.items.checklist"),
+        path: "/couple/checklist",
+        icon: "✓",
+      },
+      {
+        label: t("nav.couple.items.budgetTracker"),
+        path: "/couple/budget",
+        icon: "€",
+      },
+      {
+        label: t("nav.couple.items.guestList"),
+        path: "/couple/guests",
+        icon: "♟",
+      },
     ],
   },
   {
-    section: "Vendors",
+    section: t("nav.couple.sections.vendors"),
     items: [
-      { label: "Find Vendors", path: "/vendors", icon: "🔍" },
-      { label: "My Wedding Team", path: "/couple/team", icon: "★" },
-      { label: "Video Calls", path: "/couple/calls", icon: "📹" },
-      { label: "Calendar", path: "/couple/calendar", icon: "📅" },
-      { label: "Group Chat", path: "/couple/group-chat", icon: "⊙" },
+      {
+        label: t("nav.couple.items.findVendors"),
+        path: "/vendors",
+        icon: "🔍",
+      },
+      {
+        label: t("nav.couple.items.myWeddingTeam"),
+        path: "/couple/team",
+        icon: "★",
+      },
+      {
+        label: t("nav.couple.items.videoCalls"),
+        path: "/couple/calls",
+        icon: "📹",
+      },
+      {
+        label: t("nav.couple.items.calendar"),
+        path: "/couple/calendar",
+        icon: "📅",
+      },
+      {
+        label: t("nav.couple.items.groupChat"),
+        path: "/couple/group-chat",
+        icon: "⊙",
+      },
     ],
   },
   {
-    section: "Our Wedding",
+    section: t("nav.couple.sections.ourWedding"),
     items: [
-      { label: "Wedding Website", path: "/couple/website", icon: "⊕" },
-      { label: "Document Vault", path: "/couple/documents", icon: "⊘" },
+      {
+        label: t("nav.couple.items.weddingWebsite"),
+        path: "/couple/website",
+        icon: "⊕",
+      },
+      {
+        label: t("nav.couple.items.documentVault"),
+        path: "/couple/documents",
+        icon: "⊘",
+      },
     ],
   },
   {
-    section: "Account",
-    items: [{ label: "My Profile", path: "/couple/profile", icon: "◉" }],
+    section: t("nav.couple.sections.account"),
+    items: [
+      {
+        label: t("nav.couple.items.myProfile"),
+        path: "/couple/profile",
+        icon: "◉",
+      },
+    ],
   },
-];
+]);
 
 function isActive(path: string) {
   return route.path.startsWith(path);
@@ -72,6 +125,10 @@ function getBadge(key: string) {
 function logout() {
   authStore.logout();
   router.push("/");
+}
+
+function switchLang() {
+  setLocale(locale.value === "ro" ? "en" : "ro");
 }
 </script>
 
@@ -121,7 +178,12 @@ function logout() {
       </div>
     </div>
 
-    <button class="logout-btn" @click="logout">Sign out</button>
+    <button class="lang-btn" @click="switchLang" :title="t('lang.switch')">
+      {{ locale === "ro" ? "🇬🇧 EN" : "🇷🇴 RO" }}
+    </button>
+    <button class="logout-btn" @click="logout">
+      {{ t("common.signOut") }}
+    </button>
   </nav>
 </template>
 
@@ -238,7 +300,7 @@ function logout() {
   text-align: center;
 }
 .logout-btn {
-  margin: 16px 24px 0;
+  margin: 8px 24px 0;
   padding: 8px;
   background: none;
   border: 1.5px solid var(--color-border);
@@ -253,6 +315,24 @@ function logout() {
 .logout-btn:hover {
   border-color: var(--color-error);
   color: var(--color-error);
+}
+.lang-btn {
+  margin: 16px 24px 0;
+  padding: 7px;
+  background: none;
+  border: 1.5px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    color 0.2s;
+  text-align: center;
+}
+.lang-btn:hover {
+  border-color: var(--color-gold);
+  color: var(--color-gold);
 }
 @media (max-width: 767px) {
   .sidebar {
