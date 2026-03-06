@@ -1,0 +1,457 @@
+:root {
+  --color-gold: #b8860b;
+  --color-gold-dark: #9e7209;
+  --color-gold-light: #fdf8ee;
+  --color-white: #ffffff;
+  --color-surface: #f8f8f6;
+  --color-surface-alt: #f2f0ec;
+  --color-text: #1a1a1a;
+  --color-text-secondary: #4b5563;
+  --color-muted: #888888;
+  --color-border: #e8e4de;
+  --color-border-strong: #d0c9be;
+  --color-error: #e74c3c;
+  --color-error-light: #fdf0f0;
+  --color-green: #27ae60;
+  --color-green-light: #edfdf5;
+  --color-amber: #e65100;
+  --color-amber-light: #fff8f0;
+  --color-info: #2563eb;
+  --color-info-light: #eff6ff;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+  --radius-full: 9999px;
+
+  --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.07);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.14);
+
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  /* ─── Chip / badge token pairs (bg + text) ─── */
+  --chip-green-bg: #e9f9f0;
+  --chip-amber-bg: #fef9ec;
+  --chip-orange-bg: #fdf0e9;
+  --chip-orange-text: #d9730d;
+  --chip-red-bg: #fff0f0;
+  --chip-blue-bg: #e9f0ff;
+  --chip-blue-text: #2563eb;
+  --chip-teal-bg: #eef6ff;
+  --chip-teal-text: #1d6fa4;
+  --chip-purple-bg: #f3e9ff;
+  --chip-purple-text: #7c3aed;
+
+  /* ─── Skeleton shimmer ─── */
+  --sk-base: #f0ebe6;
+  --sk-highlight: #e8e0d8;
+}
+
+/* ─── Dark-mode overrides (applied via .dark on the layout root) ─── */
+.dark {
+  --color-gold: #d4a820;
+  --color-gold-dark: #b8920a;
+  --color-gold-light: #2a2318;
+  --color-white: #1e1e24;
+  --color-surface: #131316;
+  --color-surface-alt: #1a1a20;
+  --color-text: #e2e0dc;
+  --color-text-secondary: #a8a8b8;
+  --color-muted: #7a7a8a;
+  --color-border: #2e2e38;
+  --color-border-strong: #3e3e4c;
+  --color-error: #f05c4e;
+  --color-error-light: rgba(240, 92, 78, 0.12);
+  --color-green: #34c97a;
+  --color-green-light: rgba(52, 201, 122, 0.12);
+  --color-amber: #f4974e;
+  --color-amber-light: rgba(244, 151, 78, 0.12);
+  --color-info: #60a5fa;
+  --color-info-light: rgba(96, 165, 250, 0.12);
+
+  --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 36px rgba(0, 0, 0, 0.6);
+
+  /* Chip / badge token pairs – brightened for dark backgrounds */
+  --chip-green-bg: rgba(52, 201, 122, 0.15);
+  --chip-amber-bg: rgba(212, 168, 32, 0.15);
+  --chip-orange-bg: rgba(244, 151, 78, 0.15);
+  --chip-orange-text: #f4974e;
+  --chip-red-bg: rgba(240, 92, 78, 0.15);
+  --chip-blue-bg: rgba(123, 167, 247, 0.15);
+  --chip-blue-text: #7ba7f7;
+  --chip-teal-bg: rgba(94, 175, 214, 0.15);
+  --chip-teal-text: #5eafd6;
+  --chip-purple-bg: rgba(181, 136, 247, 0.15);
+  --chip-purple-text: #b588f7;
+
+  /* Skeleton shimmer – dark variant */
+  --sk-base: #22222c;
+  --sk-highlight: #2c2c38;
+
+  color-scheme: dark;
+}
+
+/* ─── Form elements inside dark layout ─── */
+.dark
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(
+    [type="color"]
+  ),
+.dark textarea,
+.dark select {
+  color: var(--color-text);
+  background-color: var(--color-white);
+  border-color: var(--color-border);
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  margin: 0;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  color: var(--color-text);
+  background: var(--color-surface);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--color-gold);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  font-family: inherit;
+}
+
+input,
+textarea,
+select {
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  line-height: 1.2;
+}
+
+p {
+  margin: 0;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* ─── Dashboard view roots fill the full content area ─── */
+.vendor-layout .main-content > *,
+.couple-layout .main-content > * {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   GLOBAL UTILITY CLASSES
+   Used directly in templates — work even with <style scoped>
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  font-family: inherit;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  text-decoration: none;
+  line-height: 1.4;
+}
+.btn:disabled,
+.btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.btn-primary {
+  background: var(--color-gold);
+  color: #fff;
+  border: none;
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--color-gold-dark);
+}
+.btn-outline {
+  background: transparent;
+  color: var(--color-text);
+  border: 1.5px solid var(--color-border);
+}
+.btn-outline:hover:not(:disabled) {
+  border-color: var(--color-gold);
+  color: var(--color-gold);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--color-muted);
+  border: none;
+}
+.btn-ghost:hover:not(:disabled) {
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+}
+.btn-danger {
+  background: transparent;
+  color: var(--color-error);
+  border: 1.5px solid var(--color-error);
+}
+.btn-danger:hover:not(:disabled) {
+  background: var(--color-error);
+  color: #fff;
+}
+.btn-sm {
+  padding: 5px 12px;
+  font-size: var(--text-xs);
+  border-radius: var(--radius-sm);
+}
+.btn-lg {
+  padding: 11px 24px;
+  font-size: var(--text-base);
+}
+.btn-icon {
+  padding: 7px;
+  aspect-ratio: 1;
+  justify-content: center;
+}
+
+/* ── Cards ── */
+.card {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 20px 24px;
+}
+.card:hover {
+  border-color: var(--color-border-strong);
+}
+.card-lg {
+  border-radius: var(--radius-lg);
+  padding: 24px 28px;
+}
+
+/* ── Form controls ── */
+.form-input,
+.form-select,
+.form-textarea {
+  background: var(--color-white);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: var(--text-sm);
+  font-family: inherit;
+  color: var(--color-text);
+  width: 100%;
+  transition: border-color var(--transition-fast);
+  outline: none;
+}
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  border-color: var(--color-gold);
+}
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: var(--color-muted);
+}
+.form-label {
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ── Badges / chips ── */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  line-height: 1.4;
+}
+.chip-gold {
+  background: var(--color-gold-light);
+  color: var(--color-gold);
+  border: 1px solid var(--color-gold);
+}
+.chip-green {
+  background: var(--color-green-light);
+  color: var(--color-green);
+  border: 1px solid var(--color-green);
+}
+.chip-error {
+  background: var(--color-error-light);
+  color: var(--color-error);
+  border: 1px solid var(--color-error);
+}
+.chip-amber {
+  background: var(--color-amber-light);
+  color: var(--color-amber);
+  border: 1px solid var(--color-amber);
+}
+.chip-info {
+  background: var(--color-info-light);
+  color: var(--color-info);
+  border: 1px solid var(--color-info);
+}
+.chip-muted {
+  background: var(--color-surface-alt);
+  color: var(--color-muted);
+  border: 1px solid var(--color-border);
+}
+
+/* ── Empty state ── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  gap: 10px;
+}
+.empty-icon {
+  font-size: 2.5rem;
+  opacity: 0.45;
+}
+.empty-title {
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--color-text);
+  margin: 0;
+}
+.empty-text {
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  max-width: 300px;
+  margin: 0;
+}
+
+/* ── Skeleton shimmer ── */
+.skeleton {
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    90deg,
+    var(--sk-base) 25%,
+    var(--sk-highlight) 50%,
+    var(--sk-base) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+}
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* ── Section header ── */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.section-title {
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  color: var(--color-text);
+  margin: 0;
+}
+.section-subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  margin: 4px 0 0;
+}
+
+/* ── Divider ── */
+.divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 16px 0;
+}
+
+/* ── Icon button ── */
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  color: var(--color-muted);
+  transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.icon-btn:hover {
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+}
+.icon-btn.danger:hover {
+  background: var(--color-error-light);
+  color: var(--color-error);
+}

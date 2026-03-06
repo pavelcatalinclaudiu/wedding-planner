@@ -1,0 +1,422 @@
+﻿<script setup lang="ts">
+import { ref, computed } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/auth.store";
+import { coupleApi } from "@/api/couple.api";
+import { useAuthRedirect } from "@/composables/useAuthRedirect";
+
+const route = useRoute();
+const router = useRouter();
+const authStore = useAuthStore();
+const { getEnquiryIntent, redirectAfterAuth } = useAuthRedirect();
+
+const step = ref(1);
+const loading = ref(false);
+const error = ref("");
+
+// Step 1
+const email = ref("");
+const password = ref("");
+const confirmPassword = ref("");
+const showPassword = ref(false);
+
+// Step 2
+const partner1Name = ref("");
+const partner2Name = ref("");
+const weddingDate = ref("");
+const weddingLocation = ref("");
+const estimatedGuestCount = ref<number>(100);
+const totalBudget = ref<number>(10000);
+
+const intent = computed(() =>
+  route.query.intent === "enquiry" ? getEnquiryIntent() : null,
+);
+
+async function nextStep() {
+  error.value = "";
+  if (!email.value || !password.value || !confirmPassword.value) {
+    error.value = "Please fill in all fields.";
+    return;
+  }
+  if (password.value !== confirmPassword.value) {
+    error.value = "Passwords do not match.";
+    return;
+  }
+  step.value = 2;
+}
+
+async function handleSubmit() {
+  if (!partner1Name.value || !partner2Name.value || !weddingDate.value) {
+    error.value = "Please fill in all required fields.";
+    return;
+  }
+  loading.value = true;
+  error.value = "";
+  try {
+    await authStore.register({
+      email: email.value,
+      password: password.value,
+      role: "COUPLE",
+    });
+    await coupleApi.createProfile({
+      partner1Name: partner1Name.value,
+      partner2Name: partner2Name.value,
+      weddingDate: weddingDate.value,
+      weddingLocation: weddingLocation.value,
+      estimatedGuestCount: estimatedGuestCount.value,
+      totalBudget: totalBudget.value,
+    });
+    redirectAfterAuth("COUPLE");
+  } catch (e: unknown) {
+    const err = e as { response?: { data?: { message?: string } } };
+    error.value = err.response?.data?.message ?? "Registration failed.";
+  } finally {
+    loading.value = false;
+  }
+}
+</script>
+
+<template>
+  <div class="auth-page">
+    <div class="auth-card">
+      <div class="auth-logo">Eternelle</div>
+
+      <!-- Intent banner: shown when arriving from vendor profile enquiry -->
+      <div v-if="intent" class="intent-banner">
+        <div
+          class="intent-avatar"
+          :style="
+            intent.vendorPhotoUrl
+              ? { backgroundImage: `url('${intent.vendorPhotoUrl}')` }
+              : {}
+          "
+        >
+          {{ !intent.vendorPhotoUrl ? intent.vendorName[0] : "" }}
+        </div>
+        <div class="intent-text">
+          <span class="intent-label">Complete your account to contact</span>
+          <span class="intent-name">{{ intent.vendorName }}</span>
+          <span class="intent-meta">
+            {{ intent.vendorCategory?.replace(/_/g, " ") }} ·
+            {{ intent.vendorCity }}
+          </span>
+        </div>
+        <span class="intent-badge">✦ Enquiry saved</span>
+      </div>
+
+      <div class="step-indicator">
+        <span :class="{ active: step >= 1 }">1</span>
+        <span class="sep">—</span>
+        <span :class="{ active: step >= 2 }">2</span>
+      </div>
+
+      <!-- Step 1 -->
+      <template v-if="step === 1">
+        <h1 class="auth-title">Create your account</h1>
+        <form @submit.prevent="nextStep" class="auth-form">
+          <div class="field">
+            <label>Email</label>
+            <input
+              v-model="email"
+              type="email"
+              placeholder="you@example.com"
+              required
+            />
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <div class="password-wrapper">
+              <input
+                v-model="password"
+                :type="showPassword ? 'text' : 'password'"
+                placeholder="Min. 8 characters"
+                required
+              />
+              <button
+                type="button"
+                class="toggle-password"
+                @click="showPassword = !showPassword"
+              >
+                {{ showPassword ? "Hide" : "Show" }}
+              </button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Confirm password</label>
+            <input
+              v-model="confirmPassword"
+              :type="showPassword ? 'text' : 'password'"
+              placeholder="••••••••"
+              required
+            />
+          </div>
+          <p v-if="error" class="error-msg">{{ error }}</p>
+          <button type="submit" class="btn-primary">Continue</button>
+        </form>
+      </template>
+
+      <!-- Step 2 -->
+      <template v-else>
+        <h1 class="auth-title">Your wedding details</h1>
+        <form @submit.prevent="handleSubmit" class="auth-form">
+          <div class="field">
+            <label>Partner 1 name</label>
+            <input
+              v-model="partner1Name"
+              type="text"
+              placeholder="Alex"
+              required
+            />
+          </div>
+          <div class="field">
+            <label>Partner 2 name</label>
+            <input
+              v-model="partner2Name"
+              type="text"
+              placeholder="Jordan"
+              required
+            />
+          </div>
+          <div class="field">
+            <label>Wedding date</label>
+            <input v-model="weddingDate" type="date" required />
+          </div>
+          <div class="field">
+            <label>Wedding location</label>
+            <input
+              v-model="weddingLocation"
+              type="text"
+              placeholder="City, Country"
+            />
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Est. guest count</label>
+              <input
+                v-model.number="estimatedGuestCount"
+                type="number"
+                min="1"
+              />
+            </div>
+            <div class="field">
+              <label>Total budget (€)</label>
+              <input v-model.number="totalBudget" type="number" min="0" />
+            </div>
+          </div>
+          <p v-if="error" class="error-msg">{{ error }}</p>
+          <div class="btn-row">
+            <button type="button" class="btn-secondary" @click="step = 1">
+              Back
+            </button>
+            <button type="submit" class="btn-primary" :disabled="loading">
+              {{ loading ? "Creating…" : "Create account" }}
+            </button>
+          </div>
+        </form>
+      </template>
+
+      <p class="auth-links">
+        Already have an account? <RouterLink to="/login">Sign in</RouterLink>
+      </p>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface);
+}
+.auth-card {
+  background: var(--color-white);
+  border-radius: 16px;
+  padding: 48px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.08);
+}
+.auth-logo {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--color-gold);
+  margin-bottom: 16px;
+}
+/* Intent banner */
+.intent-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #1c1c1c;
+  border-left: 3px solid var(--color-gold);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  position: relative;
+}
+.intent-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-gold);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+}
+.intent-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.intent-label {
+  font-size: 0.7rem;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.intent-name {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #fff;
+}
+.intent-meta {
+  font-size: 0.72rem;
+  color: #888;
+  text-transform: capitalize;
+}
+.intent-badge {
+  position: absolute;
+  top: -8px;
+  right: 12px;
+  background: var(--color-gold);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 10px;
+}
+.step-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: var(--color-muted);
+  margin-bottom: 24px;
+}
+.step-indicator span.active {
+  background: var(--color-gold);
+  color: #fff;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+.auth-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 28px;
+}
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.field label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.field input {
+  padding: 10px 14px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+.field input:focus {
+  outline: none;
+  border-color: var(--color-gold);
+}
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.password-wrapper {
+  position: relative;
+}
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+.error-msg {
+  color: var(--color-error);
+  font-size: 0.875rem;
+  margin: 0;
+}
+.btn-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 12px;
+}
+.btn-primary {
+  padding: 12px;
+  background: var(--color-gold);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-secondary {
+  padding: 12px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1.5px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.auth-links {
+  margin-top: 24px;
+  font-size: 0.875rem;
+  color: var(--color-muted);
+  text-align: center;
+}
+.auth-links a {
+  color: var(--color-gold);
+  text-decoration: none;
+}
+</style>

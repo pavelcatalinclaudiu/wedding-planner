@@ -1,0 +1,346 @@
+﻿<script setup lang="ts">
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/auth.store";
+import { vendorApi } from "@/api/vendor.api";
+import type { VendorCategory } from "@/types/vendor.types";
+
+const router = useRouter();
+const authStore = useAuthStore();
+
+const step = ref(1);
+const loading = ref(false);
+const error = ref("");
+const showPassword = ref(false);
+
+// Step 1
+const email = ref("");
+const password = ref("");
+const confirmPassword = ref("");
+
+// Step 2
+const businessName = ref("");
+const category = ref<VendorCategory>("PHOTOGRAPHER");
+const city = ref("");
+const description = ref("");
+const basePrice = ref<number | undefined>(undefined);
+
+const categories: { value: VendorCategory; label: string }[] = [
+  { value: "PHOTOGRAPHER", label: "Photography" },
+  { value: "VIDEOGRAPHER", label: "Videography" },
+  { value: "VENUE", label: "Venue" },
+  { value: "CATERER", label: "Catering" },
+  { value: "FLORIST", label: "Florals" },
+  { value: "BAND", label: "Live Band" },
+  { value: "DJ", label: "DJ" },
+  { value: "CAKE", label: "Cake" },
+  { value: "MAKEUP_ARTIST", label: "Makeup Artist" },
+  { value: "HAIR_STYLIST", label: "Hair Stylist" },
+  { value: "OFFICIANT", label: "Officiant" },
+  { value: "PLANNER", label: "Wedding Planner" },
+  { value: "TRANSPORTATION", label: "Transportation" },
+  { value: "LIGHTING", label: "Lighting" },
+  { value: "INVITATION_STATIONERY", label: "Invitations & Stationery" },
+  { value: "JEWELRY", label: "Jewelry" },
+  { value: "OTHER", label: "Other" },
+];
+
+function nextStep() {
+  error.value = "";
+  if (!email.value || !password.value || !confirmPassword.value) {
+    error.value = "Please fill in all fields.";
+    return;
+  }
+  if (password.value !== confirmPassword.value) {
+    error.value = "Passwords do not match.";
+    return;
+  }
+  step.value = 2;
+}
+
+async function handleSubmit() {
+  if (!businessName.value || !city.value) {
+    error.value = "Business name and city are required.";
+    return;
+  }
+  loading.value = true;
+  error.value = "";
+  try {
+    await authStore.register({
+      email: email.value,
+      password: password.value,
+      role: "VENDOR",
+    });
+    await vendorApi.createProfile({
+      businessName: businessName.value,
+      category: category.value,
+      city: city.value,
+      description: description.value,
+      basePrice: basePrice.value,
+    });
+    router.push("/vendor/overview");
+  } catch (e: unknown) {
+    const err = e as { response?: { data?: { message?: string } } };
+    error.value = err.response?.data?.message ?? "Registration failed.";
+  } finally {
+    loading.value = false;
+  }
+}
+</script>
+
+<template>
+  <div class="auth-page">
+    <div class="auth-card">
+      <div class="auth-logo">Eternelle</div>
+      <div class="step-indicator">
+        <span :class="{ active: step >= 1 }">1</span>
+        <span class="sep">—</span>
+        <span :class="{ active: step >= 2 }">2</span>
+      </div>
+
+      <template v-if="step === 1">
+        <h1 class="auth-title">Create your vendor account</h1>
+        <form @submit.prevent="nextStep" class="auth-form">
+          <div class="field">
+            <label>Email</label>
+            <input
+              v-model="email"
+              type="email"
+              placeholder="you@business.com"
+              required
+            />
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <div class="password-wrapper">
+              <input
+                v-model="password"
+                :type="showPassword ? 'text' : 'password'"
+                placeholder="Min. 8 characters"
+                required
+              />
+              <button
+                type="button"
+                class="toggle-password"
+                @click="showPassword = !showPassword"
+              >
+                {{ showPassword ? "Hide" : "Show" }}
+              </button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Confirm password</label>
+            <input
+              v-model="confirmPassword"
+              :type="showPassword ? 'text' : 'password'"
+              placeholder="••••••••"
+              required
+            />
+          </div>
+          <p v-if="error" class="error-msg">{{ error }}</p>
+          <button type="submit" class="btn-primary">Continue</button>
+        </form>
+      </template>
+
+      <template v-else>
+        <h1 class="auth-title">Your business details</h1>
+        <form @submit.prevent="handleSubmit" class="auth-form">
+          <div class="field">
+            <label>Business name</label>
+            <input
+              v-model="businessName"
+              type="text"
+              placeholder="Studio Bloom"
+              required
+            />
+          </div>
+          <div class="field">
+            <label>Category</label>
+            <select v-model="category">
+              <option v-for="c in categories" :key="c.value" :value="c.value">
+                {{ c.label }}
+              </option>
+            </select>
+          </div>
+          <div class="field">
+            <label>City</label>
+            <input
+              v-model="city"
+              type="text"
+              placeholder="Bucharest"
+              required
+            />
+          </div>
+          <div class="field">
+            <label>Description</label>
+            <textarea
+              v-model="description"
+              rows="3"
+              placeholder="A short bio about your business…"
+            />
+          </div>
+          <div class="field">
+            <label>Starting price (€)</label>
+            <input
+              v-model.number="basePrice"
+              type="number"
+              min="0"
+              placeholder="500"
+            />
+          </div>
+          <p v-if="error" class="error-msg">{{ error }}</p>
+          <div class="btn-row">
+            <button type="button" class="btn-secondary" @click="step = 1">
+              Back
+            </button>
+            <button type="submit" class="btn-primary" :disabled="loading">
+              {{ loading ? "Creating…" : "Create account" }}
+            </button>
+          </div>
+        </form>
+      </template>
+
+      <p class="auth-links">
+        Already have an account? <RouterLink to="/login">Sign in</RouterLink>
+      </p>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface);
+}
+.auth-card {
+  background: var(--color-white);
+  border-radius: 16px;
+  padding: 48px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.08);
+}
+.auth-logo {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--color-gold);
+  margin-bottom: 16px;
+}
+.step-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: var(--color-muted);
+  margin-bottom: 24px;
+}
+.step-indicator span.active {
+  background: var(--color-gold);
+  color: #fff;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+.auth-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 28px;
+}
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.field label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.field input,
+.field select,
+.field textarea {
+  padding: 10px 14px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--color-gold);
+}
+.password-wrapper {
+  position: relative;
+}
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+.error-msg {
+  color: var(--color-error);
+  font-size: 0.875rem;
+  margin: 0;
+}
+.btn-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 12px;
+}
+.btn-primary {
+  padding: 12px;
+  background: var(--color-gold);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-secondary {
+  padding: 12px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1.5px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.auth-links {
+  margin-top: 24px;
+  font-size: 0.875rem;
+  color: var(--color-muted);
+  text-align: center;
+}
+.auth-links a {
+  color: var(--color-gold);
+  text-decoration: none;
+}
+</style>

@@ -1,0 +1,162 @@
+<script setup lang="ts">
+import { computed } from "vue";
+import type { Lead } from "@/types/lead.types";
+import LeadStatusBadge from "./LeadStatusBadge.vue";
+
+const props = defineProps<{
+  lead: Lead;
+  role: "VENDOR" | "COUPLE";
+}>();
+
+const emit = defineEmits<{
+  (e: "accept", id: string): void;
+  (e: "decline", id: string): void;
+  (e: "open", lead: Lead): void;
+}>();
+
+const budget = computed(() =>
+  props.lead.budget
+    ? new Intl.NumberFormat("en-GB", {
+        style: "currency",
+        currency: "GBP",
+        maximumFractionDigits: 0,
+      }).format(props.lead.budget)
+    : null,
+);
+
+const canAct = computed(
+  () => props.role === "VENDOR" && props.lead.status === "NEW",
+);
+</script>
+
+<template>
+  <div class="lead-card" @click="emit('open', lead)">
+    <div class="lead-header">
+      <div class="lead-name">
+        {{ role === "VENDOR" ? lead.coupleName : lead.vendorName }}
+      </div>
+      <LeadStatusBadge :status="lead.status" :perspective="role" />
+    </div>
+
+    <div class="lead-meta">
+      <span v-if="lead.eventDate">📅 {{ lead.eventDate }}</span>
+      <span v-if="budget">💰 {{ budget }}</span>
+      <span v-if="role === 'COUPLE'">{{ lead.vendorCategory }}</span>
+    </div>
+
+    <p v-if="lead.message" class="lead-message">{{ lead.message }}</p>
+
+    <div v-if="canAct" class="lead-actions" @click.stop>
+      <button class="btn btn-accept" @click="emit('accept', lead.id)">
+        Accept
+      </button>
+      <button class="btn btn-decline" @click="emit('decline', lead.id)">
+        Decline
+      </button>
+    </div>
+
+    <div v-else class="lead-footer">
+      <small class="card-date">{{
+        new Date(lead.createdAt).toLocaleDateString()
+      }}</small>
+      <span
+        v-if="['IN_DISCUSSION', 'QUOTED'].includes(lead.status)"
+        class="chat-hint"
+        >Open chat →</span
+      >
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.lead-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 16px 20px;
+  cursor: pointer;
+  transition:
+    box-shadow 0.2s,
+    border-color 0.2s;
+}
+.lead-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border-color: var(--color-gold);
+}
+
+.lead-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.lead-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--color-text);
+}
+
+.lead-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  margin-bottom: 8px;
+}
+
+.lead-message {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary, #555);
+  line-height: 1.5;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  margin-bottom: 12px;
+}
+
+.lead-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  padding: 6px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+.btn-accept {
+  background: var(--color-gold);
+  color: #fff;
+}
+.btn-decline {
+  background: transparent;
+  border: 1.5px solid var(--color-border);
+  color: var(--color-muted);
+}
+.btn-decline:hover {
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+
+.lead-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.card-date {
+  font-size: 0.75rem;
+  color: var(--color-muted);
+}
+.chat-hint {
+  font-size: 0.8rem;
+  color: var(--color-gold);
+  font-weight: 500;
+}
+.lead-card.selected .chat-hint {
+  display: none;
+}
+</style>
