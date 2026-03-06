@@ -1,4 +1,4 @@
-﻿package ro.eternelle.booking;
+package ro.eternelle.booking;
 
 import java.math.BigDecimal;
 import java.time.Instant;

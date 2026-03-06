@@ -1,4 +1,4 @@
-﻿package ro.eternelle.converter;
+package ro.eternelle.converter;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

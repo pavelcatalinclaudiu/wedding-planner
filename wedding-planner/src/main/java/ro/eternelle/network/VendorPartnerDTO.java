@@ -1,4 +1,4 @@
-﻿package ro.eternelle.network;
+package ro.eternelle.network;
 
 import java.time.Instant;
 import java.util.UUID;

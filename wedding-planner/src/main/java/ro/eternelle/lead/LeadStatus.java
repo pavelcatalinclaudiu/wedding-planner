@@ -1,4 +1,4 @@
-﻿package ro.eternelle.lead;
+package ro.eternelle.lead;
 
 public enum LeadStatus {
     NEW,

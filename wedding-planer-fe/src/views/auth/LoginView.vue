@@ -3,6 +3,7 @@ import { ref, computed } from "vue";
 import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useAuthStore } from "@/stores/auth.store";
+import { extractApiError } from "@/api/client";
 import { useAuthRedirect } from "@/composables/useAuthRedirect";
 
 const { t } = useI18n();
@@ -36,8 +37,7 @@ async function handleLogin() {
     });
     redirectAfterAuth(data.user.role as "COUPLE" | "VENDOR");
   } catch (e: unknown) {
-    const err = e as { response?: { data?: { message?: string } } };
-    error.value = err.response?.data?.message ?? "Invalid email or password.";
+    error.value = extractApiError(e, t("auth.login.errorInvalid"));
   } finally {
     loading.value = false;
   }
@@ -47,7 +47,7 @@ async function handleLogin() {
 <template>
   <div class="auth-page">
     <div class="auth-card">
-      <div class="auth-logo">Eternelle</div>
+      <RouterLink to="/" class="auth-logo">Eternelle</RouterLink>
 
       <!-- Intent banner: shown when couple was mid-enquiry before auth -->
       <div v-if="intent" class="intent-banner">
@@ -153,6 +153,8 @@ async function handleLogin() {
   box-shadow: 0 4px 32px rgba(0, 0, 0, 0.08);
 }
 .auth-logo {
+  text-decoration: none;
+  cursor: pointer;
   font-size: 2rem;
   font-weight: 800;
   color: var(--color-gold);
@@ -297,11 +299,14 @@ async function handleLogin() {
 }
 .auth-links {
   display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
   gap: 8px;
   justify-content: center;
   margin-top: 24px;
   font-size: 0.875rem;
   color: var(--color-muted);
+  white-space: nowrap;
 }
 .auth-links a {
   color: var(--color-gold);

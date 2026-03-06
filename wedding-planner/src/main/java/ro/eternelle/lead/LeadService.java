@@ -1,4 +1,4 @@
-﻿package ro.eternelle.lead;
+package ro.eternelle.lead;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;

@@ -1,4 +1,4 @@
-﻿package ro.eternelle.offer;
+package ro.eternelle.offer;
 
 import java.math.BigDecimal;
 import java.time.Instant;

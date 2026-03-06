@@ -1,4 +1,4 @@
-﻿package ro.eternelle.dto.videocall;
+package ro.eternelle.dto.videocall;
 
 public class DailyRoomRequest {
 

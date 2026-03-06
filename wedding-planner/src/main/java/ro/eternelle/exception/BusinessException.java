@@ -1,4 +1,4 @@
-﻿package ro.eternelle.exception;
+package ro.eternelle.exception;
 
 public class BusinessException extends RuntimeException {
 

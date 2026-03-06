@@ -1,4 +1,4 @@
-﻿package ro.eternelle.vendor;
+package ro.eternelle.vendor;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

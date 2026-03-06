@@ -1,4 +1,4 @@
-﻿package ro.eternelle.network;
+package ro.eternelle.network;
 
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;

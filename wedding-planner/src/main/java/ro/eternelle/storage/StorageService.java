@@ -1,4 +1,4 @@
-﻿package ro.eternelle.storage;
+package ro.eternelle.storage;
 
 import java.io.IOException;
 import java.io.InputStream;

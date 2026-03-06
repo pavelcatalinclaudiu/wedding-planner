@@ -1,4 +1,4 @@
-﻿package ro.eternelle.subscription;
+package ro.eternelle.subscription;
 
 import com.stripe.model.Event;
 import com.stripe.model.Subscription;

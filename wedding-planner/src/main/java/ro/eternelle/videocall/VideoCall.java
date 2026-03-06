@@ -1,4 +1,4 @@
-﻿package ro.eternelle.videocall;
+package ro.eternelle.videocall;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;

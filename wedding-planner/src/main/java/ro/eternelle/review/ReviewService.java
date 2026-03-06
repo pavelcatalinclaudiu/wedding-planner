@@ -1,4 +1,4 @@
-﻿package ro.eternelle.review;
+package ro.eternelle.review;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

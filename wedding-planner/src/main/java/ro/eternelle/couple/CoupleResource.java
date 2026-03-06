@@ -1,4 +1,4 @@
-﻿package ro.eternelle.couple;
+package ro.eternelle.couple;
 
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;

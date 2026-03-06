@@ -1,4 +1,4 @@
-﻿package ro.eternelle.vendor;
+package ro.eternelle.vendor;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;

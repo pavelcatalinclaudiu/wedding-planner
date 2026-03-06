@@ -1,4 +1,4 @@
-﻿package ro.eternelle.booking;
+package ro.eternelle.booking;
 
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;

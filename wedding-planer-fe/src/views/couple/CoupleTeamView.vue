@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { useLeadsStore } from "@/stores/leads.store";
+
+const { t } = useI18n();
 
 const router = useRouter();
 const leadsStore = useLeadsStore();

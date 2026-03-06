@@ -1,4 +1,4 @@
-﻿package ro.eternelle.offer;
+package ro.eternelle.offer;
 
 public enum OfferStatus {
     PENDING,

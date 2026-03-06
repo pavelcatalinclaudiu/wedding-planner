@@ -1,4 +1,4 @@
-﻿package ro.eternelle.conversation;
+package ro.eternelle.conversation;
 
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;

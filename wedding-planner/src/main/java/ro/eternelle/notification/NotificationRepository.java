@@ -1,4 +1,4 @@
-﻿package ro.eternelle.notification;
+package ro.eternelle.notification;
 
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import io.quarkus.panache.common.Sort;

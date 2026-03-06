@@ -1,4 +1,4 @@
-﻿package ro.eternelle.notification;
+package ro.eternelle.notification;
 
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;

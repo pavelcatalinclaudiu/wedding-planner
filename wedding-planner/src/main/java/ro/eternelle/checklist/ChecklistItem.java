@@ -1,4 +1,4 @@
-﻿package ro.eternelle.checklist;
+package ro.eternelle.checklist;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;

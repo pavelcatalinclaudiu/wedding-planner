@@ -1,4 +1,4 @@
-﻿package ro.eternelle.exception;
+package ro.eternelle.exception;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;

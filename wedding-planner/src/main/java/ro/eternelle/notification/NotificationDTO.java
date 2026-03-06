@@ -1,4 +1,4 @@
-﻿package ro.eternelle.notification;
+package ro.eternelle.notification;
 
 import java.time.Instant;
 import java.util.UUID;

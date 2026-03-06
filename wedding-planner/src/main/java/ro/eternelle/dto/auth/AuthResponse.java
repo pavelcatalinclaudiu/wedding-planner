@@ -1,4 +1,4 @@
-﻿package ro.eternelle.dto.auth;
+package ro.eternelle.dto.auth;
 
 import java.time.Instant;
 

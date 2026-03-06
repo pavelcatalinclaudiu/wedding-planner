@@ -1,4 +1,4 @@
-﻿package ro.eternelle.auth;
+package ro.eternelle.auth;
 
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;

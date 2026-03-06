@@ -1,4 +1,4 @@
-﻿package ro.eternelle.offer;
+package ro.eternelle.offer;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

@@ -1,4 +1,4 @@
-﻿package ro.eternelle.guest;
+package ro.eternelle.guest;
 
 import java.time.Instant;
 import java.util.Map;

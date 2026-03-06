@@ -1,4 +1,4 @@
-﻿package ro.eternelle.subscription;
+package ro.eternelle.subscription;
 
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;

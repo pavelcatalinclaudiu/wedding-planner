@@ -1,4 +1,4 @@
-﻿package ro.eternelle.guest;
+package ro.eternelle.guest;
 
 /** Inbound payload for create or update guest requests. */
 public class GuestRequest {

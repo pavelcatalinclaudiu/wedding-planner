@@ -1,4 +1,4 @@
-﻿package ro.eternelle.vendor;
+package ro.eternelle.vendor;
 
 import java.time.LocalDate;
 import java.util.UUID;

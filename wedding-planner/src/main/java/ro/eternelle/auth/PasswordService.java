@@ -1,4 +1,4 @@
-﻿package ro.eternelle.auth;
+package ro.eternelle.auth;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import org.mindrot.jbcrypt.BCrypt;

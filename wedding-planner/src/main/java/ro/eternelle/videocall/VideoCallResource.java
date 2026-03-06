@@ -1,4 +1,4 @@
-﻿package ro.eternelle.videocall;
+package ro.eternelle.videocall;
 
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;

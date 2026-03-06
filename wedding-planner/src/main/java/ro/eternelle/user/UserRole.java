@@ -1,4 +1,4 @@
-﻿package ro.eternelle.user;
+package ro.eternelle.user;
 
 public enum UserRole {
     COUPLE, VENDOR

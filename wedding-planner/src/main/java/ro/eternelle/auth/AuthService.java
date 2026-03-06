@@ -1,9 +1,10 @@
-﻿package ro.eternelle.auth;
+package ro.eternelle.auth;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.jboss.logging.Logger;
 import ro.eternelle.dto.auth.AuthResponse;
 import ro.eternelle.exception.BusinessException;
 import ro.eternelle.user.User;
@@ -18,6 +19,8 @@ import java.util.UUID;
 
 @ApplicationScoped
 public class AuthService {
+
+    private static final Logger LOG = Logger.getLogger(AuthService.class);
 
     @Inject
     UserRepository userRepository;
@@ -60,7 +63,7 @@ public class AuthService {
         try {
             emailService.sendVerificationEmail(user.email, token);
         } catch (Exception ex) {
-            // Log but don't rethrow — user can request a resend
+            LOG.errorf(ex, "Verification email failed for %s", user.email);
         }
 
         String jwt = jwtService.generateToken(user);
@@ -114,7 +117,9 @@ public class AuthService {
                 user.emailVerificationExpires = Instant.now().plus(24, ChronoUnit.HOURS);
                 try {
                     emailService.sendVerificationEmail(user.email, token);
-                } catch (Exception ignored) {}
+                } catch (Exception e) {
+                    LOG.errorf(e, "Resend verification email failed for %s", user.email);
+                }
             }
         });
         // Always return 204 — don't reveal whether the email exists
@@ -130,7 +135,9 @@ public class AuthService {
             user.passwordResetExpires = Instant.now().plus(1, ChronoUnit.HOURS);
             try {
                 emailService.sendPasswordResetEmail(user.email, token);
-            } catch (Exception ignored) {}
+            } catch (Exception e) {
+                LOG.errorf(e, "Password reset email failed for %s", user.email);
+            }
         });
         // Always return 204 — don't reveal whether the email exists
     }
@@ -180,6 +187,4 @@ public class AuthService {
             )
         );
     }
-}
-
 }

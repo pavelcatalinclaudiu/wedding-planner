@@ -1,4 +1,4 @@
-﻿package ro.eternelle.guest;
+package ro.eternelle.guest;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

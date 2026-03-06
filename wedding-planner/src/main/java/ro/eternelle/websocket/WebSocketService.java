@@ -1,4 +1,4 @@
-﻿package ro.eternelle.websocket;
+package ro.eternelle.websocket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;

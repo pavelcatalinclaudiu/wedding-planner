@@ -1,4 +1,4 @@
-﻿package ro.eternelle.videocall;
+package ro.eternelle.videocall;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

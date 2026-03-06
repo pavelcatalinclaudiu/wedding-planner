@@ -1,4 +1,4 @@
-﻿package ro.eternelle.checklist;
+package ro.eternelle.checklist;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;

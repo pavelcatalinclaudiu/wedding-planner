@@ -44,7 +44,7 @@ async function resend() {
 <template>
   <div class="auth-page">
     <div class="auth-card">
-      <div class="auth-logo">Eternelle</div>
+      <RouterLink to="/" class="auth-logo">Eternelle</RouterLink>
 
       <div v-if="status === 'loading'" class="state-msg">
         <div class="spinner" />
@@ -91,6 +91,8 @@ async function resend() {
   text-align: center;
 }
 .auth-logo {
+  text-decoration: none;
+  cursor: pointer;
   font-size: 2rem;
   font-weight: 800;
   color: var(--color-gold);

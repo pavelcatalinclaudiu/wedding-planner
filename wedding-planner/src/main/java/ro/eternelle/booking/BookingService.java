@@ -1,4 +1,4 @@
-﻿package ro.eternelle.booking;
+package ro.eternelle.booking;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

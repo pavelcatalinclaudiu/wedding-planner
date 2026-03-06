@@ -1,4 +1,4 @@
-﻿package ro.eternelle.review;
+package ro.eternelle.review;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;

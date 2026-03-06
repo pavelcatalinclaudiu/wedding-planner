@@ -1,4 +1,4 @@
-﻿package ro.eternelle.messaging;
+package ro.eternelle.messaging;
 
 import java.time.Instant;
 import java.util.List;

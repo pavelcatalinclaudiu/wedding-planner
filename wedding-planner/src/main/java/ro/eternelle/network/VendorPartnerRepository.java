@@ -1,4 +1,4 @@
-﻿package ro.eternelle.network;
+package ro.eternelle.network;
 
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;

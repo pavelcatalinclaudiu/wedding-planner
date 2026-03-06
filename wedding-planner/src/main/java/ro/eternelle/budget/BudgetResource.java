@@ -1,4 +1,4 @@
-﻿package ro.eternelle.budget;
+package ro.eternelle.budget;
 
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;

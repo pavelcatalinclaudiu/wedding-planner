@@ -1,4 +1,4 @@
-﻿package ro.eternelle.conversation;
+package ro.eternelle.conversation;
 
 import java.time.Instant;
 import java.util.UUID;

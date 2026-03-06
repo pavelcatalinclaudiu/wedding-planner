@@ -1,4 +1,4 @@
-﻿package ro.eternelle.conversation;
+package ro.eternelle.conversation;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;

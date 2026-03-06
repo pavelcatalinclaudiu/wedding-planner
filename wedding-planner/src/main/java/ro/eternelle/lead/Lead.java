@@ -1,4 +1,4 @@
-﻿package ro.eternelle.lead;
+package ro.eternelle.lead;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;

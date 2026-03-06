@@ -1,4 +1,4 @@
-﻿package ro.eternelle.guest;
+package ro.eternelle.guest;
 
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;

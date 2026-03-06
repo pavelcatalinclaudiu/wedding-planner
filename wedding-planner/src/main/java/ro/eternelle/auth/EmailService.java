@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
+import org.jboss.logging.Logger;
 import ro.eternelle.client.ResendClient;
 import ro.eternelle.dto.email.SendEmailRequest;
 
@@ -11,6 +12,8 @@ import java.util.List;
 
 @ApplicationScoped
 public class EmailService {
+
+    private static final Logger LOG = Logger.getLogger(EmailService.class);
 
     @Inject
     @RestClient
@@ -153,6 +156,21 @@ public class EmailService {
         req.to = List.of(to);
         req.subject = subject;
         req.html = html;
-        resendClient.send("Bearer " + apiKey, req);
+        try {
+            resendClient.send("Bearer " + apiKey, req);
+            LOG.infof("Email sent to %s — subject: %s", to, subject);
+        } catch (Exception e) {
+            LOG.errorf(e, "Failed to send email to %s — subject: %s", to, subject);
+            // Dev fallback: extract the link from the HTML and log it directly
+            int hrefStart = html.indexOf("href=\"");
+            if (hrefStart >= 0) {
+                int linkStart = hrefStart + 6;
+                int linkEnd   = html.indexOf('"', linkStart);
+                if (linkEnd > linkStart) {
+                    LOG.warnf("[DEV FALLBACK] Email link for %s: %s", to, html.substring(linkStart, linkEnd));
+                }
+            }
+            throw e;
+        }
     }
 }

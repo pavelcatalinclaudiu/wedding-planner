@@ -1,4 +1,4 @@
-﻿package ro.eternelle.checklist;
+package ro.eternelle.checklist;
 
 import java.time.LocalDate;
 

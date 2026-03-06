@@ -1,4 +1,4 @@
-﻿package ro.eternelle.offer;
+package ro.eternelle.offer;
 
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import io.quarkus.panache.common.Sort;

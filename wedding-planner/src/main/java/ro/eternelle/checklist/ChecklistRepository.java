@@ -1,4 +1,4 @@
-﻿package ro.eternelle.checklist;
+package ro.eternelle.checklist;
 
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;

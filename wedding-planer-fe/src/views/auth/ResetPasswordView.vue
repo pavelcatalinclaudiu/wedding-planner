@@ -3,6 +3,7 @@ import { ref, computed } from "vue";
 import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useAuthStore } from "@/stores/auth.store";
+import { extractApiError } from "@/api/client";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -26,8 +27,8 @@ async function requestReset() {
   try {
     await authStore.requestPasswordReset(email.value);
     success.value = true;
-  } catch {
-    error.value = t("auth.resetPassword.errorRequest");
+  } catch (e) {
+    error.value = extractApiError(e, t("auth.resetPassword.errorRequest"));
   } finally {
     loading.value = false;
   }
@@ -47,8 +48,8 @@ async function setNewPassword() {
   try {
     await authStore.resetPassword(token.value!, password.value);
     success.value = true;
-  } catch {
-    error.value = t("auth.resetPassword.errorExpired");
+  } catch (e) {
+    error.value = extractApiError(e, t("auth.resetPassword.errorExpired"));
   } finally {
     loading.value = false;
   }
@@ -58,7 +59,7 @@ async function setNewPassword() {
 <template>
   <div class="auth-page">
     <div class="auth-card">
-      <div class="auth-logo">Eternelle</div>
+      <RouterLink to="/" class="auth-logo">Eternelle</RouterLink>
 
       <!-- Request mode -->
       <template v-if="!isResetMode">
@@ -172,6 +173,8 @@ async function setNewPassword() {
   box-shadow: 0 4px 32px rgba(0, 0, 0, 0.08);
 }
 .auth-logo {
+  text-decoration: none;
+  cursor: pointer;
   font-size: 2rem;
   font-weight: 800;
   color: var(--color-gold);

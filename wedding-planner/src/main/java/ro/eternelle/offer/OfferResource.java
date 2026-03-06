@@ -1,4 +1,4 @@
-﻿package ro.eternelle.offer;
+package ro.eternelle.offer;
 
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;

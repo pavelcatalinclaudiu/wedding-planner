@@ -1,4 +1,4 @@
-﻿package ro.eternelle.conversation;
+package ro.eternelle.conversation;
 
 public enum ConversationMessageType {
     TEXT,

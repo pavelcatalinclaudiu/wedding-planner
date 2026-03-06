@@ -28,4 +28,24 @@ apiClient.interceptors.response.use(
   },
 );
 
+/** Extract a human-readable error message from an Axios error.
+ *  Handles Quarkus constraint-violation responses ({ violations: [{ message }] })
+ *  as well as plain { message } bodies and generic network errors. */
+export function extractApiError(e: unknown, fallback: string): string {
+  const data = (e as { response?: { data?: Record<string, unknown> } })
+    ?.response?.data;
+  if (!data) return fallback;
+  // Quarkus Bean Validation: { violations: [{ field, message }] }
+  if (Array.isArray(data.violations) && data.violations.length > 0) {
+    return (data.violations as { message: string }[])
+      .map((v) => v.message)
+      .join(" · ");
+  }
+  // Plain error body: { message } or { error } or { title }
+  if (typeof data.message === "string" && data.message) return data.message;
+  if (typeof data.error === "string" && data.error) return data.error;
+  if (typeof data.title === "string" && data.title) return data.title;
+  return fallback;
+}
+
 export default apiClient;

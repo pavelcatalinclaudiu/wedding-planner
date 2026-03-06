@@ -1,4 +1,4 @@
-﻿package ro.eternelle.videocall;
+package ro.eternelle.videocall;
 
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;

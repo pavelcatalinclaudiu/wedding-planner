@@ -1,4 +1,4 @@
-﻿package ro.eternelle.review;
+package ro.eternelle.review;
 
 import java.time.Instant;
 import java.util.UUID;

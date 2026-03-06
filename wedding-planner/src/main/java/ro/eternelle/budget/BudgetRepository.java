@@ -1,4 +1,4 @@
-﻿package ro.eternelle.budget;
+package ro.eternelle.budget;
 
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;

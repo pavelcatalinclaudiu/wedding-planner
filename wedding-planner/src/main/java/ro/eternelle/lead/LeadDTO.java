@@ -1,4 +1,4 @@
-﻿package ro.eternelle.lead;
+package ro.eternelle.lead;
 
 import java.math.BigDecimal;
 import java.time.Instant;

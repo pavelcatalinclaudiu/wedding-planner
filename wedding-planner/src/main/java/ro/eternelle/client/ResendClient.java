@@ -1,4 +1,4 @@
-﻿package ro.eternelle.client;
+package ro.eternelle.client;
 
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;

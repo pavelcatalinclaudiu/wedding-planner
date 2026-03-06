@@ -1,4 +1,4 @@
-﻿package ro.eternelle.scheduler;
+package ro.eternelle.scheduler;
 
 import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;

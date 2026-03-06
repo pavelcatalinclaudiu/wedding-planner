@@ -1,4 +1,4 @@
-﻿package ro.eternelle.dto.auth;
+package ro.eternelle.dto.auth;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

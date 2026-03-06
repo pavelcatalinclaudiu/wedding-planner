@@ -1,4 +1,4 @@
-﻿package ro.eternelle.subscription;
+package ro.eternelle.subscription;
 
 import com.stripe.Stripe;
 import com.stripe.model.checkout.Session;

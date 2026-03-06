@@ -1,4 +1,4 @@
-﻿package ro.eternelle.review;
+package ro.eternelle.review;
 
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;

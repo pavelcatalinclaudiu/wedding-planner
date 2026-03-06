@@ -1,4 +1,4 @@
-﻿package ro.eternelle.videocall;
+package ro.eternelle.videocall;
 
 public enum PostCallAction {
     SEND_QUOTE,

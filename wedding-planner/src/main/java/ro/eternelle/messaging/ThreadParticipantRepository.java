@@ -1,4 +1,4 @@
-﻿package ro.eternelle.messaging;
+package ro.eternelle.messaging;
 
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;

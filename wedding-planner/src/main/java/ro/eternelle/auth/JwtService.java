@@ -1,4 +1,4 @@
-﻿package ro.eternelle.auth;
+package ro.eternelle.auth;
 
 import io.smallrye.jwt.build.Jwt;
 import jakarta.enterprise.context.ApplicationScoped;

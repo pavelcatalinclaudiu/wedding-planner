@@ -1,4 +1,4 @@
-﻿package ro.eternelle.storage;
+package ro.eternelle.storage;
 
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;

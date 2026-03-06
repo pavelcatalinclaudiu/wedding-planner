@@ -1,4 +1,4 @@
-﻿package ro.eternelle.websocket;
+package ro.eternelle.websocket;
 
 import jakarta.inject.Inject;
 import jakarta.websocket.*;

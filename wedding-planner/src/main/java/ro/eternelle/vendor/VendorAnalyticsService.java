@@ -1,4 +1,4 @@
-﻿package ro.eternelle.vendor;
+package ro.eternelle.vendor;
 
 import io.quarkus.cache.CacheInvalidate;
 import io.quarkus.cache.CacheKey;

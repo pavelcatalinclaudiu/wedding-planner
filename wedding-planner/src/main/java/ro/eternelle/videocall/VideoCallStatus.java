@@ -1,4 +1,4 @@
-﻿package ro.eternelle.videocall;
+package ro.eternelle.videocall;
 
 public enum VideoCallStatus {
     /** Proposed by one party, waiting for the other to accept/reschedule/decline. */

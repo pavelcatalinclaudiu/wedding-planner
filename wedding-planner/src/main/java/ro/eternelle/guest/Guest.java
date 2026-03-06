@@ -1,4 +1,4 @@
-﻿package ro.eternelle.guest;
+package ro.eternelle.guest;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;

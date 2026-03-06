@@ -1,4 +1,4 @@
-﻿package ro.eternelle.document;
+package ro.eternelle.document;
 
 import java.time.Instant;
 

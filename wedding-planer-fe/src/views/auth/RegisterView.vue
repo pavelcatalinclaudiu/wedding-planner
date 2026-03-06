@@ -16,7 +16,7 @@ const intentQuery = computed(() =>
 <template>
   <div class="auth-page">
     <div class="auth-card register-choice">
-      <div class="auth-logo">Eternelle</div>
+      <RouterLink to="/" class="auth-logo">Eternelle</RouterLink>
       <h1 class="auth-title">{{ t("auth.register.title") }}</h1>
       <p class="auth-subtitle">{{ t("auth.register.subtitle") }}</p>
 
@@ -62,6 +62,8 @@ const intentQuery = computed(() =>
   text-align: center;
 }
 .auth-logo {
+  text-decoration: none;
+  cursor: pointer;
   font-size: 2rem;
   font-weight: 800;
   color: var(--color-gold);

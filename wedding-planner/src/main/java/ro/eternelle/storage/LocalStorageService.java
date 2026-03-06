@@ -1,4 +1,4 @@
-﻿package ro.eternelle.storage;
+package ro.eternelle.storage;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.config.inject.ConfigProperty;

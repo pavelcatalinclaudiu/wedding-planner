@@ -1,4 +1,4 @@
-﻿package ro.eternelle.vendor.dto;
+package ro.eternelle.vendor.dto;
 
 import java.util.List;
 

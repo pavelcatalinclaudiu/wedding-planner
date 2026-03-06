@@ -1,4 +1,4 @@
-﻿package ro.eternelle.notification;
+package ro.eternelle.notification;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

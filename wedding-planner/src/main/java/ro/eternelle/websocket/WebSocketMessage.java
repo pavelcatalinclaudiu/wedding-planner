@@ -1,4 +1,4 @@
-﻿package ro.eternelle.websocket;
+package ro.eternelle.websocket;
 
 public class WebSocketMessage {
 

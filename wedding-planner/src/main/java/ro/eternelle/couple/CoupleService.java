@@ -1,4 +1,4 @@
-﻿package ro.eternelle.couple;
+package ro.eternelle.couple;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

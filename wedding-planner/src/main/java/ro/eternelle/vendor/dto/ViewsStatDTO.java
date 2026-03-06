@@ -1,4 +1,4 @@
-﻿package ro.eternelle.vendor.dto;
+package ro.eternelle.vendor.dto;
 
 public record ViewsStatDTO(
         long total,

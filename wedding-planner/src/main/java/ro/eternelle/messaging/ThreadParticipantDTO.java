@@ -1,4 +1,4 @@
-﻿package ro.eternelle.messaging;
+package ro.eternelle.messaging;
 
 public class ThreadParticipantDTO {
 

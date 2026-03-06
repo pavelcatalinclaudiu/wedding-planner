@@ -1,4 +1,4 @@
-﻿package ro.eternelle.checklist;
+package ro.eternelle.checklist;
 
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;

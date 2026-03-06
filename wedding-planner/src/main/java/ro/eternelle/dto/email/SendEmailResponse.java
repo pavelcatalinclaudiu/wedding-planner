@@ -1,4 +1,4 @@
-﻿package ro.eternelle.dto.email;
+package ro.eternelle.dto.email;
 
 public class SendEmailResponse {
 

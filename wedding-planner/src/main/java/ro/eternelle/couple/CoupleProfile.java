@@ -1,4 +1,4 @@
-﻿package ro.eternelle.couple;
+package ro.eternelle.couple;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
