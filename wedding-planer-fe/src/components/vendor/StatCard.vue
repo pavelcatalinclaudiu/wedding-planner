@@ -65,7 +65,9 @@ const primaryClass = computed(() => {
         <span v-else-if="trendDown" class="trend-down">
           ↓ {{ formatTrend(trend) }} {{ trendLabel }}
         </span>
-        <span v-else-if="trendFlat" class="trend-flat">{{ t("vendor.stats.noChange") }}</span>
+        <span v-else-if="trendFlat" class="trend-flat">{{
+          t("vendor.stats.noChange")
+        }}</span>
       </div>
       <p class="card-sub" v-if="sub">{{ sub }}</p>
     </template>

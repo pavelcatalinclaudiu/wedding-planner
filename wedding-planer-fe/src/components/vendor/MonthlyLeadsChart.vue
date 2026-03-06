@@ -6,7 +6,7 @@ import type { MonthlyLeadDTO } from "@/types/vendor.types";
 const props = defineProps<{
   data: MonthlyLeadDTO[];
   loading?: boolean;
-}>(); 
+}>();
 
 const { t } = useI18n();
 

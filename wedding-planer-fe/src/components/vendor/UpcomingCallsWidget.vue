@@ -47,7 +47,9 @@ function isImminent(iso: string): boolean {
   <div class="widget">
     <div class="widget-header">
       <h3>{{ t("vendor.overview.upcomingCalls") }}</h3>
-      <RouterLink to="/vendor/calls" class="view-all">{{ t("vendor.overview.viewAll") }}</RouterLink>
+      <RouterLink to="/vendor/calls" class="view-all">{{
+        t("vendor.overview.viewAll")
+      }}</RouterLink>
     </div>
 
     <template v-if="loading">

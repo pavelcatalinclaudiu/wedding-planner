@@ -47,7 +47,9 @@ const statusColour: Record<string, string> = {
   <div class="widget">
     <div class="widget-header">
       <h3>{{ t("vendor.overview.recentLeads") }}</h3>
-      <RouterLink to="/vendor/leads" class="view-all">{{ t("vendor.overview.viewAll") }}</RouterLink>
+      <RouterLink to="/vendor/leads" class="view-all">{{
+        t("vendor.overview.viewAll")
+      }}</RouterLink>
     </div>
 
     <template v-if="loading">
@@ -84,7 +86,9 @@ const statusColour: Record<string, string> = {
           <span
             class="status-pill"
             :style="{ background: statusColour[lead.status] ?? '#999' }"
-            >{{ t("leads.statuses." + lead.status, lead.status.replace(/_/g, " ")) }}</span
+            >{{
+              t("leads.statuses." + lead.status, lead.status.replace(/_/g, " "))
+            }}</span
           >
         </div>
       </button>

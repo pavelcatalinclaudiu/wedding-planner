@@ -7,6 +7,8 @@ const props = defineProps<{
   loading?: boolean;
 }>();
 
+const { t } = useI18n();
+
 function rankColour(rank: number): string {
   if (rank <= 3) return "#c8a951";
   if (rank <= 10) return "#2e7d32";
@@ -15,8 +17,12 @@ function rankColour(rank: number): string {
 
 function responseLabel(hours: number): { text: string; colour: string } {
   if (hours < 0)
-    return { text: t("vendor.overview.noData"), colour: "var(--color-muted, #8a7f76)" };
-  if (hours < 2) return { text: t("vendor.overview.excellent"), colour: "#2e7d32" };
+    return {
+      text: t("vendor.overview.noData"),
+      colour: "var(--color-muted, #8a7f76)",
+    };
+  if (hours < 2)
+    return { text: t("vendor.overview.excellent"), colour: "#2e7d32" };
   if (hours < 12) return { text: t("vendor.overview.good"), colour: "#e65100" };
   return { text: t("vendor.overview.slow"), colour: "#c62828" };
 }
@@ -63,7 +69,9 @@ function conversionColour(rate: number, avg: number): string {
 
       <!-- Avg Response Time -->
       <div class="perf-row">
-        <span class="perf-label">{{ t("vendor.overview.avgResponseTime") }}</span>
+        <span class="perf-label">{{
+          t("vendor.overview.avgResponseTime")
+        }}</span>
         <div class="perf-val-group">
           <span class="perf-val">{{
             formatHours(data.avgResponseTimeHours)
@@ -80,7 +88,9 @@ function conversionColour(rate: number, avg: number): string {
 
       <!-- Conversion Rate -->
       <div class="perf-row">
-        <span class="perf-label">{{ t("vendor.overview.conversionRate") }}</span>
+        <span class="perf-label">{{
+          t("vendor.overview.conversionRate")
+        }}</span>
         <div class="perf-val-group">
           <span
             class="perf-val"
@@ -94,7 +104,8 @@ function conversionColour(rate: number, avg: number): string {
             {{ data.conversionRate }}%
           </span>
           <span class="perf-sub"
-            >{{ t("vendor.overview.platformAvg") }} {{ data.platformAvgConversion }}%</span
+            >{{ t("vendor.overview.platformAvg") }}
+            {{ data.platformAvgConversion }}%</span
           >
         </div>
       </div>
