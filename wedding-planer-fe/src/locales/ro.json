@@ -97,6 +97,7 @@
         "groupChat": "Chat de grup",
         "weddingWebsite": "Site-ul nunții",
         "documentVault": "Documente",
+        "seatingChart": "Plan de mese",
         "myProfile": "Profilul meu"
       }
     },
@@ -200,7 +201,10 @@
       "signIn": "Autentifică-te",
       "errorFillFields": "Completează toate câmpurile.",
       "errorPasswordMismatch": "Parolele nu se potrivesc.",
-      "errorFailed": "Înregistrarea a eșuat."
+      "errorFailed": "Înregistrarea a eșuat.",
+      "knowsDateQuestion": "Știți deja data și locația nunții?",
+      "knowsDateYes": "Da, știu data",
+      "knowsDateNo": "Nu am decis încă"
     },
     "registerVendor": {
       "title": "Creează profilul de furnizor",
@@ -411,6 +415,7 @@
     "welcomeBack": "Bine ai revenit",
     "perfectDay": "Ziua perfectă",
     "daysToGo": "zile rămase",
+    "setWeddingDate": "Adaugă data și locația nunții →",
     "widgets": {
       "tasksComplete": "Sarcini finalizate",
       "dueSoon": "scadente curând",
@@ -510,6 +515,11 @@
     "overBudget": "depășit bugetul",
     "leftToSpend": "rămase de cheltuit",
     "pctSpent": "{pct}% cheltuit",
+    "alertOverBudget": "Ai depășit bugetul cu {amount}.",
+    "alertUnallocated": "{amount} din bugetul total nu a fost alocat unei categorii.",
+    "alertCategoryOver": "{category} depășește bugetul categoriei cu {amount}.",
+    "alertUnpaidOne": "1 articol are costuri reale înregistrate dar nu a fost marcat ca plătit.",
+    "alertUnpaidMany": "{count} articole au costuri reale înregistrate dar nu au fost marcate ca plătite.",
     "categoryBreakdown": "Defalcare pe categorii",
     "spendingBreakdown": "Structura cheltuielilor",
     "actual": "real",
@@ -519,6 +529,9 @@
     "notes": "Note",
     "optionalNotes": "Note opționale…",
     "markAsPaid": "Marchează ca plătit",
+    "markAsUnpaid": "Marchează ca neplătit",
+    "customCategory": "Introdu categorie personalizată…",
+    "custom": "Personalizat",
     "saveChanges": "Salvează modificările",
     "nameRequired": "Numele este obligatoriu.",
     "categoryRequired": "Categoria este obligatorie.",
@@ -657,7 +670,12 @@
     "pendingTasks": "Sarcini în așteptare",
     "noBookings": "Nicio rezervare confirmată.",
     "noBookingsSub": "Acceptă oferta unui furnizor pentru a confirma o dată.",
-    "noCallsSub": "Programează un apel dintr-o conversație de solicitare."
+    "noCallsSub": "Programează un apel dintr-o conversație de solicitare.",
+    "reschedulePending": "În așteptarea aprobării tale",
+    "rescheduleProposal": "Furnizorul tău a propus o nouă dată: {date}",
+    "bookingCancelled": "Anulat de furnizor",
+    "acceptProposal": "Acceptă Data Nouă",
+    "declineProposal": "Refuză"
   },
 
   "vendors": {
@@ -721,6 +739,7 @@
 
   "leads": {
     "title": "Solicitările mele",
+    "requestOfferMessage": "Ați putea să îmi trimiteți o ofertă?",
     "vendor": {
       "title": "Mesaje primite",
       "newLead": "Solicitare nouă",
@@ -735,6 +754,7 @@
       "RESPONDED": "Răspuns",
       "BOOKED": "Rezervat",
       "DECLINED": "Refuzat",
+      "CANCELLED": "Anulat",
       "CLOSED": "Închis",
       "IN_DISCUSSION": "În Discuţie",
       "OFFER_SENT": "Ofertă Trimisă",
@@ -1037,8 +1057,7 @@
     },
     "calendar": {
       "title": "Calendar de disponibilitate",
-      "subtitle": "Apasă pe o dată pentru a o bloca sau debloca pentru rezervări.",
-      "blockedDates": "Date Blocate",
+      "subtitle": "Gestionează rezervările și apelurile video viitoare.",
       "upcomingCalls": "Apeluri Viitoare",
       "upcomingBookings": "Rezervări Viitoare",
       "tabCalls": "Apeluri",
@@ -1051,14 +1070,27 @@
       "confirmed": "Confirmat",
       "legendBooked": "Rezervat",
       "legendCall": "Apel Video",
-      "legendBlocked": "Blocat",
-      "toggleHint": "👆 Apasă pe orice dată pentru a schimba disponibilitatea",
       "statusNew": "Cerere Nouă",
       "statusViewed": "Vizualizat",
       "statusChat": "Conversație",
       "statusQuoted": "Ofertă Trimisă",
       "statusBooked": "Rezervat",
-      "statusDeclined": "Respins"
+      "statusDeclined": "Respins",
+      "reschedulePending": "\u00cen a\u015fteptarea aprobării cuplului",
+      "reschedule": "Propune Reprogramare",
+      "cancelBooking": "Anulează Rezervarea",
+      "cancelTitle": "Anulează Rezervarea",
+      "cancelBody": "Ești sigur că vrei să anulezi rezervarea cu {name}?",
+      "cancelWarning": "Cuplul va fi notificat imediat, iar bugetul lor va fi actualizat.",
+      "keepBooking": "Păstrează Rezervarea",
+      "cancelBookingConfirm": "Da, Anulează Rezervarea",
+      "cancelAction": "Anulează",
+      "rescheduleTitle": "Propune Dată Nouă",
+      "rescheduleBody": "Sugerează o nouă dată de nuntă pentru {name}. Aceștia vor fi invitați să accepte sau să refuze.",
+      "newDate": "Dată Nouă",
+      "noteOptional": "Notă (opțional)",
+      "notePlaceholder": "Spune-le cuplului de ce propui o dată nouă\u2026",
+      "sendProposal": "Trimite Propunerea"
     }
   },
 
@@ -1080,6 +1112,11 @@
       "saveChanges": "Salvează modificările",
       "savedMsg": "✓ Salvat!",
       "saveError": "Nu s-a putut salva profilul.",
+      "photoSection": "Fotografie de profil",
+      "uploadPicture": "Încarcă fotografie",
+      "changePicture": "Schimbă fotografia",
+      "removePicture": "Elimină",
+      "pictureError": "Actualizarea fotografiei a eșuat.",
       "locationPlaceholder": "Oraș, Locație"
     }
   },
@@ -1117,6 +1154,7 @@
     "replyFrom": "Răspuns de la {name}:",
     "priceOnRequest": "Preț la cerere",
     "existingEnquiry": "✓ Ai deja o solicitare activă la acest vendor.",
+    "contactAgain": "✶ Trimite o nouă solicitare",
     "viewEnquiries": "Vezi Solicitările",
     "sendEnquiryBtn": "✦ Trimite Solicitare",
     "noObligation": "Fără obligații.",

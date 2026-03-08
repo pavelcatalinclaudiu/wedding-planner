@@ -7,6 +7,7 @@ import { useDebounce } from "@/composables/useDebounce";
 import VendorCard from "@/components/vendor/VendorCard.vue";
 import PublicNavbar from "@/components/public/PublicNavbar.vue";
 import type { VendorProfile } from "@/types/vendor.types";
+import { Search, Calendar, X } from "lucide-vue-next";
 
 const route = useRoute();
 const router = useRouter();
@@ -78,7 +79,7 @@ const activeChips = computed(() => {
   if (featuredOnly.value)
     chips.push({ key: "featured", label: t("vendors.filterFeatured") });
   if (weddingDate.value)
-    chips.push({ key: "date", label: `📅 ${weddingDate.value}` });
+    chips.push({ key: "date", label: `${weddingDate.value}` });
   return chips;
 });
 
@@ -188,7 +189,7 @@ onMounted(fetchVendors);
           }}
         </p>
         <div class="lh-search">
-          <span class="lh-icon">🔍</span>
+          <span class="lh-icon"><Search :size="24" /></span>
           <input
             v-model="search"
             class="lh-input"
@@ -338,7 +339,7 @@ onMounted(fetchVendors);
             class="chip"
             @click="removeChip(chip.key)"
           >
-            {{ chip.label }} ✕
+            {{ chip.label }} <X :size="12" />
           </button>
         </div>
 
@@ -349,7 +350,7 @@ onMounted(fetchVendors);
 
         <!-- Empty -->
         <div v-else-if="vendors.length === 0" class="pane-empty">
-          <p class="empty-icon">🔍</p>
+          <p class="empty-icon"><Search :size="32" /></p>
           <p>{{ t("vendors.noVendorsMatch") }}</p>
           <button
             class="clear-btn"

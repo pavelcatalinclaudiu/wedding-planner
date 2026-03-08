@@ -7,6 +7,7 @@ import { leadsApi } from "@/api/leads.api";
 import { vendorApi } from "@/api/vendor.api";
 import type { VendorProfile } from "@/types/vendor.types";
 import AvailabilityCalendar from "@/components/vendor/AvailabilityCalendar.vue";
+import { Gem, X, Users, Sparkles } from "lucide-vue-next";
 
 const props = defineProps<{
   vendor: VendorProfile;
@@ -155,14 +156,16 @@ async function submit() {
             </p>
           </div>
         </div>
-        <button class="close-btn" @click="emit('close')">✕</button>
+        <button class="close-btn" @click="emit('close')">
+          <X :size="18" />
+        </button>
       </div>
 
       <div class="modal-body">
         <!-- Couple info preview -->
         <div v-if="coupleProfile" class="couple-preview">
           <div class="couple-preview-row">
-            <span class="preview-icon">💍</span>
+            <span class="preview-icon"><Gem :size="28" /></span>
             <span v-if="coupleProfile.weddingDate">
               {{
                 new Date(coupleProfile.weddingDate).toLocaleDateString(
@@ -180,7 +183,7 @@ async function submit() {
             v-if="coupleProfile.estimatedGuestCount"
             class="couple-preview-row"
           >
-            <span class="preview-icon">👥</span>
+            <Users :size="14" />
             <span>{{ coupleProfile.estimatedGuestCount }} guests</span>
           </div>
           <p class="preview-note">
@@ -280,7 +283,7 @@ async function submit() {
           @click="submit"
         >
           <span v-if="submitting">Sending…</span>
-          <span v-else>✦ Send Enquiry</span>
+          <span v-else><Sparkles :size="14" /> Send Enquiry</span>
         </button>
 
         <p class="submit-note">

@@ -39,6 +39,9 @@ public class VendorResource {
     AvailabilityRepository availabilityRepository;
 
     @Inject
+    ro.eternelle.booking.BookingRepository bookingRepository;
+
+    @Inject
     ProfileViewService profileViewService;
 
     @Inject
@@ -129,8 +132,22 @@ public class VendorResource {
     @Path("/{id}/availability")
     @PermitAll
     public Response getVendorAvailability(@PathParam("id") UUID id) {
+        // Manual blocks
         List<AvailabilityDTO> list = availabilityRepository.findByVendor(id)
                 .stream().map(AvailabilityDTO::from).collect(Collectors.toList());
+        // Confirmed booking dates — also block these on the enquiry calendar
+        java.util.Set<String> existingDates = list.stream()
+                .map(d -> d.date).collect(java.util.stream.Collectors.toSet());
+        bookingRepository.findConfirmedWeddingDatesByVendor(id).forEach(date -> {
+            String dateStr = date.toString();
+            if (!existingDates.contains(dateStr)) {
+                AvailabilityDTO dto = new AvailabilityDTO();
+                dto.vendorId = id;
+                dto.date = dateStr;
+                dto.reason = "BOOKING";
+                list.add(dto);
+            }
+        });
         return Response.ok(list).build();
     }
 

@@ -1,6 +1,7 @@
 import { ref, onUnmounted } from "vue";
 import { offersApi } from "@/api/offers.api";
 import { useLeadsStore } from "@/stores/leads.store";
+import { useBudgetStore } from "@/stores/budget.store";
 import { useWebSocket } from "@/composables/useWebSocket";
 import type { Offer, CreateOfferPayload } from "@/types/offer.types";
 
@@ -75,6 +76,10 @@ export function useOffer(callbacks?: { onLeadUpdated?: () => void }) {
     try {
       await useLeadsStore().fetchCoupleLeads();
     } catch (_) {}
+    // Refresh budget store so the new line item appears in the budget tracker
+    try {
+      await useBudgetStore().fetchBudget();
+    } catch (_) {}
     callbacks?.onLeadUpdated?.();
     return updated;
   }
@@ -93,6 +98,15 @@ export function useOffer(callbacks?: { onLeadUpdated?: () => void }) {
     return updated;
   }
 
+  async function markViewed(offerId: string) {
+    try {
+      const updated = (await offersApi.markViewed(offerId)).data;
+      _patch(updated);
+    } catch (_) {
+      // Fire-and-forget — don't surface errors to user
+    }
+  }
+
   function _patch(updated: Offer) {
     const idx = offers.value.findIndex((o) => o.id === updated.id);
     if (idx !== -1) offers.value[idx] = updated;
@@ -107,5 +121,6 @@ export function useOffer(callbacks?: { onLeadUpdated?: () => void }) {
     accept,
     decline,
     requestRevision,
+    markViewed,
   };
 }

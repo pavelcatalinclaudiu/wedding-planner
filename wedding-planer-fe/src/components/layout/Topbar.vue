@@ -2,15 +2,13 @@
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useAuthStore } from "@/stores/auth.store";
-import { useCoupleStore } from "@/stores/couple.store";
 import { useVendorStore } from "@/stores/vendor.store";
-import { useCountdown } from "@/composables/useCountdown";
 import { useTheme } from "@/composables/useTheme";
 import { useSidebar } from "@/composables/useSidebar";
 import NotificationBell from "@/components/notifications/NotificationBell.vue";
 import DashboardSearchBar from "@/components/couple/DashboardSearchBar.vue";
 import { vendorApi } from "@/api/vendor.api";
-import { toRef } from "vue";
+import { Sun, Moon } from "lucide-vue-next";
 
 const { t } = useI18n();
 defineProps<{ title: string }>();
@@ -19,7 +17,6 @@ const { isDark, toggleDark } = useTheme();
 const { toggle: toggleSidebar } = useSidebar();
 
 const authStore = useAuthStore();
-const coupleStore = useCoupleStore();
 const vendorStore = useVendorStore();
 const isCouple = computed(() => authStore.user?.role === "COUPLE");
 const isVendor = computed(() => authStore.user?.role === "VENDOR");
@@ -31,9 +28,6 @@ async function toggleVisibility() {
     vendorStore.profile.active = res.data.active;
   }
 }
-
-const weddingDateRef = toRef(() => coupleStore.profile?.weddingDate);
-const { days } = useCountdown(weddingDateRef);
 </script>
 
 <template>
@@ -51,10 +45,6 @@ const { days } = useCountdown(weddingDateRef);
     <DashboardSearchBar v-if="isCouple" class="topbar-search" />
 
     <div class="topbar-right">
-      <div v-if="isCouple && days > 0" class="countdown-chip">
-        <span class="countdown-icon">♡</span>
-        {{ t("topbar.daysToGo", { days }) }}
-      </div>
       <div v-if="isVendor" class="chip-wrap">
         <div
           class="profile-live-chip"
@@ -82,7 +72,8 @@ const { days } = useCountdown(weddingDateRef);
         :title="isDark ? t('topbar.switchToLight') : t('topbar.switchToDark')"
         @click="toggleDark"
       >
-        {{ isDark ? "☀" : "☽" }}
+        <Sun v-if="isDark" :size="18" />
+        <Moon v-else :size="18" />
       </button>
       <NotificationBell />
     </div>
@@ -93,7 +84,7 @@ const { days } = useCountdown(weddingDateRef);
 .topbar {
   position: sticky;
   top: 0;
-  height: 60px;
+  height: 81px;
   background: var(--color-white);
   border-bottom: 1px solid var(--color-border);
   display: flex;
@@ -144,21 +135,6 @@ const { days } = useCountdown(weddingDateRef);
   display: flex;
   align-items: center;
   gap: 14px;
-}
-.countdown-chip {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  background: var(--color-gold-light, #fdf8ee);
-  color: var(--color-gold);
-  border: 1px solid var(--color-gold);
-  border-radius: 20px;
-  padding: 4px 14px;
-  font-size: 0.82rem;
-  font-weight: 600;
-}
-.countdown-icon {
-  font-size: 1rem;
 }
 .chip-wrap {
   position: relative;

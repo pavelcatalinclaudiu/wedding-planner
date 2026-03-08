@@ -5,6 +5,7 @@ export interface Review {
   bookingId: string;
   coupleId: string;
   coupleName: string;
+  coupleProfilePicture?: string;
   vendorId: string;
   rating: number;
   comment?: string;

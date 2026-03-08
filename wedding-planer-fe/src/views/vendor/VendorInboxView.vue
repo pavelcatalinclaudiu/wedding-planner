@@ -13,6 +13,8 @@ import OfferCard from "@/components/lead/OfferCard.vue";
 import CallBanner from "@/components/video/CallBanner.vue";
 import ScheduleCallModal from "@/components/video/ScheduleCallModal.vue";
 import type { Lead } from "@/types/lead.types";
+import { MessageSquare, ClipboardList, Lock } from "lucide-vue-next";
+import { Calendar } from "lucide-vue-next";
 
 const { t } = useI18n();
 const { leads, loading, fetchVendorLeads, accept, decline } = useLeads();
@@ -57,10 +59,7 @@ const sendBlockReason = computed(() => {
 });
 
 function formatOfferPrice(price: number) {
-  return new Intl.NumberFormat("en-GB", {
-    style: "currency",
-    currency: "GBP",
-  }).format(price);
+  return "\u20AC" + Math.round(price).toLocaleString();
 }
 
 const filtered = computed(() => {
@@ -111,6 +110,9 @@ async function openLead(lead: Lead) {
   if (["IN_DISCUSSION", "QUOTED", "BOOKED"].includes(lead.status)) {
     tasks.push(loadForLead(lead.id), loadOffers(lead.id));
     tasks.push(videoStore.fetchActiveForLead(lead.id));
+  } else if (["CANCELLED", "DECLINED"].includes(lead.status)) {
+    // Load chat history and offers (read-only) for terminal leads
+    tasks.push(loadForLead(lead.id), loadOffers(lead.id));
   }
   await Promise.all(tasks);
 }
@@ -203,12 +205,25 @@ async function submitOffer() {
 
       <template v-else>
         <div class="detail-header">
-          <div>
-            <h3>{{ selectedLead.coupleName }}</h3>
-            <small
-              >{{ selectedLead.vendorCategory }} ·
-              {{ selectedLead.eventDate }}</small
-            >
+          <div class="detail-title">
+            <div class="dh-avatar">
+              <img
+                v-if="selectedLead.coupleProfilePicture"
+                :src="selectedLead.coupleProfilePicture"
+                class="dh-avatar-img"
+                alt=""
+              />
+              <template v-else>{{
+                (selectedLead.coupleName?.[0] ?? "?").toUpperCase()
+              }}</template>
+            </div>
+            <div>
+              <h3>{{ selectedLead.coupleName }}</h3>
+              <small
+                >{{ selectedLead.vendorCategory }} ·
+                {{ selectedLead.eventDate }}</small
+              >
+            </div>
           </div>
           <div
             v-if="
@@ -227,7 +242,7 @@ async function submitOffer() {
               class="btn-video"
               @click="openScheduleModal"
             >
-              📅 {{ t("leads.scheduleCall") }}
+              <Calendar :size="15" /> {{ t("leads.scheduleCall") }}
             </button>
             <CallBanner
               v-else
@@ -245,17 +260,17 @@ async function submitOffer() {
             :class="{ active: activeTab === 'chat' }"
             @click="activeTab = 'chat'"
           >
-            💬 {{ t("leads.chatTab") }}
+            <MessageSquare :size="14" /> {{ t("leads.chatTab") }}
           </button>
           <button
             class="tab-btn"
             :class="{ active: activeTab === 'offers' }"
             @click="activeTab = 'offers'"
           >
-            📋 {{ t("leads.offersTab") }}
-            <span v-if="offers.length" class="tab-badge">{{
-              offers.length
-            }}</span>
+            <ClipboardList :size="14" /> {{ t("leads.offersTab") }}
+            <span v-if="latestOffer?.status === 'REVISED'" class="tab-badge"
+              >!</span
+            >
           </button>
         </div>
 
@@ -331,7 +346,7 @@ async function submitOffer() {
 
             <!-- Blocked reason -->
             <div v-if="sendBlockReason" class="send-blocked">
-              🔒 {{ sendBlockReason }}
+              <Lock :size="14" /> {{ sendBlockReason }}
             </div>
 
             <!-- Inline offer form -->
@@ -477,6 +492,39 @@ async function submitOffer() {
   flex-shrink: 0;
   gap: 12px;
   flex-wrap: wrap;
+}
+.detail-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.dh-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-gold);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  position: relative;
+  transition:
+    transform 0.18s,
+    box-shadow 0.18s;
+}
+.dh-avatar:hover {
+  transform: scale(3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+}
+.dh-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .detail-header h3 {
   margin: 0 0 4px;

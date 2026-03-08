@@ -14,6 +14,26 @@ import { useChecklistStore } from "@/stores/checklist.store";
 import { useBudgetStore } from "@/stores/budget.store";
 import { useGuestsStore } from "@/stores/guests.store";
 import { useMessagesStore } from "@/stores/messages.store";
+import type { Component } from "vue";
+import {
+  Camera,
+  Landmark,
+  Utensils,
+  Flower2,
+  Music,
+  Video,
+  Cake,
+  Car,
+  Scissors,
+  Lightbulb,
+  Mail,
+  Gem,
+  Tag,
+  MapPin,
+  MessageCircle,
+} from "lucide-vue-next";
+
+import { useCategoryLabel } from "@/utils/vendorCategories";
 
 const { t, locale } = useI18n();
 
@@ -23,6 +43,8 @@ const checklistStore = useChecklistStore();
 const budgetStore = useBudgetStore();
 const guestsStore = useGuestsStore();
 const messagesStore = useMessagesStore();
+
+const { categoryLabel } = useCategoryLabel();
 
 onMounted(async () => {
   await Promise.all([
@@ -43,18 +65,35 @@ const weddingLocation = computed(
 );
 const weddingDate = computed(() => coupleStore.profile?.weddingDate ?? null);
 
+// Use profile date if set; otherwise fall back to the first booked lead's eventDate
+const effectiveWeddingDate = computed(() => {
+  if (weddingDate.value) return weddingDate.value;
+  const bookedLead = leadsStore.leads.find((l) => l.status === "BOOKED");
+  return bookedLead?.eventDate ?? null;
+});
+
+// Use profile location if set; otherwise fall back to the booked vendor's city
+const effectiveWeddingLocation = computed(() => {
+  if (weddingLocation.value) return weddingLocation.value;
+  const bookedLead = leadsStore.leads.find((l) => l.status === "BOOKED");
+  return bookedLead?.vendorCity ?? "";
+});
+
+// Show wedding details in the hero banner when we have a date (from profile or booking)
+const showWeddingDetails = computed(() => !!effectiveWeddingDate.value);
+
 const daysToGo = computed(() => {
-  if (!weddingDate.value) return null;
+  if (!effectiveWeddingDate.value) return null;
   const diff = differenceInCalendarDays(
-    parseISO(weddingDate.value),
+    parseISO(effectiveWeddingDate.value),
     new Date(),
   );
   return diff > 0 ? diff : null;
 });
 
 const formattedWeddingDate = computed(() => {
-  if (!weddingDate.value) return "";
-  return new Date(weddingDate.value).toLocaleDateString(
+  if (!effectiveWeddingDate.value) return "";
+  return new Date(effectiveWeddingDate.value).toLocaleDateString(
     locale.value === "ro" ? "ro-RO" : "en-GB",
     {
       day: "numeric",
@@ -120,33 +159,36 @@ function dueDateUrgent(item: { done: boolean; dueDate?: string }): boolean {
 }
 
 // ── Wedding Team ───────────────────────────────────────────────────────────
-const categoryIcons: Record<string, string> = {
-  PHOTOGRAPHY: "📷",
-  VENUE: "🏛️",
-  CATERING: "🍽️",
-  FLORALS: "🌸",
-  MUSIC: "🎵",
-  VIDEOGRAPHY: "🎥",
-  CAKE: "🎂",
-  TRANSPORT: "🚗",
-  HAIR_MAKEUP: "💄",
-  LIGHTING: "💡",
-  STATIONERY: "✉️",
-  JEWELLERY: "💍",
+const categoryIcons: Record<string, Component> = {
+  PHOTOGRAPHY: Camera,
+  VENUE: Landmark,
+  CATERING: Utensils,
+  FLORALS: Flower2,
+  MUSIC: Music,
+  VIDEOGRAPHY: Video,
+  CAKE: Cake,
+  TRANSPORT: Car,
+  HAIR_MAKEUP: Scissors,
+  LIGHTING: Lightbulb,
+  STATIONERY: Mail,
+  JEWELLERY: Gem,
 };
 
-function categoryIcon(cat?: string): string {
-  return cat ? (categoryIcons[cat] ?? "🏷️") : "🏷️";
+function categoryIcon(cat?: string): Component {
+  return cat ? (categoryIcons[cat] ?? Tag) : Tag;
 }
 
 function statusBadgeClass(status: string): string {
   if (status === "BOOKED") return "badge-booked";
+  if (status === "CANCELLED") return "badge-cancelled";
   if (status === "IN_DISCUSSION" || status === "QUOTED") return "badge-pending";
   return "badge-contacted";
 }
 
 function statusLabel(status: string): string {
   if (status === "BOOKED") return t("common.booked");
+  if (status === "CANCELLED")
+    return locale.value === "ro" ? "Anulat" : "Cancelled";
   if (status === "IN_DISCUSSION") return t("common.pending");
   if (status === "QUOTED") return locale.value === "ro" ? "Cotat" : "Quoted";
   return locale.value === "ro" ? "Contactat" : "Contacted";
@@ -154,7 +196,7 @@ function statusLabel(status: string): string {
 
 const teamLeads = computed(() =>
   [...leadsStore.leads]
-    .filter((l) => !["DECLINED"].includes(l.status))
+    .filter((l) => !["DECLINED", "CANCELLED"].includes(l.status))
     .sort((a, b) => {
       const order: Record<string, number> = {
         BOOKED: 0,
@@ -232,18 +274,28 @@ function timeAgo(dateStr?: string): string {
           <span class="hero-subtitle">{{ t("overview.perfectDay") }}</span>
         </h1>
         <p class="hero-meta">
-          <span v-if="weddingLocation" class="hero-meta-item"
-            >📍 {{ weddingLocation }}</span
-          >
-          <span v-if="weddingLocation && formattedWeddingDate" class="hero-dot"
-            >·</span
-          >
-          <span v-if="formattedWeddingDate" class="hero-meta-item">{{
-            formattedWeddingDate
-          }}</span>
+          <template v-if="showWeddingDetails">
+            <span v-if="effectiveWeddingLocation" class="hero-meta-item"
+              ><MapPin :size="14" /> {{ effectiveWeddingLocation }}</span
+            >
+            <span
+              v-if="effectiveWeddingLocation && formattedWeddingDate"
+              class="hero-dot"
+              >·</span
+            >
+            <span v-if="formattedWeddingDate" class="hero-meta-item">{{
+              formattedWeddingDate
+            }}</span>
+          </template>
+          <RouterLink v-else to="/couple/profile" class="hero-meta-set">
+            {{ t("overview.setWeddingDate") }}
+          </RouterLink>
         </p>
       </div>
-      <div v-if="daysToGo !== null" class="hero-countdown">
+      <div
+        v-if="showWeddingDetails && daysToGo !== null"
+        class="hero-countdown"
+      >
         <span class="countdown-number">{{ daysToGo }}</span>
         <span class="countdown-label">{{ t("overview.daysToGo") }}</span>
       </div>
@@ -338,13 +390,25 @@ function timeAgo(dateStr?: string): string {
         </div>
         <ul v-else class="team-list">
           <li v-for="lead in teamLeads" :key="lead.id" class="team-item">
-            <span class="team-icon">{{
-              categoryIcon(lead.vendorCategory)
-            }}</span>
+            <div class="team-avatar">
+              <img
+                v-if="lead.vendorProfilePicture"
+                :src="lead.vendorProfilePicture"
+                class="team-avatar-img"
+                alt=""
+              />
+              <component
+                v-else
+                :is="categoryIcon(lead.vendorCategory)"
+                :size="15"
+              />
+            </div>
             <div class="team-info">
               <span class="team-name">{{ lead.vendorName ?? "Vendor" }}</span>
               <span class="team-cat">{{
-                lead.vendorCategory?.replace(/_/g, " ")
+                lead.vendorCategory
+                  ? t(`categories.${lead.vendorCategory}`)
+                  : ""
               }}</span>
             </div>
             <span class="badge" :class="statusBadgeClass(lead.status)">{{
@@ -387,7 +451,7 @@ function timeAgo(dateStr?: string): string {
             :key="cat"
             class="budget-cat-row"
           >
-            <span class="budget-cat-name">{{ cat.replace(/_/g, " ") }}</span>
+            <span class="budget-cat-name">{{ categoryLabel(cat) }}</span>
             <div class="budget-cat-bar-wrap">
               <div
                 class="budget-cat-bar"
@@ -417,7 +481,7 @@ function timeAgo(dateStr?: string): string {
             :key="thread.id"
             class="message-item"
           >
-            <span class="message-icon">💬</span>
+            <MessageCircle class="message-icon" :size="16" />
             <div class="message-body">
               <div class="message-row">
                 <span class="message-name">{{ thread.participantName }}</span>
@@ -493,6 +557,20 @@ function timeAgo(dateStr?: string): string {
 
 .hero-dot {
   color: rgba(255, 255, 255, 0.3);
+}
+
+.hero-meta-set {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.55);
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.3);
+  transition:
+    color 0.18s,
+    border-color 0.18s;
+}
+.hero-meta-set:hover {
+  color: #d4a843;
+  border-color: #d4a843;
 }
 
 .hero-countdown {
@@ -594,6 +672,7 @@ function timeAgo(dateStr?: string): string {
   border: 1px solid var(--color-border);
   border-radius: 16px;
   padding: 22px 24px;
+  overflow: hidden;
 }
 
 .card-header {
@@ -708,11 +787,32 @@ function timeAgo(dateStr?: string): string {
   border-bottom: none;
 }
 
-.team-icon {
-  font-size: 1.2rem;
-  width: 28px;
-  text-align: center;
+.team-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-bg-2, #f0ebe3);
+  color: var(--color-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  overflow: hidden;
+  position: relative;
+  transition:
+    transform 0.18s,
+    box-shadow 0.18s;
+}
+.team-avatar:hover {
+  transform: scale(3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+}
+.team-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 .team-info {
@@ -758,8 +858,16 @@ function timeAgo(dateStr?: string): string {
   color: #4a5fa0;
 }
 
+.badge-cancelled {
+  background: #e2e3e5;
+  color: #383d41;
+}
+
 /* ── Budget ──────────────────────────────────────────────────────────────── */
 .budget-total {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
   margin-bottom: 10px;
   font-size: 0.88rem;
   color: var(--color-muted);
@@ -865,8 +973,8 @@ function timeAgo(dateStr?: string): string {
 }
 
 .message-icon {
-  font-size: 1.1rem;
-  margin-top: 1px;
+  color: var(--color-muted);
+  margin-top: 2px;
   flex-shrink: 0;
 }
 

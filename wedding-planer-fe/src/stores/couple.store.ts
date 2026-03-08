@@ -28,6 +28,16 @@ export const useCoupleStore = defineStore("couple", () => {
     profile.value = res.data;
   }
 
+  async function uploadPicture(file: File) {
+    const res = await coupleApi.uploadPicture(file);
+    if (profile.value) profile.value.profilePicture = res.data.profilePicture;
+  }
+
+  async function deletePicture() {
+    await coupleApi.deletePicture();
+    if (profile.value) profile.value.profilePicture = undefined;
+  }
+
   async function fetchChecklist() {
     const res = await coupleApi.getChecklist();
     checklist.value = res.data;
@@ -83,5 +93,7 @@ export const useCoupleStore = defineStore("couple", () => {
     addBudgetItem,
     updateBudgetItem,
     deleteBudgetItem,
+    uploadPicture,
+    deletePicture,
   };
 });

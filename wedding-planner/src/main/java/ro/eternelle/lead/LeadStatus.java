@@ -6,5 +6,6 @@ public enum LeadStatus {
     IN_DISCUSSION,
     QUOTED,
     BOOKED,
-    DECLINED
+    DECLINED,
+    CANCELLED
 }

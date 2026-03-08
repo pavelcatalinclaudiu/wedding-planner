@@ -8,6 +8,19 @@ import { useLeadsStore } from "@/stores/leads.store";
 import { useMessagesStore } from "@/stores/messages.store";
 import { useSidebar } from "@/composables/useSidebar";
 import { setLocale } from "@/i18n";
+import {
+  LayoutDashboard,
+  Inbox,
+  CalendarDays,
+  Video,
+  Image as ImageIcon,
+  Star,
+  Network,
+  MessageCircle,
+  BarChart2,
+  CreditCard,
+  User,
+} from "lucide-vue-next";
 
 const { t, locale } = useI18n();
 const route = useRoute();
@@ -28,23 +41,23 @@ const navItems = computed(() => [
       {
         label: t("nav.vendor.items.overview"),
         path: "/vendor/overview",
-        icon: "⊞",
+        icon: LayoutDashboard,
       },
       {
         label: t("nav.vendor.items.inbox"),
         path: "/vendor/leads",
-        icon: "◈",
+        icon: Inbox,
         badge: "leads",
       },
       {
         label: t("nav.vendor.items.availability"),
         path: "/vendor/calendar",
-        icon: "◎",
+        icon: CalendarDays,
       },
       {
         label: t("nav.vendor.items.videoCalls"),
         path: "/vendor/calls",
-        icon: "⊙",
+        icon: Video,
       },
     ],
   },
@@ -54,22 +67,22 @@ const navItems = computed(() => [
       {
         label: t("nav.vendor.items.portfolio"),
         path: "/vendor/portfolio",
-        icon: "★",
+        icon: ImageIcon,
       },
       {
         label: t("nav.vendor.items.reviews"),
         path: "/vendor/reviews",
-        icon: "✦",
+        icon: Star,
       },
       {
         label: t("nav.vendor.items.partnerNetwork"),
         path: "/vendor/network",
-        icon: "⊗",
+        icon: Network,
       },
       {
         label: t("nav.vendor.items.groupChat"),
         path: "/vendor/group-chat",
-        icon: "⊙",
+        icon: MessageCircle,
       },
     ],
   },
@@ -79,17 +92,17 @@ const navItems = computed(() => [
       {
         label: t("nav.vendor.items.analytics"),
         path: "/vendor/analytics",
-        icon: "≋",
+        icon: BarChart2,
       },
       {
         label: t("nav.vendor.items.subscription"),
         path: "/vendor/subscription",
-        icon: "◇",
+        icon: CreditCard,
       },
       {
         label: t("nav.vendor.items.myProfile"),
         path: "/vendor/profile",
-        icon: "◉",
+        icon: User,
       },
     ],
   },
@@ -160,7 +173,7 @@ function switchLang() {
           class="nav-item"
           :class="{ active: isActive(item.path) }"
         >
-          <span class="nav-icon">{{ item.icon }}</span>
+          <span class="nav-icon"><component :is="item.icon" :size="16" /></span>
           <span class="nav-label">{{ item.label }}</span>
           <span v-if="item.badge && getBadge(item.badge)" class="badge">
             {{ getBadge(item.badge) }}
@@ -170,7 +183,7 @@ function switchLang() {
     </div>
 
     <button class="lang-btn" @click="switchLang" :title="t('lang.switch')">
-      {{ locale === "ro" ? "🇬🇧 EN" : "🇷🇴 RO" }}
+      {{ locale === "ro" ? "EN" : "RO" }}
     </button>
     <button class="logout-btn" @click="logout">
       {{ t("common.signOut") }}

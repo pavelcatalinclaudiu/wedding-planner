@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import type { Component } from "vue";
 import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
-  emoji: string;
+  icon: Component;
   primary: string;
   label: string;
   trend?: number | null;
@@ -54,7 +55,7 @@ const primaryClass = computed(() => {
     </template>
     <template v-else>
       <div class="card-top">
-        <span class="card-emoji">{{ emoji }}</span>
+        <span class="card-emoji"><component :is="icon" :size="18" /></span>
         <span class="card-label">{{ label }}</span>
       </div>
       <p class="card-primary" :class="primaryClass">{{ primary }}</p>
@@ -91,7 +92,10 @@ const primaryClass = computed(() => {
   gap: 8px;
 }
 .card-emoji {
-  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  color: var(--color-muted, #8a7f76);
+  opacity: 0.8;
 }
 .card-label {
   font-size: 0.78rem;

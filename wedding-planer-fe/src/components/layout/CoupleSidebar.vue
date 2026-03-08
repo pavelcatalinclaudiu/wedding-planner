@@ -8,6 +8,21 @@ import { useLeadsStore } from "@/stores/leads.store";
 import { useMessagesStore } from "@/stores/messages.store";
 import { useSidebar } from "@/composables/useSidebar";
 import { setLocale } from "@/i18n";
+import {
+  LayoutDashboard,
+  MessageSquare,
+  CheckSquare,
+  Wallet,
+  Users,
+  Search,
+  Star,
+  Video,
+  Calendar,
+  MessageCircle,
+  Globe,
+  FolderOpen,
+  User,
+} from "lucide-vue-next";
 
 const { t, locale } = useI18n();
 const route = useRoute();
@@ -28,28 +43,28 @@ const navItems = computed(() => [
       {
         label: t("nav.couple.items.overview"),
         path: "/couple/overview",
-        icon: "⊞",
+        icon: LayoutDashboard,
       },
       {
         label: t("nav.couple.items.myEnquiries"),
         path: "/couple/enquiries",
-        icon: "◈",
+        icon: MessageSquare,
         badge: "enquiries",
       },
       {
         label: t("nav.couple.items.checklist"),
         path: "/couple/checklist",
-        icon: "✓",
+        icon: CheckSquare,
       },
       {
         label: t("nav.couple.items.budgetTracker"),
         path: "/couple/budget",
-        icon: "€",
+        icon: Wallet,
       },
       {
         label: t("nav.couple.items.guestList"),
         path: "/couple/guests",
-        icon: "♟",
+        icon: Users,
       },
     ],
   },
@@ -59,27 +74,27 @@ const navItems = computed(() => [
       {
         label: t("nav.couple.items.findVendors"),
         path: "/vendors",
-        icon: "🔍",
+        icon: Search,
       },
       {
         label: t("nav.couple.items.myWeddingTeam"),
         path: "/couple/team",
-        icon: "★",
+        icon: Star,
       },
       {
         label: t("nav.couple.items.videoCalls"),
         path: "/couple/calls",
-        icon: "📹",
+        icon: Video,
       },
       {
         label: t("nav.couple.items.calendar"),
         path: "/couple/calendar",
-        icon: "📅",
+        icon: Calendar,
       },
       {
         label: t("nav.couple.items.groupChat"),
         path: "/couple/group-chat",
-        icon: "⊙",
+        icon: MessageCircle,
       },
     ],
   },
@@ -89,12 +104,12 @@ const navItems = computed(() => [
       {
         label: t("nav.couple.items.weddingWebsite"),
         path: "/couple/website",
-        icon: "⊕",
+        icon: Globe,
       },
       {
         label: t("nav.couple.items.documentVault"),
         path: "/couple/documents",
-        icon: "⊘",
+        icon: FolderOpen,
       },
     ],
   },
@@ -104,7 +119,7 @@ const navItems = computed(() => [
       {
         label: t("nav.couple.items.myProfile"),
         path: "/couple/profile",
-        icon: "◉",
+        icon: User,
       },
     ],
   },
@@ -139,10 +154,16 @@ function switchLang() {
 
     <div class="user-info">
       <div class="user-avatar">
-        {{
+        <img
+          v-if="coupleStore.profile?.profilePicture"
+          :src="coupleStore.profile.profilePicture"
+          class="avatar-img"
+          alt=""
+        />
+        <template v-else>{{
           (coupleStore.profile?.partner1Name ??
             authStore.user?.email)?.[0]?.toUpperCase()
-        }}
+        }}</template>
       </div>
       <div class="user-name">
         <template v-if="coupleStore.profile?.partner1Name">
@@ -169,7 +190,7 @@ function switchLang() {
           class="nav-item"
           :class="{ active: isActive(item.path) }"
         >
-          <span class="nav-icon">{{ item.icon }}</span>
+          <span class="nav-icon"><component :is="item.icon" :size="16" /></span>
           <span class="nav-label">{{ item.label }}</span>
           <span v-if="item.badge && getBadge(item.badge)" class="badge">
             {{ getBadge(item.badge) }}
@@ -179,7 +200,7 @@ function switchLang() {
     </div>
 
     <button class="lang-btn" @click="switchLang" :title="t('lang.switch')">
-      {{ locale === "ro" ? "🇬🇧 EN" : "🇷🇴 RO" }}
+      {{ locale === "ro" ? "EN" : "RO" }}
     </button>
     <button class="logout-btn" @click="logout">
       {{ t("common.signOut") }}
@@ -232,6 +253,22 @@ function switchLang() {
   font-size: 0.875rem;
   font-weight: 700;
   flex-shrink: 0;
+  overflow: hidden;
+  position: relative;
+  transition:
+    transform 0.18s,
+    box-shadow 0.18s;
+}
+.user-avatar:hover {
+  transform: scale(3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+}
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 .user-name {
   font-size: 0.85rem;

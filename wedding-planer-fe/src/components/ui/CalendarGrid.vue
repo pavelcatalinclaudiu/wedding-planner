@@ -130,26 +130,6 @@ function isTaskOverdue(day: Date) {
         <span v-if="day">{{ format(day, "d") }}</span>
       </div>
     </div>
-
-    <div class="cal-legend">
-      <span v-if="!readonly" class="legend-item"
-        ><span class="legend-dot blocked"></span> Blocked</span
-      >
-      <span class="legend-item"
-        ><span class="legend-dot available"></span> Available</span
-      >
-      <span v-if="(bookingDates ?? []).length > 0" class="legend-item"
-        ><span class="legend-dot booking"></span> Booked</span
-      >
-      <span
-        v-if="(videoCallDates ?? []).length > 0 || readonly"
-        class="legend-item"
-        ><span class="legend-dot video-call"></span> Video Call</span
-      >
-      <span v-if="(taskDates ?? []).length > 0" class="legend-item"
-        ><span class="legend-dot task"></span> Task Due</span
-      >
-    </div>
   </div>
 </template>
 
@@ -234,49 +214,17 @@ function isTaskOverdue(day: Date) {
 .day-cell.other-month {
   opacity: 0.3;
 }
-.cal-legend {
-  display: flex;
-  gap: 16px;
-  margin-top: 12px;
-  font-size: 0.78rem;
-  color: var(--color-muted);
-}
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-.legend-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 3px;
-}
-.legend-dot.blocked {
-  background: var(--chip-red-bg);
-  border: 1px solid var(--color-error);
-}
-.legend-dot.available {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-}
+
 .day-cell.booking {
   background: var(--color-gold-light, #fdf8ee);
   color: var(--color-gold, #c9a84c);
   font-weight: 800;
   box-shadow: inset 0 0 0 2px var(--color-gold, #c9a84c);
 }
-.legend-dot.booking {
-  background: var(--color-gold-light, #fdf8ee);
-  border: 2px solid var(--color-gold, #c9a84c);
-}
 .day-cell.video-call {
   background: #ede9fe;
   color: #7c3aed;
   font-weight: 700;
-}
-.legend-dot.video-call {
-  background: #ede9fe;
-  border: 1px solid #7c3aed;
 }
 .day-cell.task {
   background: #ccfbf1;
@@ -287,10 +235,6 @@ function isTaskOverdue(day: Date) {
   background: #fee2e2;
   color: #dc2626;
   font-weight: 700;
-}
-.legend-dot.task {
-  background: #ccfbf1;
-  border: 1px solid #0d9488;
 }
 .day-cell.cal-readonly {
   cursor: default;

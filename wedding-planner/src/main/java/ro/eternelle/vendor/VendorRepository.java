@@ -15,6 +15,10 @@ public class VendorRepository implements PanacheRepositoryBase<VendorProfile, UU
         return find("user.id", userId).firstResultOptional();
     }
 
+    public List<VendorProfile> findActiveVendors() {
+        return find("isActive = true").list();
+    }
+
     public List<VendorProfile> findByCategory(VendorCategory category) {
         return find("category = ?1 AND isActive = true", category).list();
     }

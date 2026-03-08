@@ -2,6 +2,7 @@
 import { ref, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { coupleApi } from "@/api/couple.api";
+import { FileText } from "lucide-vue-next";
 
 const { t } = useI18n();
 const apiBase = import.meta.env.VITE_API_BASE_URL as string; // e.g. http://localhost:8080/api
@@ -79,7 +80,7 @@ onMounted(fetchDocs);
     </div>
     <div v-else class="doc-list">
       <div v-for="doc in documents" :key="doc.id" class="doc-row">
-        <span class="doc-icon">📄</span>
+        <span class="doc-icon"><FileText :size="20" /></span>
         <a
           :href="apiBase.replace('/api', '') + doc.url"
           target="_blank"

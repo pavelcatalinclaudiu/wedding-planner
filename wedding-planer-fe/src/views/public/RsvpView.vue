@@ -3,6 +3,7 @@ import { ref } from "vue";
 import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { guestsApi } from "@/api/guests.api";
+import { Sparkles, Mail } from "lucide-vue-next";
 
 const route = useRoute();
 const { t } = useI18n();
@@ -106,13 +107,13 @@ async function submit() {
       </div>
 
       <div v-else-if="step === 'thanks'" class="result-state">
-        <div class="result-icon">🎉</div>
+        <div class="result-icon"><Sparkles :size="48" /></div>
         <h2>{{ t("rsvp.celebrate") }}</h2>
         <p>{{ t("rsvp.received") }}</p>
       </div>
 
       <div v-else class="result-state">
-        <div class="result-icon">💌</div>
+        <div class="result-icon"><Mail :size="48" /></div>
         <h2>{{ t("rsvp.missYou") }}</h2>
         <p>
           {{ t("rsvp.thanksForLetting") }}

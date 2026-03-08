@@ -6,6 +6,7 @@ import { useLeads } from "@/composables/useLeads";
 import { useConversation } from "@/composables/useConversation";
 import { useOffer } from "@/composables/useOffer";
 import { useVideoCallsStore } from "@/stores/videoCalls.store";
+import { useBudgetStore } from "@/stores/budget.store";
 import { conversationsApi } from "@/api/conversations.api";
 import LeadCard from "@/components/lead/LeadCard.vue";
 import ConversationThread from "@/components/lead/ConversationThread.vue";
@@ -13,6 +14,8 @@ import OfferCard from "@/components/lead/OfferCard.vue";
 import CallBanner from "@/components/video/CallBanner.vue";
 import ScheduleCallModal from "@/components/video/ScheduleCallModal.vue";
 import type { Lead } from "@/types/lead.types";
+import { MessageSquare, ClipboardList } from "lucide-vue-next";
+import { Calendar } from "lucide-vue-next";
 
 const { t } = useI18n();
 
@@ -25,11 +28,13 @@ const {
   accept: acceptOffer,
   decline: declineOffer,
   requestRevision,
+  markViewed,
 } = useOffer({ onLeadUpdated: () => fetchCoupleLeads() });
 
 const selectedLead = ref<Lead | null>(null);
 const activeTab = ref<"chat" | "offers">("chat");
 const videoStore = useVideoCallsStore();
+const budgetStore = useBudgetStore();
 const route = useRoute();
 
 const activeCall = computed(() =>
@@ -39,6 +44,7 @@ const activeCall = computed(() =>
 );
 
 const latestOffer = computed(() => offers.value[0] ?? null);
+const latestOfferViewed = computed(() => !!latestOffer.value?.viewedAt);
 const hasPendingOffer = computed(() =>
   offers.value.some((o) => o.status === "PENDING"),
 );
@@ -59,14 +65,12 @@ function requestOfferLabel() {
 }
 
 function formatOfferPrice(price: number) {
-  return new Intl.NumberFormat("en-GB", {
-    style: "currency",
-    currency: "GBP",
-  }).format(price);
+  return "\u20AC" + Math.round(price).toLocaleString();
 }
 
 onMounted(async () => {
   await fetchCoupleLeads();
+  await budgetStore.fetchBudget();
   await handleDeepLink();
 });
 
@@ -107,8 +111,29 @@ async function openLead(lead: Lead) {
   if (["IN_DISCUSSION", "QUOTED", "BOOKED"].includes(lead.status)) {
     tasks.push(videoStore.fetchActiveForLead(lead.id));
   }
+  // Refresh budget when opening a cancelled lead so the removed item disappears
+  if (lead.status === "CANCELLED") {
+    tasks.push(budgetStore.fetchBudget());
+  }
   await Promise.all(tasks);
+  // Auto-mark pending offer as viewed since couple is now looking at it
+  const pending = offers.value.find(
+    (o) => o.status === "PENDING" && !o.viewedAt,
+  );
+  if (pending) markViewed(pending.id);
 }
+
+// When a new PENDING offer arrives via WS while the couple is already viewing this lead, auto-mark it viewed
+watch(latestOffer, (offer) => {
+  if (
+    offer &&
+    offer.status === "PENDING" &&
+    !offer.viewedAt &&
+    selectedLead.value
+  ) {
+    markViewed(offer.id);
+  }
+});
 
 async function sendMessage(content: string) {
   await send(content);
@@ -129,7 +154,7 @@ async function requestNewOffer() {
     await requestRevision(pending.id);
   } else {
     // No existing offer yet — send a plain text to initiate
-    await send("Could you please send me an offer?");
+    await send(t("leads.requestOfferMessage"));
   }
   activeTab.value = "chat";
 }
@@ -181,12 +206,25 @@ async function onCallScheduled(leadId: string) {
 
       <template v-else>
         <div class="detail-header">
-          <div>
-            <h3>{{ selectedLead.vendorName }}</h3>
-            <small
-              >{{ selectedLead.vendorCategory }} ·
-              {{ selectedLead.eventDate }}</small
-            >
+          <div class="detail-title">
+            <div class="dh-avatar">
+              <img
+                v-if="selectedLead.vendorProfilePicture"
+                :src="selectedLead.vendorProfilePicture"
+                class="dh-avatar-img"
+                alt=""
+              />
+              <template v-else>{{
+                (selectedLead.vendorName?.[0] ?? "?").toUpperCase()
+              }}</template>
+            </div>
+            <div>
+              <h3>{{ selectedLead.vendorName }}</h3>
+              <small
+                >{{ selectedLead.vendorCategory }} ·
+                {{ selectedLead.eventDate }}</small
+              >
+            </div>
           </div>
           <div
             v-if="
@@ -205,7 +243,7 @@ async function onCallScheduled(leadId: string) {
               class="btn-video"
               @click="openScheduleModal"
             >
-              📅 {{ t("leads.scheduleCall") }}
+              <Calendar :size="15" /> {{ t("leads.scheduleCall") }}
             </button>
             <CallBanner
               v-else
@@ -216,32 +254,39 @@ async function onCallScheduled(leadId: string) {
           </div>
         </div>
 
-        <!-- Tab bar (show when conversation exists, regardless of offers) -->
-        <div v-if="conversation" class="detail-tabs">
+        <!-- Tab bar (only once vendor has engaged — past NEW/VIEWED) -->
+        <div
+          v-if="
+            conversation && !['NEW', 'VIEWED'].includes(selectedLead.status)
+          "
+          class="detail-tabs"
+        >
           <button
             class="tab-btn"
             :class="{ active: activeTab === 'chat' }"
             @click="activeTab = 'chat'"
           >
-            💬 {{ t("leads.chatTab") }}
+            <MessageSquare :size="14" /> {{ t("leads.chatTab") }}
           </button>
           <button
             class="tab-btn"
             :class="{ active: activeTab === 'offers' }"
             @click="activeTab = 'offers'"
           >
-            📋 {{ t("leads.offersTab") }}
-            <span v-if="offers.length" class="tab-badge">{{
-              offers.length
-            }}</span>
+            <ClipboardList :size="14" /> {{ t("leads.offersTab") }}
+            <span
+              v-if="offers.filter((o) => o.status === 'PENDING').length"
+              class="tab-badge"
+            >
+              {{ offers.filter((o) => o.status === "PENDING").length }}
+            </span>
           </button>
         </div>
 
-        <!-- Pending (no tabs yet) -->
+        <!-- Pending (vendor hasn't engaged yet) -->
         <div
           v-if="
-            !conversation &&
-            (selectedLead.status === 'NEW' || selectedLead.status === 'VIEWED')
+            selectedLead.status === 'NEW' || selectedLead.status === 'VIEWED'
           "
           class="pending-notice"
         >
@@ -270,15 +315,6 @@ async function onCallScheduled(leadId: string) {
               </span>
             </div>
             <div class="offer-banner-actions">
-              <button
-                v-if="!hasAcceptedOffer"
-                class="offer-banner-request"
-                :class="{ requested: revisionRequested }"
-                :disabled="revisionRequested"
-                @click="requestNewOffer"
-              >
-                {{ requestOfferLabel() }}
-              </button>
               <button class="offer-banner-link" @click="activeTab = 'offers'">
                 {{ t("leads.viewAll") }} →
               </button>
@@ -399,6 +435,39 @@ async function onCallScheduled(leadId: string) {
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
+}
+.detail-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.dh-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-gold);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  position: relative;
+  transition:
+    transform 0.18s,
+    box-shadow 0.18s;
+}
+.dh-avatar:hover {
+  transform: scale(3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+}
+.dh-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .detail-header h3 {
   margin: 0 0 4px;

@@ -187,6 +187,7 @@ export type DealStatus =
 export interface RecentLeadDTO {
   dealId: string;
   coupleName: string;
+  coupleProfilePicture: string | null;
   weddingDate: string | null;
   location: string | null;
   message: string;
@@ -197,6 +198,7 @@ export interface RecentLeadDTO {
 export interface UpcomingCallDTO {
   callId: string;
   coupleName: string;
+  coupleProfilePicture: string | null;
   scheduledAt: string;
   dealId: string;
 }

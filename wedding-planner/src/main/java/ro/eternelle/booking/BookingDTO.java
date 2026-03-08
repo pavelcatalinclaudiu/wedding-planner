@@ -19,7 +19,13 @@ public class BookingDTO {
     public Instant    createdAt;
     public boolean    hasReview;
     public String     vendorName;
+    public String     vendorProfilePicture;
     public String     vendorCategory;
+    public String     coupleName;
+    public String     coupleProfilePicture;
+    public String     status;
+    public LocalDate  proposedDate;
+    public String     proposedNote;
 
     public static BookingDTO from(Booking b, boolean hasReview) {
         BookingDTO dto = new BookingDTO();
@@ -36,11 +42,21 @@ public class BookingDTO {
         dto.createdAt     = b.createdAt;
         dto.hasReview     = hasReview;
         if (b.lead != null && b.lead.vendor != null) {
-            dto.vendorName     = b.lead.vendor.businessName;
-            dto.vendorCategory = b.lead.vendor.category != null
+            dto.vendorName           = b.lead.vendor.businessName;
+            dto.vendorProfilePicture = b.lead.vendor.profilePicture;
+            dto.vendorCategory       = b.lead.vendor.category != null
                     ? b.lead.vendor.category.name()
                     : null;
         }
+        if (b.lead != null && b.lead.couple != null) {
+            String p1 = b.lead.couple.partner1Name != null ? b.lead.couple.partner1Name : "";
+            String p2 = b.lead.couple.partner2Name != null ? b.lead.couple.partner2Name : "";
+            dto.coupleName          = p2.isEmpty() ? p1 : p1 + " & " + p2;
+            dto.coupleProfilePicture = b.lead.couple.profilePicture;
+        }
+        dto.status       = b.status != null ? b.status.name() : BookingStatus.CONFIRMED.name();
+        dto.proposedDate = b.proposedDate;
+        dto.proposedNote = b.proposedNote;
         return dto;
     }
 }

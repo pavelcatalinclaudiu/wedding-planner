@@ -7,6 +7,8 @@ import org.hibernate.type.SqlTypes;
 import ro.eternelle.lead.Lead;
 import ro.eternelle.offer.Offer;
 
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -49,6 +51,16 @@ public class Booking extends PanacheEntityBase {
 
     @Column(columnDefinition = "TEXT")
     public String notes;
+
+    @Column(name = "status", length = 30)
+    @Enumerated(EnumType.STRING)
+    public BookingStatus status = BookingStatus.CONFIRMED;
+
+    @Column(name = "proposed_date")
+    public LocalDate proposedDate;
+
+    @Column(name = "proposed_note", length = 500)
+    public String proposedNote;
 
     @Column(name = "created_at")
     public Instant createdAt = Instant.now();

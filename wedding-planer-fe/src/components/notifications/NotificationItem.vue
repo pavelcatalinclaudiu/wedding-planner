@@ -1,8 +1,21 @@
 ﻿<script setup lang="ts">
 import { useRouter } from "vue-router";
+import type { Component } from "vue";
 import type { Notification } from "@/types/notification.types";
 import { useNotificationsStore } from "@/stores/notifications.store";
 import { useAuthStore } from "@/stores/auth.store";
+import {
+  ClipboardList,
+  CheckCircle,
+  XCircle,
+  Mail,
+  Sparkles,
+  Phone,
+  Video,
+  RefreshCw,
+  Star,
+  Bell,
+} from "lucide-vue-next";
 
 const props = defineProps<{ notification: Notification }>();
 const emit = defineEmits<{ close: [] }>();
@@ -30,7 +43,16 @@ const iconMap: Record<string, string> = {
   OFFER_ACCEPTED: "\uD83C\uDF89",
   NEW_MESSAGE: "\u2709\uFE0F",
   call_reminder: "\uD83D\uDCDE",
+  VIDEO_CALL_PROPOSED: "\uD83D\uDCF9",
+  VIDEO_CALL_RESCHEDULED: "\uD83D\uDD04",
+  VIDEO_CALL_ACCEPTED: "\u2705",
+  VIDEO_CALL_CANCELLED: "\u274C",
   review_request: "\u2B50",
+  // Booking
+  BOOKING_CANCELLED: "\uD83D\uDEAB",
+  BOOKING_RESCHEDULE_PROPOSED: "\uD83D\uDCC5",
+  BOOKING_RESCHEDULE_ACCEPTED: "\u2705",
+  BOOKING_RESCHEDULE_DECLINED: "\u274C",
 };
 
 function resolveRoute(): string | null {
@@ -61,10 +83,21 @@ function resolveRoute(): string | null {
       return id ? `/vendor/leads?conversation=${id}` : "/vendor/leads";
     // Calls
     case "call_reminder":
+    case "VIDEO_CALL_PROPOSED":
+    case "VIDEO_CALL_RESCHEDULED":
+    case "VIDEO_CALL_ACCEPTED":
+    case "VIDEO_CALL_CANCELLED":
       return role === "COUPLE" ? "/couple/calls" : "/vendor/calls";
     // Reviews
     case "review_request":
       return "/vendor/reviews";
+    // Bookings — couple receives PROPOSED / CANCELLED, vendor receives ACCEPTED / DECLINED
+    case "BOOKING_RESCHEDULE_PROPOSED":
+    case "BOOKING_CANCELLED":
+      return "/couple/calendar";
+    case "BOOKING_RESCHEDULE_ACCEPTED":
+    case "BOOKING_RESCHEDULE_DECLINED":
+      return "/vendor/calendar";
     default:
       return null;
   }

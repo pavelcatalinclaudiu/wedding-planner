@@ -6,6 +6,7 @@ import { useAuthStore } from "@/stores/auth.store";
 import { coupleApi } from "@/api/couple.api";
 import { extractApiError } from "@/api/client";
 import { useAuthRedirect } from "@/composables/useAuthRedirect";
+import { Mail } from "lucide-vue-next";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -27,6 +28,7 @@ const showPassword = ref(false);
 // Step 2
 const partner1Name = ref("");
 const partner2Name = ref("");
+const knowsWeddingDate = ref<boolean | null>(null);
 const weddingDate = ref("");
 const weddingLocation = ref("");
 const estimatedGuestCount = ref<number>(100);
@@ -50,8 +52,8 @@ async function nextStep() {
 }
 
 async function handleSubmit() {
-  if (!partner1Name.value || !partner2Name.value || !weddingDate.value) {
-    error.value = "Please fill in all required fields.";
+  if (!partner1Name.value || !partner2Name.value) {
+    error.value = t("auth.registerCouple.errorFillFields");
     return;
   }
   loading.value = true;
@@ -65,8 +67,9 @@ async function handleSubmit() {
     await coupleApi.createProfile({
       partner1Name: partner1Name.value,
       partner2Name: partner2Name.value,
-      weddingDate: weddingDate.value,
-      weddingLocation: weddingLocation.value,
+      weddingDate: knowsWeddingDate.value === true ? weddingDate.value : "",
+      weddingLocation:
+        knowsWeddingDate.value === true ? weddingLocation.value : "",
       estimatedGuestCount: estimatedGuestCount.value,
       totalBudget: totalBudget.value,
     });
@@ -88,7 +91,7 @@ async function handleSubmit() {
 
       <!-- ✅ Email verification pending -->
       <div v-if="pendingVerification" class="pending-verification">
-        <div class="pv-icon">✉️</div>
+        <div class="pv-icon"><Mail :size="40" /></div>
         <h2 class="pv-title">{{ t("auth.checkEmail.title") }}</h2>
         <p class="pv-sub">{{ t("auth.checkEmail.subtitle", { email }) }}</p>
         <p class="pv-note">{{ t("auth.checkEmail.note") }}</p>
@@ -115,7 +118,12 @@ async function handleSubmit() {
             }}</span>
             <span class="intent-name">{{ intent.vendorName }}</span>
             <span class="intent-meta">
-              {{ intent.vendorCategory?.replace(/_/g, " ") }} ·
+              {{
+                intent.vendorCategory
+                  ? t(`categories.${intent.vendorCategory}`)
+                  : ""
+              }}
+              ·
               {{ intent.vendorCity }}
             </span>
           </div>
@@ -199,18 +207,47 @@ async function handleSubmit() {
                 required
               />
             </div>
-            <div class="field">
-              <label>{{ t("auth.registerCouple.weddingDateLabel") }}</label>
-              <input v-model="weddingDate" type="date" required />
+            <!-- Do you know your wedding date? -->
+            <div class="field knows-date-field">
+              <p class="knows-date-label">
+                {{ t("auth.registerCouple.knowsDateQuestion") }}
+              </p>
+              <div class="knows-date-options">
+                <button
+                  type="button"
+                  class="knows-date-btn"
+                  :class="{ active: knowsWeddingDate === true }"
+                  @click="knowsWeddingDate = true"
+                >
+                  {{ t("auth.registerCouple.knowsDateYes") }}
+                </button>
+                <button
+                  type="button"
+                  class="knows-date-btn"
+                  :class="{ active: knowsWeddingDate === false }"
+                  @click="knowsWeddingDate = false"
+                >
+                  {{ t("auth.registerCouple.knowsDateNo") }}
+                </button>
+              </div>
             </div>
-            <div class="field">
-              <label>{{ t("auth.registerCouple.weddingLocationLabel") }}</label>
-              <input
-                v-model="weddingLocation"
-                type="text"
-                placeholder="Oraș, Țară"
-              />
-            </div>
+
+            <template v-if="knowsWeddingDate === true">
+              <div class="field">
+                <label>{{ t("auth.registerCouple.weddingDateLabel") }}</label>
+                <input v-model="weddingDate" type="date" />
+              </div>
+              <div class="field">
+                <label>{{
+                  t("auth.registerCouple.weddingLocationLabel")
+                }}</label>
+                <input
+                  v-model="weddingLocation"
+                  type="text"
+                  placeholder="Oraș, Țară"
+                />
+              </div>
+            </template>
             <div class="field-row">
               <div class="field">
                 <label>{{ t("auth.registerCouple.guestCountLabel") }}</label>
@@ -392,6 +429,43 @@ async function handleSubmit() {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
+}
+/* Yes / No wedding-date toggle */
+.knows-date-field {
+  gap: 10px;
+}
+.knows-date-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
+}
+.knows-date-options {
+  display: flex;
+  gap: 12px;
+}
+.knows-date-btn {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    border-color 0.18s,
+    background 0.18s,
+    color 0.18s;
+}
+.knows-date-btn:hover:not(.active) {
+  border-color: var(--color-gold);
+}
+.knows-date-btn.active {
+  border-color: var(--color-gold);
+  background: var(--color-gold);
+  color: #fff;
 }
 .password-wrapper {
   position: relative;

@@ -15,6 +15,7 @@ public class OfferDTO {
     public BigDecimal price;
     public LocalDate  expiresAt;
     public String     status;
+    public Instant    viewedAt;
     public Instant    createdAt;
 
     public static OfferDTO from(Offer o) {
@@ -28,6 +29,7 @@ public class OfferDTO {
         dto.price          = o.price;
         dto.expiresAt      = o.expiresAt;
         dto.status         = o.status != null ? o.status.name() : null;
+        dto.viewedAt       = o.viewedAt;
         dto.createdAt      = o.createdAt;
         return dto;
     }

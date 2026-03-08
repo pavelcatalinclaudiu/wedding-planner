@@ -19,4 +19,7 @@ export const offersApi = {
   /** Couple: Request a revision — marks offer REVISED, unlocks vendor to re-send */
   requestRevision: (id: string) =>
     apiClient.patch<Offer>(`/offers/${id}/request-revision`),
+
+  /** Couple: Mark offer as viewed (first time opening it) */
+  markViewed: (id: string) => apiClient.patch<Offer>(`/offers/${id}/view`),
 };

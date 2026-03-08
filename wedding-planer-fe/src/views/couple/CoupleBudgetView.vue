@@ -5,10 +5,26 @@ import { useBudgetStore } from "@/stores/budget.store";
 import { useConfirm } from "@/composables/useConfirm";
 import { useCoupleStore } from "@/stores/couple.store";
 import type { BudgetItem } from "@/types/couple.types";
+import {
+  X,
+  Pencil,
+  Trash2,
+  AlertCircle,
+  AlertTriangle,
+  Info,
+  Check,
+  Circle,
+} from "lucide-vue-next";
 
-const { t } = useI18n();
+import {
+  useCategoryLabel,
+  VENDOR_CATEGORY_MAP,
+} from "@/utils/vendorCategories";
+
+const { t, te } = useI18n();
 const budgetStore = useBudgetStore();
 const coupleStore = useCoupleStore();
+const { categoryLabel } = useCategoryLabel();
 
 onMounted(async () => {
   await Promise.all([
@@ -96,7 +112,9 @@ const alerts = computed(() => {
   if (isOverBudget.value) {
     list.push({
       type: "error",
-      message: `You're ${fmt(totalSpent.value - totalBudget.value)} over budget.`,
+      message: t("budget.alertOverBudget", {
+        amount: fmt(totalSpent.value - totalBudget.value),
+      }),
     });
   }
   if (
@@ -105,14 +123,19 @@ const alerts = computed(() => {
   ) {
     list.push({
       type: "warn",
-      message: `${fmt(unallocatedAmount.value)} of your total budget hasn't been allocated to a category yet.`,
+      message: t("budget.alertUnallocated", {
+        amount: fmt(unallocatedAmount.value),
+      }),
     });
   }
   categoryGroups.value.forEach((g) => {
     if (g.actual > g.estimated && g.estimated > 0) {
       list.push({
         type: "warn",
-        message: `${g.category} is over its category budget by ${fmt(g.actual - g.estimated)}.`,
+        message: t("budget.alertCategoryOver", {
+          category: categoryLabel(g.category),
+          amount: fmt(g.actual - g.estimated),
+        }),
       });
     }
   });
@@ -122,7 +145,10 @@ const alerts = computed(() => {
   if (unpaidCount > 0) {
     list.push({
       type: "info",
-      message: `${unpaidCount} item${unpaidCount > 1 ? "s have" : " has"} actual costs recorded but haven't been marked as paid.`,
+      message:
+        unpaidCount === 1
+          ? t("budget.alertUnpaidOne")
+          : t("budget.alertUnpaidMany", { count: unpaidCount }),
     });
   }
   return list;
@@ -134,20 +160,16 @@ const editingItem = ref<BudgetItem | null>(null);
 const saving = ref(false);
 const addError = ref("");
 
-const CATEGORY_SUGGESTIONS = [
-  "Venue",
-  "Catering",
-  "Photography",
-  "Videography",
-  "Florals",
-  "Music",
-  "Cake",
-  "Hair & Makeup",
-  "Transport",
-  "Attire",
-  "Stationery",
-  "Other",
-];
+// ── Category sync with VendorCategory enum ──────────────────────────────
+// Datalist suggestions: always English labels (canonical stored value) with translated display
+const CATEGORY_SUGGESTIONS = computed(() =>
+  Object.keys(VENDOR_CATEGORY_MAP).map((enLabel) => ({
+    value: enLabel,
+    label: te(`categories.${VENDOR_CATEGORY_MAP[enLabel]}`)
+      ? t(`categories.${VENDOR_CATEGORY_MAP[enLabel]}`)
+      : enLabel,
+  })),
+);
 
 const addForm = ref({
   name: "",
@@ -158,6 +180,61 @@ const addForm = ref({
   isPaid: false,
   notes: "",
 });
+
+// ── Category combobox state ───────────────────────────────────────────────
+const catSearch = ref("");
+const catDropdownOpen = ref(false);
+
+const filteredCategories = computed(() => {
+  const q = catSearch.value.trim().toLowerCase();
+  const all = [
+    ...CATEGORY_SUGGESTIONS.value,
+    { value: "__custom__", label: t("budget.custom") },
+  ];
+  return q ? all.filter((c) => c.label.toLowerCase().includes(q)) : all;
+});
+
+function openCatDropdown() {
+  catSearch.value = "";
+  catDropdownOpen.value = true;
+}
+
+function selectCategory(value: string) {
+  if (value === "__custom__") {
+    addForm.value.category = "";
+    catSearch.value = "";
+    catDropdownOpen.value = false;
+    // re-open as free-text mode by leaving category empty and keeping focus
+    return;
+  }
+  addForm.value.category = value;
+  const match = CATEGORY_SUGGESTIONS.value.find((c) => c.value === value);
+  catSearch.value = match ? match.label : value;
+  catDropdownOpen.value = false;
+}
+
+function onCatBlur() {
+  // Delay so click on option registers before blur fires
+  setTimeout(() => {
+    catDropdownOpen.value = false;
+    // If user typed something that doesn't match a suggestion, keep it as custom
+    if (catSearch.value.trim() && !addForm.value.category) {
+      addForm.value.category = catSearch.value.trim();
+    }
+    // Sync display to current selection
+    const match = CATEGORY_SUGGESTIONS.value.find(
+      (c) => c.value === addForm.value.category,
+    );
+    if (match) catSearch.value = match.label;
+  }, 150);
+}
+
+function syncCatSearch() {
+  const match = CATEGORY_SUGGESTIONS.value.find(
+    (c) => c.value === addForm.value.category,
+  );
+  catSearch.value = match ? match.label : addForm.value.category;
+}
 
 function openAddModal(prefillCategory?: string) {
   editingItem.value = null;
@@ -170,6 +247,7 @@ function openAddModal(prefillCategory?: string) {
     isPaid: false,
     notes: "",
   };
+  syncCatSearch();
   addError.value = "";
   showAddModal.value = true;
 }
@@ -188,6 +266,7 @@ function openEditModal(item: BudgetItem) {
     isPaid: item.isPaid,
     notes: item.notes ?? "",
   };
+  syncCatSearch();
   addError.value = "";
   showAddModal.value = true;
 }
@@ -268,7 +347,7 @@ function varianceClass(estimated: number, actual: number): string {
             :title="t('budget.editTotalBudget')"
             @click="startEditTotalBudget"
           >
-            ✏️
+            <Pencil :size="14" />
           </button>
         </div>
         <div v-else class="ov-edit-row">
@@ -288,7 +367,7 @@ function varianceClass(estimated: number, actual: number): string {
             {{ savingTotalBudget ? "…" : t("common.save") }}
           </button>
           <button class="btn-cancel-sm" @click="editingTotalBudget = false">
-            ✕
+            <X :size="14" />
           </button>
         </div>
         <p class="ov-sub">{{ t("budget.budgetCap") }}</p>
@@ -352,9 +431,9 @@ function varianceClass(estimated: number, actual: number): string {
         :class="`alert-${alert.type}`"
       >
         <span class="alert-icon">
-          {{
-            alert.type === "error" ? "🔴" : alert.type === "warn" ? "🟡" : "🔵"
-          }}
+          <AlertCircle v-if="alert.type === 'error'" :size="14" />
+          <AlertTriangle v-else-if="alert.type === 'warn'" :size="14" />
+          <Info v-else :size="14" />
         </span>
         <span>{{ alert.message }}</span>
       </div>
@@ -380,7 +459,7 @@ function varianceClass(estimated: number, actual: number): string {
               <span class="cat-chevron">
                 {{ expandedCategories.has(group.category) ? "▾" : "▸" }}
               </span>
-              <span class="cat-name">{{ group.category }}</span>
+              <span class="cat-name">{{ categoryLabel(group.category) }}</span>
               <span class="cat-count">
                 {{ group.items.length }} item{{
                   group.items.length !== 1 ? "s" : ""
@@ -438,7 +517,10 @@ function varianceClass(estimated: number, actual: number): string {
                   :title="item.isPaid ? 'Mark as unpaid' : 'Mark as paid'"
                   @click="togglePaid(item)"
                 >
-                  {{ item.isPaid ? "✓" : "○" }}
+                  <Check v-if="item.isPaid" :size="12" /><Circle
+                    v-else
+                    :size="12"
+                  />
                 </button>
                 <div class="item-info">
                   <span
@@ -448,6 +530,9 @@ function varianceClass(estimated: number, actual: number): string {
                   >
                   <span v-if="item.vendorName" class="item-vendor">{{
                     item.vendorName
+                  }}</span>
+                  <span v-if="item.notes" class="item-notes">{{
+                    item.notes
                   }}</span>
                 </div>
               </div>
@@ -471,22 +556,30 @@ function varianceClass(estimated: number, actual: number): string {
                     {{ t("budget.actual") }}</span
                   >
                 </div>
-                <span :class="item.isPaid ? 'badge-paid' : 'badge-unpaid'">
+                <button
+                  :class="item.isPaid ? 'badge-paid' : 'badge-unpaid'"
+                  :title="
+                    item.isPaid
+                      ? t('budget.markAsUnpaid')
+                      : t('budget.markAsPaid')
+                  "
+                  @click="togglePaid(item)"
+                >
                   {{ item.isPaid ? t("budget.paid") : t("budget.unpaid") }}
-                </span>
+                </button>
                 <button
                   class="icon-btn"
                   title="Edit"
                   @click="openEditModal(item)"
                 >
-                  ✏️
+                  <Pencil :size="14" />
                 </button>
                 <button
                   class="icon-btn danger"
                   title="Delete"
                   @click="remove(item.id)"
                 >
-                  🗑
+                  <Trash2 :size="14" />
                 </button>
               </div>
             </div>
@@ -551,7 +644,9 @@ function varianceClass(estimated: number, actual: number): string {
                   : t("budget.addItemModal")
               }}
             </h3>
-            <button class="modal-close" @click="showAddModal = false">✕</button>
+            <button class="modal-close" @click="showAddModal = false">
+              <X :size="18" />
+            </button>
           </div>
 
           <div class="modal-body">
@@ -566,15 +661,36 @@ function varianceClass(estimated: number, actual: number): string {
 
             <div class="field-row">
               <label>{{ t("common.category") }} *</label>
-              <input
-                v-model="addForm.category"
-                class="fi"
-                :placeholder="t('common.category')"
-                list="cat-suggestions"
-              />
-              <datalist id="cat-suggestions">
-                <option v-for="c in CATEGORY_SUGGESTIONS" :key="c" :value="c" />
-              </datalist>
+              <div class="cat-combo">
+                <input
+                  v-model="catSearch"
+                  class="fi cat-combo-input"
+                  :placeholder="addForm.category ? '' : t('common.category')"
+                  autocomplete="off"
+                  @focus="openCatDropdown"
+                  @blur="onCatBlur"
+                  @input="catDropdownOpen = true"
+                />
+                <ul v-if="catDropdownOpen" class="cat-combo-dropdown">
+                  <li
+                    v-for="c in filteredCategories"
+                    :key="c.value"
+                    class="cat-combo-option"
+                    :class="{
+                      'cat-combo-option-active': addForm.category === c.value,
+                    }"
+                    @mousedown.prevent="selectCategory(c.value)"
+                  >
+                    {{ c.label }}
+                  </li>
+                  <li
+                    v-if="filteredCategories.length === 0"
+                    class="cat-combo-empty"
+                  >
+                    {{ t("budget.customCategory") }}
+                  </li>
+                </ul>
+              </div>
             </div>
 
             <div class="field-row">
@@ -1045,6 +1161,15 @@ function varianceClass(estimated: number, actual: number): string {
   font-size: 0.75rem;
   color: var(--color-muted);
 }
+.item-notes {
+  font-size: 0.72rem;
+  color: var(--color-muted);
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
 
 .item-right {
   display: flex;
@@ -1074,19 +1199,28 @@ function varianceClass(estimated: number, actual: number): string {
   color: var(--color-green);
 }
 
-.badge-paid {
-  font-size: 0.72rem;
-  font-weight: 700;
-  padding: 2px 9px;
-  border-radius: 10px;
-  background: var(--color-green-light);
-  color: var(--color-green);
-}
+.badge-paid,
 .badge-unpaid {
   font-size: 0.72rem;
   font-weight: 700;
   padding: 2px 9px;
   border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition:
+    opacity 0.15s,
+    filter 0.15s;
+  white-space: nowrap;
+}
+.badge-paid:hover,
+.badge-unpaid:hover {
+  filter: brightness(0.92);
+}
+.badge-paid {
+  background: var(--color-green-light);
+  color: var(--color-green);
+}
+.badge-unpaid {
   background: var(--color-gold-light);
   color: var(--color-gold-dark);
 }
@@ -1233,10 +1367,54 @@ function varianceClass(estimated: number, actual: number): string {
   outline: none;
   transition: border-color 0.15s;
   background: var(--color-surface);
+  color: var(--color-text);
 }
 .fi:focus {
   border-color: var(--color-gold);
   background: var(--color-white);
+}
+/* ── Category combobox ───────────────────────────────────────────────────── */
+.cat-combo {
+  position: relative;
+}
+.cat-combo-input {
+  width: 100%;
+  box-sizing: border-box;
+}
+.cat-combo-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--color-white);
+  border: 1.5px solid var(--color-border);
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+  z-index: 200;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.cat-combo-option {
+  padding: 9px 14px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  color: var(--color-text);
+  transition: background 0.1s;
+}
+.cat-combo-option:hover,
+.cat-combo-option-active {
+  background: var(--color-gold-light);
+  color: var(--color-gold-dark);
+  font-weight: 600;
+}
+.cat-combo-empty {
+  padding: 9px 14px;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  font-style: italic;
 }
 .check-row {
   display: flex;

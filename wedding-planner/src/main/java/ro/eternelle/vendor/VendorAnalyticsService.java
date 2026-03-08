@@ -8,6 +8,7 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import ro.eternelle.booking.BookingRepository;
 import ro.eternelle.lead.Lead;
+import ro.eternelle.offer.OfferRepository;
 import ro.eternelle.lead.LeadRepository;
 import ro.eternelle.lead.LeadStatus;
 import ro.eternelle.review.Review;
@@ -27,6 +28,7 @@ import java.util.*;
 public class VendorAnalyticsService {
 
     @Inject BookingRepository     bookingRepository;
+    @Inject OfferRepository       offerRepository;
     @Inject LeadRepository        leadRepository;
     @Inject ProfileViewRepository profileViewRepository;
     @Inject ReviewRepository      reviewRepository;
@@ -58,12 +60,12 @@ public class VendorAnalyticsService {
     //  Stat 1  Revenue Booked 
 
     public RevenueStatDTO getRevenueBooked(UUID vendorId) {
-        Instant monthStart    = YearMonth.now().atDay(1).atStartOfDay().toInstant(ZoneOffset.UTC);
+        Instant monthStart     = YearMonth.now().atDay(1).atStartOfDay().toInstant(ZoneOffset.UTC);
         Instant prevMonthStart = YearMonth.now().minusMonths(1).atDay(1).atStartOfDay().toInstant(ZoneOffset.UTC);
 
-        BigDecimal current  = bookingRepository.sumRevenueForVendorSince(vendorId, monthStart);
-        BigDecimal previous = bookingRepository.sumRevenueForVendorBetween(vendorId, prevMonthStart, monthStart);
-        long       count    = bookingRepository.countConfirmedForVendorSince(vendorId, monthStart);
+        BigDecimal current  = offerRepository.sumAcceptedRevenueForVendorSince(vendorId, monthStart);
+        BigDecimal previous = offerRepository.sumAcceptedRevenueForVendorBetween(vendorId, prevMonthStart, monthStart);
+        long       count    = offerRepository.countAcceptedForVendorSince(vendorId, monthStart);
         BigDecimal trend    = current.subtract(previous);
 
         return new RevenueStatDTO(current, trend, count);
@@ -174,6 +176,7 @@ public class VendorAnalyticsService {
 
         for (Lead lead : leads) {
             String coupleName  = buildCoupleName(lead);
+            String coupleProfilePicture = lead.couple != null ? lead.couple.profilePicture : null;
             String weddingDate = lead.couple != null && lead.couple.weddingDate != null ? lead.couple.weddingDate.toString() : null;
             String location    = lead.couple != null ? lead.couple.weddingLocation : null;
             String preview     = lead.message != null ? truncate(lead.message, 120) : "";
@@ -181,6 +184,7 @@ public class VendorAnalyticsService {
             result.add(new RecentLeadDTO(
                     lead.id.toString(),
                     coupleName,
+                    coupleProfilePicture,
                     weddingDate,
                     location,
                     preview,
@@ -199,9 +203,11 @@ public class VendorAnalyticsService {
 
         for (VideoCall call : calls) {
             String coupleName = call.lead != null ? buildCoupleName(call.lead) : "Unknown";
+            String coupleProfilePicture = call.lead != null && call.lead.couple != null ? call.lead.couple.profilePicture : null;
             result.add(new UpcomingCallDTO(
                     call.id.toString(),
                     coupleName,
+                    coupleProfilePicture,
                     call.scheduledAt,
                     call.lead != null ? call.lead.id.toString() : null
             ));

@@ -3,6 +3,7 @@ import { ref, onMounted, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { networkApi } from "@/api/network.api";
 import type { VendorPartner } from "@/types/vendor.types";
+import { X } from "lucide-vue-next";
 
 const partners = ref<VendorPartner[]>([]);
 const loading = ref(false);
@@ -217,7 +218,7 @@ function initials(name: string) {
           :title="t('vendor.network.removePartner')"
           @click="remove(p.id)"
         >
-          ✕
+          <X :size="16" />
         </button>
       </div>
     </div>

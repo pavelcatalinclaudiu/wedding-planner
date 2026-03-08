@@ -70,7 +70,13 @@ const statusColour: Record<string, string> = {
         @click="openLead()"
       >
         <div class="avatar" :title="lead.coupleName">
-          {{ initials(lead.coupleName) }}
+          <img
+            v-if="lead.coupleProfilePicture"
+            :src="lead.coupleProfilePicture"
+            class="avatar-img"
+            alt=""
+          />
+          <template v-else>{{ initials(lead.coupleName) }}</template>
         </div>
         <div class="lead-info">
           <p class="lead-name">{{ lead.coupleName }}</p>
@@ -155,6 +161,22 @@ const statusColour: Record<string, string> = {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  overflow: hidden;
+  position: relative;
+  transition:
+    transform 0.18s,
+    box-shadow 0.18s;
+}
+.avatar:hover {
+  transform: scale(3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+}
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 .lead-info {
   flex: 1;

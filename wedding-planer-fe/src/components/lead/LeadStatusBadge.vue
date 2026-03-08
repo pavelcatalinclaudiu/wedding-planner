@@ -59,4 +59,8 @@ const label = computed(() => {
   background: #f8d7da;
   color: #721c24;
 }
+.status-cancelled {
+  background: #e2e3e5;
+  color: #383d41;
+}
 </style>

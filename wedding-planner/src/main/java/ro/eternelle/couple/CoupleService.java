@@ -44,7 +44,7 @@ public class CoupleService {
         if (updates.weddingDate != null)     profile.weddingDate     = updates.weddingDate;
         if (updates.weddingLocation != null) profile.weddingLocation = updates.weddingLocation;
         if (updates.totalBudget != null)     profile.totalBudget     = updates.totalBudget;
-        profile.guestCount = updates.guestCount > 0 ? updates.guestCount : profile.guestCount;
+        profile.guestCount = updates.guestCount;
         return profile;
     }
 }

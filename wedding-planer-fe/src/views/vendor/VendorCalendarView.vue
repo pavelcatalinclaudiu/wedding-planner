@@ -1,29 +1,27 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
-import { vendorApi } from "@/api/vendor.api";
 import { videoCallsApi } from "@/api/videoCalls.api";
-import { useLeadsStore } from "@/stores/leads.store";
+import { bookingsApi } from "@/api/bookings.api";
 import CalendarGrid from "@/components/ui/CalendarGrid.vue";
 import { format, parseISO, isAfter, startOfToday, compareAsc } from "date-fns";
-import type { AvailabilityBlock } from "@/types/vendor.types";
-import type { Lead, VideoCall } from "@/types/lead.types";
+import type { Booking, VideoCall } from "@/types/lead.types";
+import { Calendar, Video, X, CalendarClock } from "lucide-vue-next";
 
-const availability = ref<AvailabilityBlock[]>([]);
 const calls = ref<VideoCall[]>([]);
-const loading = ref(false);
-const leadsStore = useLeadsStore();
-const activeTab = ref<"calls" | "bookings">("calls");
+const bookings = ref<Booking[]>([]);
+const loadingBookings = ref(false);
+const activeTab = ref<"bookings" | "calls">("bookings");
 const { t } = useI18n();
 
-async function fetchAvailability() {
-  loading.value = true;
-  try {
-    availability.value = (await vendorApi.getAvailability()).data;
-  } finally {
-    loading.value = false;
-  }
-}
+// Modal state
+const cancelTarget = ref<Booking | null>(null);
+const rescheduleTarget = ref<Booking | null>(null);
+const newDate = ref("");
+const rescheduleNote = ref("");
+const modalBusy = ref(false);
+const modalError = ref("");
+const minDate = computed(() => format(startOfToday(), "yyyy-MM-dd"));
 
 async function fetchCalls() {
   try {
@@ -33,47 +31,92 @@ async function fetchCalls() {
   }
 }
 
-async function block(date: string) {
-  await vendorApi.blockDate(date);
-  await fetchAvailability();
+async function fetchBookings() {
+  loadingBookings.value = true;
+  try {
+    bookings.value = (await bookingsApi.list()).data;
+  } catch {
+    bookings.value = [];
+  } finally {
+    loadingBookings.value = false;
+  }
 }
 
-async function unblock(date: string) {
-  await vendorApi.unblockDate(date);
-  await fetchAvailability();
-}
-
-/* ── Upcoming bookings ──────────────────────────────────────────────────── */
+/* ── Bookings ─────────────────────────────────────────────────────────────── */
 const today = startOfToday();
 
-const upcomingBookings = computed<Lead[]>(() => {
-  return leadsStore.leads
+const upcomingBookings = computed<Booking[]>(() =>
+  bookings.value
     .filter(
-      (l) =>
-        l.status === "BOOKED" &&
-        l.eventDate &&
-        isAfter(parseISO(l.eventDate), today),
+      (b) =>
+        b.status !== "CANCELLED" &&
+        !!b.weddingDate &&
+        isAfter(parseISO(b.weddingDate), today),
     )
-    .sort((a, b) => compareAsc(parseISO(a.eventDate!), parseISO(b.eventDate!)));
-});
+    .sort((a, b) =>
+      compareAsc(parseISO(a.weddingDate!), parseISO(b.weddingDate!)),
+    ),
+);
 
-const STATUS_LABELS = computed<Record<string, string>>(() => ({
-  NEW: t("vendor.calendar.statusNew"),
-  VIEWED: t("vendor.calendar.statusViewed"),
-  IN_DISCUSSION: t("vendor.calendar.statusChat"),
-  QUOTED: t("vendor.calendar.statusQuoted"),
-  BOOKED: t("vendor.calendar.statusBooked"),
-  DECLINED: t("vendor.calendar.statusDeclined"),
-}));
+function bookingStatusClass(status?: string) {
+  if (status === "RESCHEDULE_PENDING") return "status-pending";
+  return "status-confirmed";
+}
+function bookingStatusLabel(status?: string) {
+  if (status === "RESCHEDULE_PENDING")
+    return t("vendor.calendar.reschedulePending");
+  return t("vendor.calendar.confirmed");
+}
 
-const STATUS_CLASS: Record<string, string> = {
-  NEW: "status-enquiry",
-  VIEWED: "status-enquiry",
-  IN_DISCUSSION: "status-chat",
-  QUOTED: "status-quote",
-  BOOKED: "status-confirmed",
-  DECLINED: "status-declined",
-};
+// Cancel modal
+function openCancel(b: Booking) {
+  cancelTarget.value = b;
+  modalError.value = "";
+}
+async function confirmCancel() {
+  if (!cancelTarget.value) return;
+  modalBusy.value = true;
+  modalError.value = "";
+  try {
+    await bookingsApi.cancel(cancelTarget.value.id);
+    cancelTarget.value = null;
+    // Re-fetch from server so the calendar grid is fully in sync
+    await fetchBookings();
+  } catch (e: any) {
+    modalError.value = e?.response?.data?.message ?? "Something went wrong.";
+  } finally {
+    modalBusy.value = false;
+  }
+}
+
+// Reschedule modal
+function openReschedule(b: Booking) {
+  rescheduleTarget.value = b;
+  newDate.value = "";
+  rescheduleNote.value = "";
+  modalError.value = "";
+}
+async function confirmReschedule() {
+  if (!rescheduleTarget.value || !newDate.value) return;
+  modalBusy.value = true;
+  modalError.value = "";
+  try {
+    const updated = await bookingsApi.proposeReschedule(
+      rescheduleTarget.value.id,
+      newDate.value,
+      rescheduleNote.value || undefined,
+    );
+    const idx = bookings.value.findIndex(
+      (b) => b.id === rescheduleTarget.value!.id,
+    );
+    if (idx !== -1) bookings.value[idx] = updated.data;
+    rescheduleTarget.value = null;
+  } catch (e: any) {
+    modalError.value = e?.response?.data?.message ?? "Something went wrong.";
+  } finally {
+    modalBusy.value = false;
+  }
+}
 
 function dayNum(iso: string) {
   return format(parseISO(iso), "d");
@@ -104,6 +147,12 @@ const videoCallDates = computed<string[]>(() =>
   upcomingCalls.value.map((c) => format(parseISO(c.scheduledAt), "yyyy-MM-dd")),
 );
 
+const bookingDates = computed<string[]>(() =>
+  bookings.value
+    .filter((b) => b.status !== "CANCELLED" && !!b.weddingDate)
+    .map((b) => b.weddingDate!),
+);
+
 function callTime(iso: string) {
   return format(parseISO(iso), "HH:mm");
 }
@@ -115,11 +164,7 @@ function callMonthAbbr(iso: string) {
 }
 
 onMounted(async () => {
-  await Promise.all([
-    fetchAvailability(),
-    fetchCalls(),
-    leadsStore.fetchVendorLeads(),
-  ]);
+  await Promise.all([fetchCalls(), fetchBookings()]);
 });
 </script>
 
@@ -135,22 +180,15 @@ onMounted(async () => {
 
     <!-- Stat chips -->
     <div class="cv-stats">
-      <div class="cv-stat cv-stat--blocked">
-        <span class="cv-stat-icon">🚫</span>
-        <div>
-          <p class="cv-stat-val">{{ availability.length }}</p>
-          <p class="cv-stat-label">{{ t("vendor.calendar.blockedDates") }}</p>
-        </div>
-      </div>
       <div class="cv-stat cv-stat--call">
-        <span class="cv-stat-icon">📹</span>
+        <span class="cv-stat-icon"><Video :size="20" /></span>
         <div>
           <p class="cv-stat-val">{{ upcomingCalls.length }}</p>
           <p class="cv-stat-label">{{ t("vendor.calendar.upcomingCalls") }}</p>
         </div>
       </div>
       <div class="cv-stat cv-stat--booking">
-        <span class="cv-stat-icon">📅</span>
+        <span class="cv-stat-icon"><Calendar :size="20" /></span>
         <div>
           <p class="cv-stat-val">{{ upcomingBookings.length }}</p>
           <p class="cv-stat-label">
@@ -163,13 +201,11 @@ onMounted(async () => {
     <div class="cv-body">
       <!-- Calendar column -->
       <div class="cv-calendar-col">
-        <div v-if="loading" class="cv-loading">{{ t("common.loading") }}</div>
         <CalendarGrid
-          v-else
-          :blocked-dates="availability.map((a) => a.date)"
+          :blocked-dates="[]"
+          :booking-dates="bookingDates"
           :video-call-dates="videoCallDates"
-          @block="block"
-          @unblock="unblock"
+          :readonly="true"
         />
         <div class="cv-legend">
           <span class="legend-pip legend-pip--booking"></span
@@ -178,26 +214,12 @@ onMounted(async () => {
           }}</span>
           <span class="legend-pip legend-pip--call"></span
           ><span class="legend-lbl">{{ t("vendor.calendar.legendCall") }}</span>
-          <span class="legend-pip legend-pip--blocked"></span
-          ><span class="legend-lbl">{{
-            t("vendor.calendar.legendBlocked")
-          }}</span>
-          <span class="cv-hint">{{ t("vendor.calendar.toggleHint") }}</span>
         </div>
       </div>
 
       <!-- Right: Tabbed events panel -->
       <div class="cv-panel">
         <div class="panel-tabs">
-          <button
-            class="panel-tab"
-            :class="{ active: activeTab === 'calls' }"
-            @click="activeTab = 'calls'"
-          >
-            <span class="tab-pip tab-pip--call"></span>
-            {{ t("vendor.calendar.tabCalls") }}
-            <span class="tab-badge">{{ upcomingCalls.length }}</span>
-          </button>
           <button
             class="panel-tab"
             :class="{ active: activeTab === 'bookings' }"
@@ -207,13 +229,85 @@ onMounted(async () => {
             {{ t("vendor.calendar.tabBookings") }}
             <span class="tab-badge">{{ upcomingBookings.length }}</span>
           </button>
+          <button
+            class="panel-tab"
+            :class="{ active: activeTab === 'calls' }"
+            @click="activeTab = 'calls'"
+          >
+            <span class="tab-pip tab-pip--call"></span>
+            {{ t("vendor.calendar.tabCalls") }}
+            <span class="tab-badge">{{ upcomingCalls.length }}</span>
+          </button>
         </div>
 
         <div class="panel-body">
+          <!-- Bookings tab (first) -->
+          <template v-if="activeTab === 'bookings'">
+            <div v-if="loadingBookings" class="bk-loading">
+              {{ t("common.loading") }}
+            </div>
+            <div v-else-if="upcomingBookings.length === 0" class="bk-empty">
+              <span class="bk-empty-icon"><Calendar :size="28" /></span>
+              <p>{{ t("vendor.calendar.noUpcomingBookings") }}</p>
+              <p class="bk-empty-sub">
+                {{ t("vendor.calendar.bookingsHint") }}
+              </p>
+            </div>
+            <ul v-else class="bk-list">
+              <li
+                v-for="b in upcomingBookings"
+                :key="b.id"
+                class="bk-item"
+                :class="{ 'is-reschedule': b.status === 'RESCHEDULE_PENDING' }"
+              >
+                <div class="bk-date-badge bk-date-badge--booking">
+                  <span class="bk-month">{{ monthAbbr(b.weddingDate!) }}</span>
+                  <span class="bk-day">{{ dayNum(b.weddingDate!) }}</span>
+                </div>
+                <div class="bk-info">
+                  <div class="pf-av" :title="b.coupleName ?? 'Couple'">
+                    <img
+                      v-if="b.coupleProfilePicture"
+                      :src="b.coupleProfilePicture"
+                      class="pf-av-img"
+                      alt=""
+                    />
+                    <template v-else>{{
+                      (b.coupleName?.[0] ?? "?").toUpperCase()
+                    }}</template>
+                  </div>
+                  <div>
+                    <p class="bk-couple">{{ b.coupleName ?? "Couple" }}</p>
+                    <p class="bk-weekday">{{ weekday(b.weddingDate!) }}</p>
+                  </div>
+                </div>
+                <span class="bk-status" :class="bookingStatusClass(b.status)">
+                  {{ bookingStatusLabel(b.status) }}
+                </span>
+                <div class="bk-actions">
+                  <button
+                    class="bk-act bk-act--reschedule"
+                    :title="t('vendor.calendar.reschedule')"
+                    @click="openReschedule(b)"
+                  >
+                    <CalendarClock :size="13" />
+                  </button>
+                  <button
+                    class="bk-act bk-act--cancel"
+                    :title="t('vendor.calendar.cancelBooking')"
+                    @click="openCancel(b)"
+                  >
+                    <X :size="13" />
+                  </button>
+                </div>
+              </li>
+            </ul>
+          </template>
+
           <!-- Calls tab -->
-          <template v-if="activeTab === 'calls'">
+          <template v-else>
             <div v-if="upcomingCalls.length === 0" class="bk-empty">
-              <span class="bk-empty-icon">📹</span>
+              <span class="bk-empty-icon"><Video :size="28" /></span>
               <p>{{ t("vendor.calendar.noUpcomingCalls") }}</p>
               <p class="bk-empty-sub">
                 {{ t("vendor.calendar.scheduleCallHint") }}
@@ -228,8 +322,21 @@ onMounted(async () => {
                   <span class="bk-day">{{ callDayNum(call.scheduledAt) }}</span>
                 </div>
                 <div class="bk-info">
-                  <p class="bk-couple">{{ call.coupleName ?? "Couple" }}</p>
-                  <p class="bk-weekday">{{ callTime(call.scheduledAt) }}</p>
+                  <div class="pf-av" :title="call.coupleName ?? 'Couple'">
+                    <img
+                      v-if="call.coupleProfilePicture"
+                      :src="call.coupleProfilePicture"
+                      class="pf-av-img"
+                      alt=""
+                    />
+                    <template v-else>{{
+                      (call.coupleName?.[0] ?? "?").toUpperCase()
+                    }}</template>
+                  </div>
+                  <div>
+                    <p class="bk-couple">{{ call.coupleName ?? "Couple" }}</p>
+                    <p class="bk-weekday">{{ callTime(call.scheduledAt) }}</p>
+                  </div>
                 </div>
                 <span
                   class="bk-status"
@@ -248,42 +355,110 @@ onMounted(async () => {
               </li>
             </ul>
           </template>
-
-          <!-- Bookings tab -->
-          <template v-else>
-            <div v-if="leadsStore.loading" class="bk-loading">
-              {{ t("common.loading") }}
-            </div>
-            <div v-else-if="upcomingBookings.length === 0" class="bk-empty">
-              <span class="bk-empty-icon">📅</span>
-              <p>{{ t("vendor.calendar.noUpcomingBookings") }}</p>
-              <p class="bk-empty-sub">
-                {{ t("vendor.calendar.bookingsHint") }}
-              </p>
-            </div>
-            <ul v-else class="bk-list">
-              <li
-                v-for="lead in upcomingBookings"
-                :key="lead.id"
-                class="bk-item"
-              >
-                <div class="bk-date-badge bk-date-badge--booking">
-                  <span class="bk-month">{{ monthAbbr(lead.eventDate!) }}</span>
-                  <span class="bk-day">{{ dayNum(lead.eventDate!) }}</span>
-                </div>
-                <div class="bk-info">
-                  <p class="bk-couple">{{ lead.coupleName }}</p>
-                  <p class="bk-weekday">{{ weekday(lead.eventDate!) }}</p>
-                </div>
-                <span class="bk-status" :class="STATUS_CLASS[lead.status]">
-                  {{ STATUS_LABELS[lead.status] ?? lead.status }}
-                </span>
-              </li>
-            </ul>
-          </template>
         </div>
       </div>
     </div>
+
+    <!-- ── Cancel Booking Modal ─────────────────────────────────── -->
+    <Teleport to="body">
+      <div
+        v-if="cancelTarget"
+        class="vcal-overlay"
+        @click.self="cancelTarget = null"
+      >
+        <div class="vcal-modal">
+          <h3 class="vcal-modal-title">
+            {{ t("vendor.calendar.cancelTitle") }}
+          </h3>
+          <p class="vcal-modal-body">
+            {{
+              t("vendor.calendar.cancelBody", {
+                name: cancelTarget.coupleName,
+              })
+            }}
+          </p>
+          <p class="vcal-modal-warn">
+            {{ t("vendor.calendar.cancelWarning") }}
+          </p>
+          <p v-if="modalError" class="vcal-modal-error">{{ modalError }}</p>
+          <div class="vcal-modal-footer">
+            <button
+              class="vcal-btn vcal-btn--secondary"
+              @click="cancelTarget = null"
+            >
+              {{ t("vendor.calendar.keepBooking") }}
+            </button>
+            <button
+              class="vcal-btn vcal-btn--danger"
+              :disabled="modalBusy"
+              @click="confirmCancel"
+            >
+              {{ t("vendor.calendar.cancelBookingConfirm") }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- ── Reschedule Modal ──────────────────────────────────────── -->
+    <Teleport to="body">
+      <div
+        v-if="rescheduleTarget"
+        class="vcal-overlay"
+        @click.self="rescheduleTarget = null"
+      >
+        <div class="vcal-modal">
+          <h3 class="vcal-modal-title">
+            {{ t("vendor.calendar.rescheduleTitle") }}
+          </h3>
+          <p class="vcal-modal-body">
+            {{
+              t("vendor.calendar.rescheduleBody", {
+                name: rescheduleTarget.coupleName,
+              })
+            }}
+          </p>
+          <div class="vcal-modal-field">
+            <label class="vcal-modal-label">{{
+              t("vendor.calendar.newDate")
+            }}</label>
+            <input
+              type="date"
+              v-model="newDate"
+              :min="minDate"
+              class="vcal-modal-input"
+            />
+          </div>
+          <div class="vcal-modal-field">
+            <label class="vcal-modal-label">{{
+              t("vendor.calendar.noteOptional")
+            }}</label>
+            <textarea
+              v-model="rescheduleNote"
+              class="vcal-modal-textarea"
+              :placeholder="t('vendor.calendar.notePlaceholder')"
+              rows="3"
+            ></textarea>
+          </div>
+          <p v-if="modalError" class="vcal-modal-error">{{ modalError }}</p>
+          <div class="vcal-modal-footer">
+            <button
+              class="vcal-btn vcal-btn--secondary"
+              @click="rescheduleTarget = null"
+            >
+              {{ t("vendor.calendar.cancelAction") }}
+            </button>
+            <button
+              class="vcal-btn vcal-btn--primary"
+              :disabled="modalBusy || !newDate"
+              @click="confirmReschedule"
+            >
+              {{ t("vendor.calendar.sendProposal") }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -352,9 +527,6 @@ onMounted(async () => {
   margin: 2px 0 0;
 }
 
-.cv-stat--blocked {
-  border-left: 3px solid var(--color-muted);
-}
 .cv-stat--call {
   border-left: 3px solid #7c3aed;
 }
@@ -383,12 +555,6 @@ onMounted(async () => {
   .cv-stats {
     grid-template-columns: 1fr;
   }
-}
-
-.cv-loading {
-  color: var(--color-muted);
-  text-align: center;
-  padding: 48px;
 }
 
 /* ── Calendar column ─────────────────────────────────── */
@@ -424,21 +590,10 @@ onMounted(async () => {
 .legend-pip--call {
   background: #7c3aed;
 }
-.legend-pip--blocked {
-  background: var(--color-border-strong);
-}
-
 .legend-lbl {
   font-size: 0.76rem;
   color: var(--color-muted);
   margin-right: 6px;
-}
-
-.cv-hint {
-  font-size: 0.76rem;
-  color: var(--color-muted);
-  margin-left: auto;
-  font-style: italic;
 }
 
 /* ── Tabbed panel ────────────────────────────────────── */
@@ -621,6 +776,37 @@ onMounted(async () => {
 .bk-info {
   flex: 1;
   min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pf-av {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-gold);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  position: relative;
+  transition:
+    transform 0.18s,
+    box-shadow 0.18s;
+}
+.pf-av:hover {
+  transform: scale(3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+}
+.pf-av-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .bk-couple {
@@ -679,5 +865,169 @@ onMounted(async () => {
   background: var(--color-amber-light);
   color: var(--color-amber);
   border: 1px solid var(--color-amber);
+}
+
+/* ── Booking action buttons ──────────────────────────────── */
+.bk-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.bk-act {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  background: var(--color-white);
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+  color: var(--color-muted);
+}
+
+.bk-act:hover {
+  background: var(--color-surface-alt);
+  border-color: var(--color-text);
+  color: var(--color-text);
+}
+
+.bk-act--cancel:hover {
+  border-color: var(--color-error);
+  color: var(--color-error);
+  background: var(--chip-red-bg);
+}
+
+.bk-act--reschedule:hover {
+  border-color: var(--color-gold);
+  color: var(--color-gold);
+  background: var(--color-gold-light);
+}
+
+.is-reschedule {
+  border-left: 3px solid var(--color-amber, #f59e0b);
+}
+
+/* ── Modals ──────────────────────────────────────────────── */
+.vcal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.vcal-modal {
+  background: var(--color-white);
+  border-radius: 16px;
+  padding: 28px 28px 24px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.vcal-modal-title {
+  margin: 0 0 12px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.vcal-modal-body {
+  margin: 0 0 8px;
+  font-size: 0.92rem;
+  color: var(--color-text);
+}
+
+.vcal-modal-warn {
+  margin: 0 0 16px;
+  font-size: 0.83rem;
+  color: var(--color-muted);
+  padding: 10px 12px;
+  background: var(--chip-amber-bg, #fef9c3);
+  border-radius: 8px;
+  border-left: 3px solid var(--color-amber, #f59e0b);
+}
+
+.vcal-modal-field {
+  margin-bottom: 14px;
+}
+
+.vcal-modal-label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 6px;
+}
+
+.vcal-modal-input,
+.vcal-modal-textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  box-sizing: border-box;
+  background: var(--color-white);
+  color: var(--color-text);
+}
+
+.vcal-modal-textarea {
+  resize: vertical;
+  min-height: 72px;
+}
+
+.vcal-modal-error {
+  color: var(--color-error);
+  font-size: 0.82rem;
+  margin: 0 0 12px;
+}
+
+.vcal-modal-footer {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.vcal-btn {
+  padding: 9px 20px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  border: none;
+}
+
+.vcal-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.vcal-btn--secondary {
+  background: var(--color-surface);
+  color: var(--color-muted);
+  border: 1px solid var(--color-border);
+}
+
+.vcal-btn--danger {
+  background: var(--color-error);
+  color: #fff;
+}
+
+.vcal-btn--primary {
+  background: var(--color-gold);
+  color: #fff;
 }
 </style>

@@ -17,7 +17,9 @@ public class VideoCallDTO {
     /** Caller-specific JWT for JaaS (null when JaaS not configured). */
     public String  token;
     public String  coupleName;
+    public String  coupleProfilePicture;
     public String  vendorName;
+    public String  vendorProfilePicture;
     public String  vendorId;
     /** "COUPLE" or "VENDOR" – whoever proposed / last rescheduled this call. */
     public String  proposedBy;
@@ -44,10 +46,12 @@ public class VideoCallDTO {
             if (c.lead.couple != null) {
                 dto.coupleName = c.lead.couple.partner1Name
                         + (c.lead.couple.partner2Name != null ? " & " + c.lead.couple.partner2Name : "");
+                dto.coupleProfilePicture = c.lead.couple.profilePicture;
             }
             if (c.lead.vendor != null) {
                 dto.vendorName = c.lead.vendor.businessName;
                 dto.vendorId = c.lead.vendor.id.toString();
+                dto.vendorProfilePicture = c.lead.vendor.profilePicture;
             }
         }
         return dto;

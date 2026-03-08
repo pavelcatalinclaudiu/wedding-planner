@@ -32,7 +32,7 @@ public class BudgetItem extends PanacheEntityBase {
     public String name;
 
     @Column(name = "estimated_cost", precision = 10, scale = 2)
-    public BigDecimal estimatedCost = BigDecimal.ZERO;
+    public BigDecimal estimatedCost;
 
     @Column(name = "actual_cost", precision = 10, scale = 2)
     public BigDecimal actualCost;
@@ -42,6 +42,11 @@ public class BudgetItem extends PanacheEntityBase {
 
     @Column(name = "vendor_name")
     public String vendorName;
+
+    /** Reference back to the lead this item was auto-created from (nullable for manual items). */
+    @Column(name = "lead_id")
+    @JdbcTypeCode(SqlTypes.VARCHAR)
+    public UUID leadId;
 
     public String notes;
 

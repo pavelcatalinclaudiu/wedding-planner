@@ -8,6 +8,7 @@ export interface CoupleProfile {
   estimatedGuestCount: number;
   totalBudget: number;
   subdomain?: string;
+  profilePicture?: string;
   createdAt: string;
   updatedAt: string;
 }

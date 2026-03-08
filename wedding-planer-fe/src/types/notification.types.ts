@@ -9,6 +9,10 @@ export interface Notification {
     | "OFFER_ACCEPTED"
     | "NEW_MESSAGE"
     | "call_reminder"
+    | "VIDEO_CALL_PROPOSED"
+    | "VIDEO_CALL_RESCHEDULED"
+    | "VIDEO_CALL_ACCEPTED"
+    | "VIDEO_CALL_CANCELLED"
     | "review_request"
     | string;
   title: string;

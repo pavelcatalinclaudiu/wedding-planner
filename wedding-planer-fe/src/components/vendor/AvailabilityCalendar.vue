@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
+import { Calendar, X } from "lucide-vue-next";
 
 const props = defineProps<{
   modelValue: string; // selected date yyyy-MM-dd ('' = none)
@@ -189,7 +190,7 @@ function clearSelection() {
       <!-- Selected date display + clear -->
       <div v-if="modelValue" class="cal-selection-bar">
         <span>
-          📅
+          <Calendar :size="15" />
           {{
             new Date(modelValue + "T00:00:00").toLocaleDateString("en-GB", {
               day: "numeric",
@@ -198,24 +199,13 @@ function clearSelection() {
             })
           }}
         </span>
-        <button class="cal-clear-btn" @click="clearSelection">✕ Clear</button>
+        <button class="cal-clear-btn" @click="clearSelection">
+          <X :size="14" /> Clear
+        </button>
       </div>
       <p v-else class="cal-no-selection">
         Click a date to select it (optional)
       </p>
-
-      <!-- Legend -->
-      <div class="cal-legend">
-        <span class="legend-item">
-          <span class="legend-dot ld-available"></span> Available
-        </span>
-        <span class="legend-item">
-          <span class="legend-dot ld-selected"></span> Selected
-        </span>
-        <span class="legend-item">
-          <span class="legend-dot ld-booked"></span> Booked
-        </span>
-      </div>
     </template>
   </div>
 </template>
@@ -419,37 +409,5 @@ function clearSelection() {
   font-size: 0.75rem;
   color: var(--color-muted);
   text-align: center;
-}
-
-/* ── legend ──────────────────────────────────────────────────────────────── */
-.cal-legend {
-  display: flex;
-  gap: 16px;
-  justify-content: center;
-  margin-top: 12px;
-}
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 0.73rem;
-  color: var(--color-muted);
-}
-.legend-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 3px;
-  flex-shrink: 0;
-}
-.ld-available {
-  background: var(--color-white);
-  border: 1.5px solid var(--color-border);
-}
-.ld-selected {
-  background: var(--color-gold);
-}
-.ld-booked {
-  background: var(--color-error-light);
-  border: 1.5px solid var(--color-error-light);
 }
 </style>

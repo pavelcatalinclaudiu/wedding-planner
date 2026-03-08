@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import { useNotificationsStore } from "@/stores/notifications.store";
 import NotificationDropdown from "./NotificationDropdown.vue";
+import { Bell } from "lucide-vue-next";
 
 const notificationsStore = useNotificationsStore();
 const open = ref(false);
@@ -21,7 +22,7 @@ function close() {
 <template>
   <div class="bell-wrapper">
     <button class="bell-btn" @click="toggle" :class="{ active: open }">
-      <span class="bell-icon">🔔</span>
+      <Bell :size="20" />
       <span v-if="notificationsStore.unreadCount > 0" class="bell-count">
         {{
           notificationsStore.unreadCount > 99

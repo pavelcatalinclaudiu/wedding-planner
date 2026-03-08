@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import ro.eternelle.budget.BudgetRepository;
 import ro.eternelle.conversation.Conversation;
 import ro.eternelle.conversation.ConversationMessage;
 import ro.eternelle.conversation.ConversationMessageRepository;
@@ -33,6 +34,7 @@ public class LeadService {
     @Inject VendorRepository vendorRepository;
     @Inject ConversationRepository conversationRepository;
     @Inject ConversationMessageRepository conversationMessageRepository;
+    @Inject BudgetRepository budgetRepository;
     @Inject NotificationService notificationService;
     @Inject ro.eternelle.vendor.VendorAnalyticsService vendorAnalyticsService;
     @Inject WebSocketService webSocketService;
@@ -54,6 +56,13 @@ public class LeadService {
         lead.message = message;
         lead.status = LeadStatus.NEW;
         leadRepository.persist(lead);
+
+        // Create conversation thread for this lead
+        Conversation conversation = new Conversation();
+        conversation.lead   = lead;
+        conversation.couple = couple;
+        conversation.vendor = vendor;
+        conversationRepository.persist(conversation);
 
         vendorAnalyticsService.invalidateOverview(vendor.id);
 
@@ -160,6 +169,11 @@ public class LeadService {
         lead.updatedAt = Instant.now();
 
         vendorAnalyticsService.invalidateOverview(vendor.id);
+
+        // Remove any auto-created budget item for this lead
+        try {
+            budgetRepository.deleteByLeadId(lead.id);
+        } catch (Exception ignored) {}
 
         // Notify couple
         try {

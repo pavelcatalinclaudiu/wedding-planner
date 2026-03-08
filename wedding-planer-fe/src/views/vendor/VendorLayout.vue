@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted } from "vue";
 import { useRoute } from "vue-router";
+import { useI18n } from "vue-i18n";
 import VendorSidebar from "@/components/layout/VendorSidebar.vue";
 import Topbar from "@/components/layout/Topbar.vue";
 import { useVendorStore } from "@/stores/vendor.store";
@@ -10,6 +11,7 @@ import { useAuthStore } from "@/stores/auth.store";
 import { useNotificationSocket } from "@/composables/useNotificationSocket";
 import { useTheme } from "@/composables/useTheme";
 
+const { t } = useI18n();
 const route = useRoute();
 const vendorStore = useVendorStore();
 const leadsStore = useLeadsStore();
@@ -20,7 +22,8 @@ const notifSocket = useNotificationSocket();
 const { isDark } = useTheme();
 
 const pageTitle = computed(() => {
-  return (route.meta.title as string) ?? "Dashboard";
+  const key = route.meta.title as string | undefined;
+  return key ? t(key) : "Dashboard";
 });
 
 onMounted(async () => {

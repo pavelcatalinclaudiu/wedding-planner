@@ -69,7 +69,17 @@ function isImminent(iso: string): boolean {
         class="call-row"
         :class="{ imminent: isImminent(call.scheduledAt) }"
       >
-        <span class="call-icon">📹</span>
+        <div class="pf-av" :title="call.coupleName">
+          <img
+            v-if="call.coupleProfilePicture"
+            :src="call.coupleProfilePicture"
+            class="pf-av-img"
+            alt=""
+          />
+          <template v-else>{{
+            (call.coupleName?.[0] ?? "?").toUpperCase()
+          }}</template>
+        </div>
         <div class="call-info">
           <p class="call-name">{{ call.coupleName }}</p>
           <p class="call-time">{{ formatDateTime(call.scheduledAt) }}</p>
@@ -81,6 +91,12 @@ function isImminent(iso: string): boolean {
           <button
             class="join-btn"
             :class="{ pulse: isImminent(call.scheduledAt) }"
+            :disabled="!isImminent(call.scheduledAt)"
+            :title="
+              isImminent(call.scheduledAt)
+                ? undefined
+                : 'Available 30 min before the call'
+            "
             @click="emit('join', call.callId)"
           >
             {{ t("vendor.overview.join") }}
@@ -135,14 +151,39 @@ function isImminent(iso: string): boolean {
     background 0.12s;
 }
 .call-row:hover {
-  background: var(--color-bg, #f8f5f0);
+  background: var(--color-surface, rgba(0, 0, 0, 0.06));
 }
 .call-row.imminent {
   border-color: var(--color-gold);
 }
 
-.call-icon {
-  font-size: 1.3rem;
+.pf-av {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-gold);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  position: relative;
+  transition:
+    transform 0.18s,
+    box-shadow 0.18s;
+}
+.pf-av:hover {
+  transform: scale(3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+}
+.pf-av-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .call-info {
   flex: 1;
@@ -181,8 +222,14 @@ function isImminent(iso: string): boolean {
   cursor: pointer;
   transition: opacity 0.15s;
 }
-.join-btn:hover {
+.join-btn:not(:disabled):hover {
   opacity: 0.85;
+}
+.join-btn:disabled {
+  background: var(--color-muted, #aaa);
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 .join-btn.pulse {
   animation: pulse 1.5s infinite;

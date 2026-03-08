@@ -50,6 +50,9 @@ public class CoupleProfile extends PanacheEntityBase {
     @Column(name = "website_subdomain", unique = true)
     public String websiteSubdomain;
 
+    @Column(name = "profile_picture")
+    public String profilePicture;
+
     @Column(name = "created_at")
     public Instant createdAt = Instant.now();
 }

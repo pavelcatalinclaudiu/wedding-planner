@@ -2,6 +2,7 @@
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useVideoCallsStore } from "@/stores/videoCalls.store";
 import type { VideoCall } from "@/types/lead.types";
+import { Check, X, Clock, Inbox, Video } from "lucide-vue-next";
 
 const props = defineProps<{
   call: VideoCall;
@@ -111,7 +112,7 @@ function reschedule() {
 <template>
   <div class="vc-card" :class="call.status.toLowerCase()">
     <div class="vc-header">
-      <span class="vc-icon">📹</span>
+      <span class="vc-icon"><Video :size="20" /></span>
       <div class="vc-title-block">
         <span class="vc-label">Video Call</span>
         <span class="vc-status" :class="call.status.toLowerCase()">{{
@@ -126,13 +127,35 @@ function reschedule() {
 
     <div class="vc-participants">
       <span v-if="call.coupleName" class="vc-participant couple">
-        👰 {{ call.coupleName }}
+        <div class="pf-av" :title="call.coupleName">
+          <img
+            v-if="call.coupleProfilePicture"
+            :src="call.coupleProfilePicture"
+            class="pf-av-img"
+            alt=""
+          />
+          <template v-else>{{
+            (call.coupleName?.[0] ?? "?").toUpperCase()
+          }}</template>
+        </div>
+        {{ call.coupleName }}
       </span>
       <span v-if="call.coupleName && call.vendorName" class="vc-participant-sep"
         >·</span
       >
       <span v-if="call.vendorName" class="vc-participant vendor">
-        🤝 {{ call.vendorName }}
+        <div class="pf-av" :title="call.vendorName">
+          <img
+            v-if="call.vendorProfilePicture"
+            :src="call.vendorProfilePicture"
+            class="pf-av-img"
+            alt=""
+          />
+          <template v-else>{{
+            (call.vendorName?.[0] ?? "?").toUpperCase()
+          }}</template>
+        </div>
+        {{ call.vendorName }}
       </span>
     </div>
 
@@ -150,17 +173,20 @@ function reschedule() {
     <!-- PENDING: Other party proposed — I need to respond -->
     <div v-if="needsMyResponse" class="vc-pending-respond">
       <p class="pending-msg">
-        📬 The {{ otherParty }} proposed this time. Please respond:
+        <Inbox :size="15" /> The {{ otherParty }} proposed this time. Please
+        respond:
       </p>
       <div class="vc-actions">
         <button class="btn-accept" :disabled="accepting" @click="accept">
-          {{ accepting ? "…" : "✓ Accept" }}
+          <span v-if="!accepting"><Check :size="15" /> Accept</span
+          ><span v-else>…</span>
         </button>
         <button class="btn-reschedule" @click="reschedule">
           Propose New Time
         </button>
         <button class="btn-cancel" :disabled="cancelling" @click="cancel">
-          {{ cancelling ? "…" : "✗ Decline" }}
+          <span v-if="!cancelling"><X :size="15" /> Decline</span
+          ><span v-else>…</span>
         </button>
       </div>
     </div>
@@ -168,7 +194,8 @@ function reschedule() {
     <!-- PENDING: I proposed — waiting for the other party -->
     <div v-else-if="waitingForOther" class="vc-pending-waiting">
       <p class="pending-msg">
-        ⏳ Waiting for the {{ otherParty }} to confirm this time.
+        <Clock :size="15" /> Waiting for the {{ otherParty }} to confirm this
+        time.
       </p>
       <div class="vc-actions">
         <button class="btn-reschedule" @click="reschedule">
@@ -297,8 +324,39 @@ function reschedule() {
   flex-wrap: wrap;
 }
 .vc-participant {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 0.82rem;
   color: var(--color-text-secondary, #666);
+}
+.pf-av {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-gold);
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  position: relative;
+  transition:
+    transform 0.18s,
+    box-shadow 0.18s;
+}
+.pf-av:hover {
+  transform: scale(3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+}
+.pf-av-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .vc-participant-sep {
   font-size: 0.82rem;

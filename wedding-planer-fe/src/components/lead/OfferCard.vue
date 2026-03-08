@@ -13,9 +13,10 @@ const emit = defineEmits<{
 }>();
 
 const price = computed(() =>
-  new Intl.NumberFormat("en-GB", {
+  new Intl.NumberFormat("en", {
     style: "currency",
-    currency: "GBP",
+    currency: "EUR",
+    maximumFractionDigits: 0,
   }).format(props.offer.price),
 );
 

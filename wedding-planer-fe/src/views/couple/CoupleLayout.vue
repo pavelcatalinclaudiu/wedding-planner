@@ -1,28 +1,29 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted } from "vue";
 import { useRoute } from "vue-router";
+import { useI18n } from "vue-i18n";
 import CoupleSidebar from "@/components/layout/CoupleSidebar.vue";
 import Topbar from "@/components/layout/Topbar.vue";
 import { useAuthStore } from "@/stores/auth.store";
 import { useCoupleStore } from "@/stores/couple.store";
 import { useLeadsStore } from "@/stores/leads.store";
 import { useNotificationsStore } from "@/stores/notifications.store";
-import { useWebSocket } from "@/composables/useWebSocket";
 import { useNotificationSocket } from "@/composables/useNotificationSocket";
 import { useTheme } from "@/composables/useTheme";
 
+const { t } = useI18n();
 const route = useRoute();
 const coupleStore = useCoupleStore();
 const leadsStore = useLeadsStore();
 const notificationsStore = useNotificationsStore();
 const authStore = useAuthStore();
-const ws = useWebSocket();
 const notifSocket = useNotificationSocket();
 
 const { isDark } = useTheme();
 
 const pageTitle = computed(() => {
-  return (route.meta.title as string) ?? "Dashboard";
+  const key = route.meta.title as string | undefined;
+  return key ? t(key) : "Dashboard";
 });
 
 onMounted(async () => {
@@ -31,10 +32,7 @@ onMounted(async () => {
     leadsStore.fetchCoupleLeads(),
     notificationsStore.fetchNotifications(),
   ]);
-  // Connect WS for each active lead
-  for (const lead of leadsStore.activeLeads) {
-    ws.connect(lead.id);
-  }
+  // WS deal channel is connected lazily by MessageWindow when a thread is opened
   // Real-time notification delivery
   const userId = authStore.user?.id;
   if (userId) {

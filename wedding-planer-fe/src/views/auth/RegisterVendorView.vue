@@ -6,6 +6,7 @@ import { useAuthStore } from "@/stores/auth.store";
 import { vendorApi } from "@/api/vendor.api";
 import { extractApiError } from "@/api/client";
 import type { VendorCategory } from "@/types/vendor.types";
+import { Mail } from "lucide-vue-next";
 
 const { t } = useI18n();
 const router = useRouter();
@@ -103,7 +104,7 @@ async function handleSubmit() {
 
       <!-- ✅ Email verification pending -->
       <div v-if="pendingVerification" class="pending-verification">
-        <div class="pv-icon">✉️</div>
+        <div class="pv-icon"><Mail :size="40" /></div>
         <h2 class="pv-title">{{ t("auth.checkEmail.title") }}</h2>
         <p class="pv-sub">{{ t("auth.checkEmail.subtitle", { email }) }}</p>
         <p class="pv-note">{{ t("auth.checkEmail.note") }}</p>

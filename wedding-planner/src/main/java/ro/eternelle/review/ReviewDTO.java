@@ -8,6 +8,7 @@ public class ReviewDTO {
     public UUID bookingId;
     public UUID coupleId;
     public String coupleName;
+    public String coupleProfilePicture;
     public UUID vendorId;
     public double rating;
     public String comment;
@@ -24,6 +25,7 @@ public class ReviewDTO {
             String p1 = r.couple.partner1Name != null ? r.couple.partner1Name : "";
             String p2 = r.couple.partner2Name != null ? r.couple.partner2Name : "";
             dto.coupleName = p2.isEmpty() ? p1 : p1 + " & " + p2;
+            dto.coupleProfilePicture = r.couple.profilePicture;
         }
         dto.vendorId = r.vendor != null ? r.vendor.id : null;
         dto.rating = r.rating != null ? r.rating.doubleValue() : 0;

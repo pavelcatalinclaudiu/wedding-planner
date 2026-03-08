@@ -53,6 +53,15 @@ public class OfferResource {
         return Response.ok(offerService.declineOffer(id, userId)).build();
     }
 
+    /** PATCH /api/offers/{id}/view — couple marks offer as viewed */
+    @PATCH
+    @Path("/{id}/view")
+    @RolesAllowed("COUPLE")
+    public Response markViewed(@PathParam("id") UUID id) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        return Response.ok(offerService.markViewed(id, userId)).build();
+    }
+
     /** PATCH /api/offers/{id}/request-revision – couple requests a revised offer */
     @PATCH
     @Path("/{id}/request-revision")

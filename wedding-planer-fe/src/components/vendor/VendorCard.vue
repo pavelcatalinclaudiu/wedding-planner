@@ -5,6 +5,7 @@ import { useAuthStore } from "@/stores/auth.store";
 import { useLeadsStore } from "@/stores/leads.store";
 import type { VendorProfile } from "@/types/vendor.types";
 import EnquiryModal from "./EnquiryModal.vue";
+import { Camera, Star as StarIcon, MapPin } from "lucide-vue-next";
 
 const props = defineProps<{ vendor: VendorProfile }>();
 defineOptions({ inheritAttrs: false });
@@ -25,8 +26,28 @@ const isFeatured = computed(
     (props.vendor.tier as string) === "STUDIO",
 );
 
+const TERMINAL_STATUSES = ["CANCELLED", "DECLINED"] as const;
+
 const existingLead = computed(() =>
-  leadsStore.leads.find((l) => l.vendorId === props.vendor.id),
+  leadsStore.leads.find(
+    (l) =>
+      l.vendorId === props.vendor.id &&
+      !TERMINAL_STATUSES.includes(
+        l.status as (typeof TERMINAL_STATUSES)[number],
+      ),
+  ),
+);
+
+const canContactAgain = computed(
+  () =>
+    !existingLead.value &&
+    leadsStore.leads.some(
+      (l) =>
+        l.vendorId === props.vendor.id &&
+        TERMINAL_STATUSES.includes(
+          l.status as (typeof TERMINAL_STATUSES)[number],
+        ),
+    ),
 );
 
 const categoryLabel = computed(
@@ -50,6 +71,7 @@ function handleEnquire(e: Event) {
     return;
   }
 
+  // canContactAgain — fall through to open modal
   showModal.value = true;
 }
 </script>
@@ -76,16 +98,20 @@ function handleEnquire(e: Event) {
       </div>
 
       <!-- Top-left badge -->
-      <span v-if="isFeatured" class="badge badge-featured">✦ Featured</span>
+      <span v-if="isFeatured" class="badge badge-featured"
+        ><StarIcon :size="11" /> Featured</span
+      >
 
       <!-- Category label in card -->
       <span class="badge badge-category">{{ categoryLabel }}</span>
 
       <!-- Hover quick stats -->
       <div class="quick-stats">
-        <span v-if="vendor.photos?.length">📷 {{ vendor.photos.length }}</span>
+        <span v-if="vendor.photos?.length"
+          ><Camera :size="13" /> {{ vendor.photos.length }}</span
+        >
         <span v-if="vendor.averageRating"
-          >⭐ {{ vendor.averageRating.toFixed(1) }}</span
+          ><StarIcon :size="13" /> {{ vendor.averageRating.toFixed(1) }}</span
         >
       </div>
     </div>
@@ -95,7 +121,7 @@ function handleEnquire(e: Event) {
       <div class="card-row-1">
         <p class="card-name">{{ vendor.businessName }}</p>
       </div>
-      <p class="card-city">📍 {{ vendor.city }}</p>
+      <p class="card-city"><MapPin :size="13" /> {{ vendor.city }}</p>
 
       <!-- Rating -->
       <div v-if="vendor.reviewCount" class="card-rating">
@@ -132,7 +158,13 @@ function handleEnquire(e: Event) {
           :class="{ 'already-contacted': !!existingLead }"
           @click="handleEnquire"
         >
-          {{ existingLead ? "In Enquiries" : "Send Enquiry" }}
+          {{
+            existingLead
+              ? "In Enquiries"
+              : canContactAgain
+                ? "Send New Enquiry"
+                : "Send Enquiry"
+          }}
         </button>
       </div>
     </div>

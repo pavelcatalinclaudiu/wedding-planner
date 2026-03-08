@@ -14,6 +14,7 @@ import {
 } from "date-fns";
 import type { VideoCall, Booking } from "@/types/lead.types";
 import { useChecklistStore } from "@/stores/checklist.store";
+import { Gem, Video, CheckCircle2 } from "lucide-vue-next";
 
 const { t } = useI18n();
 
@@ -23,6 +24,7 @@ const loading = ref(false);
 const today = startOfToday();
 const checklistStore = useChecklistStore();
 const activeTab = ref<"bookings" | "calls" | "tasks">("bookings");
+const respondBusy = ref<string | null>(null);
 
 async function fetchAll() {
   loading.value = true;
@@ -43,6 +45,20 @@ async function fetchAll() {
 }
 
 onMounted(fetchAll);
+
+/* ── Reschedule response ────────────────────────────────────── */
+async function respondReschedule(b: Booking, accept: boolean) {
+  respondBusy.value = b.id;
+  try {
+    const updated = await bookingsApi.respondReschedule(b.id, accept);
+    const idx = bookings.value.findIndex((bk) => bk.id === b.id);
+    if (idx !== -1) bookings.value[idx] = updated.data;
+  } catch {
+    /* silent */
+  } finally {
+    respondBusy.value = null;
+  }
+}
 
 /* ── Upcoming calls (not completed/cancelled, in the future) ── */
 const upcomingCalls = computed<VideoCall[]>(() =>
@@ -75,7 +91,14 @@ const videoCallDates = computed<string[]>(() =>
 
 /** Dates (yyyy-MM-dd) that have a wedding booking — shown gold on CalendarGrid. */
 const bookingDates = computed<string[]>(() =>
-  bookings.value.filter((b) => !!b.weddingDate).map((b) => b.weddingDate!),
+  bookings.value
+    .filter((b) => b.status !== "CANCELLED" && !!b.weddingDate)
+    .map((b) => b.weddingDate!),
+);
+
+/** Bookings with a pending reschedule proposal that the couple needs to respond to. */
+const pendingReschedules = computed(() =>
+  bookings.value.filter((b) => b.status === "RESCHEDULE_PENDING"),
 );
 
 /** Task due dates for pending (not done) checklist items. */
@@ -142,21 +165,21 @@ function isTaskOverdue(dateStr: string) {
     <!-- Stat chips -->
     <div class="cv-stats">
       <div class="cv-stat cv-stat--booking">
-        <span class="cv-stat-icon">💍</span>
+        <span class="cv-stat-icon"><Gem :size="20" /></span>
         <div>
           <p class="cv-stat-val">{{ bookings.length }}</p>
           <p class="cv-stat-label">{{ t("calendar.weddingBookings") }}</p>
         </div>
       </div>
       <div class="cv-stat cv-stat--call">
-        <span class="cv-stat-icon">📹</span>
+        <span class="cv-stat-icon"><Video :size="20" /></span>
         <div>
           <p class="cv-stat-val">{{ upcomingCalls.length }}</p>
           <p class="cv-stat-label">{{ t("calendar.upcomingCalls") }}</p>
         </div>
       </div>
       <div class="cv-stat cv-stat--task">
-        <span class="cv-stat-icon">✅</span>
+        <span class="cv-stat-icon"><CheckCircle2 :size="20" /></span>
         <div>
           <p class="cv-stat-val">{{ upcomingTasks.length }}</p>
           <p class="cv-stat-label">{{ t("calendar.pendingTasks") }}</p>
@@ -198,7 +221,11 @@ function isTaskOverdue(dateStr: string) {
           >
             <span class="tab-pip tab-pip--booking"></span>
             {{ t("calendar.tabs.bookings") }}
-            <span class="tab-badge">{{ bookings.length }}</span>
+            <span
+              class="tab-badge"
+              :class="{ 'tab-badge--warn': pendingReschedules.length > 0 }"
+              >{{ bookings.length }}</span
+            >
           </button>
           <button
             class="panel-tab"
@@ -235,7 +262,7 @@ function isTaskOverdue(dateStr: string) {
               {{ t("common.loading") }}
             </div>
             <div v-else-if="bookings.length === 0" class="bk-empty">
-              <span class="bk-empty-icon">💍</span>
+              <span class="bk-empty-icon"><Gem :size="40" /></span>
               <p>{{ t("calendar.noBookings") }}</p>
               <p class="bk-empty-sub">
                 {{ t("calendar.noBookingsSub") }}
@@ -243,22 +270,88 @@ function isTaskOverdue(dateStr: string) {
             </div>
             <ul v-else class="bk-list">
               <li v-for="b in bookings" :key="b.id" class="bk-item">
-                <div class="bk-date-badge bk-date-badge--booking">
+                <div
+                  class="bk-date-badge"
+                  :class="
+                    b.status === 'CANCELLED'
+                      ? 'bk-date-badge--cancelled'
+                      : 'bk-date-badge--booking'
+                  "
+                >
                   <span class="bk-month">{{
                     bookingMonth(b.weddingDate!)
                   }}</span>
                   <span class="bk-day">{{ bookingDay(b.weddingDate!) }}</span>
                 </div>
                 <div class="bk-info">
-                  <p class="bk-couple">{{ b.vendorName ?? "Vendor" }}</p>
-                  <p class="bk-weekday">
-                    {{ b.vendorCategory ?? "" }} ·
-                    {{ bookingYear(b.weddingDate!) }}
-                  </p>
+                  <div class="pf-av" :title="b.vendorName ?? 'Vendor'">
+                    <img
+                      v-if="b.vendorProfilePicture"
+                      :src="b.vendorProfilePicture"
+                      class="pf-av-img"
+                      alt=""
+                    />
+                    <template v-else>{{
+                      (b.vendorName?.[0] ?? "?").toUpperCase()
+                    }}</template>
+                  </div>
+                  <div>
+                    <p class="bk-couple">{{ b.vendorName ?? "Vendor" }}</p>
+                    <p class="bk-weekday">
+                      {{ b.vendorCategory ?? "" }} ·
+                      {{ bookingYear(b.weddingDate!) }}
+                    </p>
+                  </div>
                 </div>
-                <span class="bk-status status-confirmed">{{
-                  t("common.booked")
-                }}</span>
+                <span
+                  class="bk-status"
+                  :class="
+                    b.status === 'RESCHEDULE_PENDING'
+                      ? 'status-pending'
+                      : b.status === 'CANCELLED'
+                        ? 'status-cancelled'
+                        : 'status-confirmed'
+                  "
+                  >{{
+                    b.status === "RESCHEDULE_PENDING"
+                      ? t("calendar.reschedulePending")
+                      : b.status === "CANCELLED"
+                        ? t("calendar.bookingCancelled")
+                        : t("common.booked")
+                  }}</span
+                >
+                <!-- Reschedule proposal banner -->
+                <div
+                  v-if="b.status === 'RESCHEDULE_PENDING'"
+                  class="bk-banner bk-banner--reschedule"
+                >
+                  <p class="bk-banner-msg">
+                    {{
+                      t("calendar.rescheduleProposal", {
+                        date: b.proposedDate,
+                      })
+                    }}
+                  </p>
+                  <p v-if="b.proposedNote" class="bk-banner-note">
+                    {{ b.proposedNote }}
+                  </p>
+                  <div class="bk-banner-actions">
+                    <button
+                      class="bk-banner-btn bk-banner-btn--accept"
+                      :disabled="respondBusy === b.id"
+                      @click="respondReschedule(b, true)"
+                    >
+                      {{ t("calendar.acceptProposal") }}
+                    </button>
+                    <button
+                      class="bk-banner-btn bk-banner-btn--decline"
+                      :disabled="respondBusy === b.id"
+                      @click="respondReschedule(b, false)"
+                    >
+                      {{ t("calendar.declineProposal") }}
+                    </button>
+                  </div>
+                </div>
               </li>
             </ul>
           </template>
@@ -272,7 +365,7 @@ function isTaskOverdue(dateStr: string) {
               v-else-if="upcomingCalls.length === 0 && pastCalls.length === 0"
               class="bk-empty"
             >
-              <span class="bk-empty-icon">📹</span>
+              <span class="bk-empty-icon"><Video :size="40" /></span>
               <p>{{ t("videoCalls.noCalls") }}</p>
               <p class="bk-empty-sub">
                 {{ t("calendar.noCallsSub") }}
@@ -297,8 +390,21 @@ function isTaskOverdue(dateStr: string) {
                     }}</span>
                   </div>
                   <div class="bk-info">
-                    <p class="bk-couple">{{ call.vendorName ?? "Vendor" }}</p>
-                    <p class="bk-weekday">{{ callTime(call.scheduledAt) }}</p>
+                    <div class="pf-av" :title="call.vendorName ?? 'Vendor'">
+                      <img
+                        v-if="call.vendorProfilePicture"
+                        :src="call.vendorProfilePicture"
+                        class="pf-av-img"
+                        alt=""
+                      />
+                      <template v-else>{{
+                        (call.vendorName?.[0] ?? "?").toUpperCase()
+                      }}</template>
+                    </div>
+                    <div>
+                      <p class="bk-couple">{{ call.vendorName ?? "Vendor" }}</p>
+                      <p class="bk-weekday">{{ callTime(call.scheduledAt) }}</p>
+                    </div>
                   </div>
                   <span
                     class="bk-status"
@@ -342,8 +448,25 @@ function isTaskOverdue(dateStr: string) {
                       }}</span>
                     </div>
                     <div class="bk-info">
-                      <p class="bk-couple">{{ call.vendorName ?? "Vendor" }}</p>
-                      <p class="bk-weekday">{{ callTime(call.scheduledAt) }}</p>
+                      <div class="pf-av" :title="call.vendorName ?? 'Vendor'">
+                        <img
+                          v-if="call.vendorProfilePicture"
+                          :src="call.vendorProfilePicture"
+                          class="pf-av-img"
+                          alt=""
+                        />
+                        <template v-else>{{
+                          (call.vendorName?.[0] ?? "?").toUpperCase()
+                        }}</template>
+                      </div>
+                      <div>
+                        <p class="bk-couple">
+                          {{ call.vendorName ?? "Vendor" }}
+                        </p>
+                        <p class="bk-weekday">
+                          {{ callTime(call.scheduledAt) }}
+                        </p>
+                      </div>
                     </div>
                     <span
                       class="bk-status"
@@ -371,7 +494,7 @@ function isTaskOverdue(dateStr: string) {
               {{ t("common.loading") }}
             </div>
             <div v-else-if="upcomingTasks.length === 0" class="bk-empty">
-              <span class="bk-empty-icon">✅</span>
+              <span class="bk-empty-icon"><CheckCircle2 :size="40" /></span>
               <p>{{ t("calendar.pendingTasks") }}.</p>
               <p class="bk-empty-sub">{{ t("checklist.addTask") }}.</p>
             </div>
@@ -761,6 +884,10 @@ function isTaskOverdue(dateStr: string) {
   background: var(--color-gold, #c9a84c);
 }
 
+.bk-date-badge--cancelled {
+  background: var(--color-error, #e53e3e);
+}
+
 .bk-date-badge--call {
   background: #7c3aed;
 }
@@ -794,6 +921,37 @@ function isTaskOverdue(dateStr: string) {
 .bk-info {
   flex: 1;
   min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pf-av {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-gold);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  position: relative;
+  transition:
+    transform 0.18s,
+    box-shadow 0.18s;
+}
+.pf-av:hover {
+  transform: scale(3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+}
+.pf-av-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .bk-couple {
@@ -861,5 +1019,68 @@ function isTaskOverdue(dateStr: string) {
   background: var(--chip-red-bg, #fff1f0);
   color: var(--color-error, #e53e3e);
   border: 1px solid var(--color-error, #e53e3e);
+}
+
+/* ── Booking management banners ─────────────────────────── */
+.bk-item {
+  flex-wrap: wrap;
+}
+
+.bk-banner {
+  flex-basis: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-top: 8px;
+  font-size: 0.82rem;
+}
+
+.bk-banner--reschedule {
+  background: var(--chip-amber-bg, #fef9c3);
+  border: 1px solid var(--color-amber, #f59e0b);
+}
+
+.bk-banner-msg {
+  margin: 0 0 6px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.bk-banner-note {
+  margin: 0 0 10px;
+  color: var(--color-muted);
+  font-style: italic;
+  font-size: 0.8rem;
+}
+
+.bk-banner-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.bk-banner-btn {
+  padding: 6px 16px;
+  border-radius: 7px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s;
+}
+
+.bk-banner-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.bk-banner-btn--accept {
+  background: var(--color-gold);
+  color: #fff;
+}
+
+.bk-banner-btn--decline {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-muted);
 }
 </style>

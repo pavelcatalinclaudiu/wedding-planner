@@ -4,6 +4,7 @@ import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { coupleApi } from "@/api/couple.api";
 import type { WeddingWebsite } from "@/types/couple.types";
+import { MapPin } from "lucide-vue-next";
 
 const route = useRoute();
 const { t } = useI18n();
@@ -46,7 +47,7 @@ onMounted(async () => {
           }}
         </p>
         <p v-if="website.location" class="site-location">
-          📍 {{ website.location }}
+          <MapPin :size="14" /> {{ website.location }}
         </p>
       </div>
 

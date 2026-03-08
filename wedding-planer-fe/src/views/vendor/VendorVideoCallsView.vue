@@ -66,6 +66,17 @@ async function onCallScheduled() {
       <h3 class="section-title">{{ t("videoCalls.pastCalls") }}</h3>
       <div class="past-list">
         <div v-for="call in pastCalls" :key="call.id" class="past-row">
+          <div class="pf-av" :title="call.coupleName ?? 'Couple'">
+            <img
+              v-if="call.coupleProfilePicture"
+              :src="call.coupleProfilePicture"
+              class="pf-av-img"
+              alt=""
+            />
+            <template v-else>{{
+              (call.coupleName?.[0] ?? "?").toUpperCase()
+            }}</template>
+          </div>
           <div class="past-info">
             <span class="past-couple">{{ call.coupleName ?? "Couple" }}</span>
             <span class="past-date">{{ formatDate(call.scheduledAt) }}</span>
@@ -155,6 +166,35 @@ h2 {
 .past-date {
   font-size: 0.8rem;
   color: var(--color-muted);
+}
+
+.pf-av {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-gold);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  position: relative;
+  transition:
+    transform 0.18s,
+    box-shadow 0.18s;
+}
+.pf-av:hover {
+  transform: scale(3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+}
+.pf-av-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .call-status {

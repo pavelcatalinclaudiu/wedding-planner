@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { reviewsApi, type Review } from "@/api/reviews.api";
+import { X } from "lucide-vue-next";
 
 const props = defineProps<{
   bookingId: string;
@@ -44,7 +45,7 @@ async function submit() {
 <template>
   <div class="modal-backdrop" @click.self="emit('close')">
     <div class="modal">
-      <button class="close-btn" @click="emit('close')">✕</button>
+      <button class="close-btn" @click="emit('close')"><X :size="18" /></button>
       <h3 class="modal-title">Leave a Review</h3>
       <p class="modal-sub">
         How was your experience with <strong>{{ vendorName }}</strong

@@ -33,7 +33,7 @@ export function useConversation() {
 
   onUnmounted(() => {
     offNewMessage();
-    ws.disconnect();
+    // Do NOT disconnect the shared singleton — just deregister this composable's handler
   });
 
   async function loadForLead(leadId: string) {

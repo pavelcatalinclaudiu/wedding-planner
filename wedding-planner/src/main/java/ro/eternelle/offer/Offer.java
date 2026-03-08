@@ -46,6 +46,9 @@ public class Offer extends PanacheEntityBase {
     @Enumerated(EnumType.STRING)
     public OfferStatus status = OfferStatus.PENDING;
 
+    @Column(name = "viewed_at")
+    public Instant viewedAt;
+
     @Column(name = "created_at")
     public Instant createdAt = Instant.now();
 }

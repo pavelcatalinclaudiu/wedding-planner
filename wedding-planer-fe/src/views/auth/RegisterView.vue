@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
+import { Gem, Sparkles } from "lucide-vue-next";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -25,12 +26,12 @@ const intentQuery = computed(() =>
           class="role-card"
           @click="router.push(`/register/couple${intentQuery}`)"
         >
-          <span class="role-icon">💍</span>
+          <span class="role-icon"><Gem :size="32" /></span>
           <h2>{{ t("auth.register.coupleCard.title") }}</h2>
           <p>{{ t("auth.register.coupleCard.description") }}</p>
         </button>
         <button class="role-card" @click="router.push('/register/vendor')">
-          <span class="role-icon">🎉</span>
+          <span class="role-icon"><Sparkles :size="32" /></span>
           <h2>{{ t("auth.register.vendorCard.title") }}</h2>
           <p>{{ t("auth.register.vendorCard.description") }}</p>
         </button>

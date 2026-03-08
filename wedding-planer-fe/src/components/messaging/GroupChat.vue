@@ -6,6 +6,7 @@ import { useAuthStore } from "@/stores/auth.store";
 import { messagesApi } from "@/api/messages.api";
 import type { ThreadParticipant } from "@/types/message.types";
 import MessageBubble from "./MessageBubble.vue";
+import { UserPlus, X } from "lucide-vue-next";
 
 const props = defineProps<{ threadId: string }>();
 const emit = defineEmits<{ (e: "left"): void }>();
@@ -117,19 +118,7 @@ function avatarInitial(name: string) {
         </div>
         <div class="gc-header-actions">
           <button class="action-btn" title="Manage members" @click="openPanel">
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <circle cx="9" cy="7" r="4" />
-              <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
-              <line x1="19" y1="8" x2="19" y2="14" />
-              <line x1="22" y1="11" x2="16" y2="11" />
-            </svg>
+            <UserPlus :size="18" />
           </button>
           <button
             v-if="isVendor"
@@ -174,7 +163,9 @@ function avatarInitial(name: string) {
       <div v-if="showPanel" class="gc-panel">
         <div class="panel-header">
           <span>Members</span>
-          <button class="close-btn" @click="showPanel = false">✕</button>
+          <button class="close-btn" @click="showPanel = false">
+            <X :size="16" />
+          </button>
         </div>
 
         <div v-if="loadingParticipants" class="panel-loading">Loading…</div>
@@ -197,7 +188,7 @@ function avatarInitial(name: string) {
               title="Remove from chat"
               @click="removeParticipant(p)"
             >
-              ✕
+              <X :size="14" />
             </button>
           </li>
         </ul>

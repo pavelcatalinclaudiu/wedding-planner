@@ -3,6 +3,7 @@ import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useAuthStore } from "@/stores/auth.store";
+import { Check, X } from "lucide-vue-next";
 
 const route = useRoute();
 const authStore = useAuthStore();
@@ -52,7 +53,7 @@ async function resend() {
       </div>
 
       <div v-else-if="status === 'success'" class="state-msg success">
-        <span class="icon">✓</span>
+        <span class="icon"><Check :size="32" /></span>
         <h2>{{ t("auth.verifyEmail.verified") }}</h2>
         <p>{{ t("auth.verifyEmail.active") }}</p>
         <RouterLink to="/login" class="btn-primary">{{
@@ -61,7 +62,7 @@ async function resend() {
       </div>
 
       <div v-else class="state-msg error">
-        <span class="icon">✕</span>
+        <span class="icon"><X :size="32" /></span>
         <h2>{{ t("auth.verifyEmail.failed") }}</h2>
         <p>{{ error }}</p>
         <button class="btn-secondary" @click="resend">

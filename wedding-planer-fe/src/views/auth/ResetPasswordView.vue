@@ -4,6 +4,7 @@ import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useAuthStore } from "@/stores/auth.store";
 import { extractApiError } from "@/api/client";
+import { Check, Mail } from "lucide-vue-next";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -89,7 +90,7 @@ async function setNewPassword() {
           </form>
         </template>
         <div v-else class="success-state">
-          <span class="icon">✉️</span>
+          <span class="icon"><Mail :size="32" /></span>
           <p>{{ t("auth.resetPassword.successRequest") }}</p>
         </div>
       </template>
@@ -139,7 +140,7 @@ async function setNewPassword() {
           </form>
         </template>
         <div v-else class="success-state">
-          <span class="icon">✓</span>
+          <span class="icon"><Check :size="32" /></span>
           <p>
             {{ t("auth.resetPassword.successReset") }}
             <RouterLink to="/login">{{ t("common.signIn") }}</RouterLink>

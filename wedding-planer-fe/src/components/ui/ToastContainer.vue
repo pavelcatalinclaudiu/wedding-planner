@@ -1,12 +1,14 @@
 <script setup lang="ts">
+import type { Component } from "vue";
 import { useToast } from "@/composables/useToast";
+import { Check, X, AlertTriangle, Info } from "lucide-vue-next";
 const { toasts, dismiss } = useToast();
 
-const icons: Record<string, string> = {
-  success: "✓",
-  error: "✕",
-  warn: "!",
-  info: "i",
+const icons: Record<string, Component> = {
+  success: Check,
+  error: X,
+  warn: AlertTriangle,
+  info: Info,
 };
 </script>
 
@@ -21,10 +23,12 @@ const icons: Record<string, string> = {
           :class="`toast-${t.type}`"
           role="alert"
         >
-          <span class="toast-icon">{{ icons[t.type] }}</span>
+          <span class="toast-icon"
+            ><component :is="icons[t.type]" :size="16"
+          /></span>
           <span class="toast-message">{{ t.message }}</span>
           <button class="toast-close" @click="dismiss(t.id)" aria-label="Close">
-            &#10005;
+            <X :size="14" />
           </button>
         </div>
       </TransitionGroup>

@@ -8,6 +8,7 @@ import MessageBubble from "./MessageBubble.vue";
 import SendOfferModal from "@/components/vendor/SendOfferModal.vue";
 import CallBanner from "@/components/video/CallBanner.vue";
 import ScheduleCallModal from "@/components/video/ScheduleCallModal.vue";
+import { Gem, MapPin, ClipboardList, Calendar } from "lucide-vue-next";
 
 const props = defineProps<{
   threadId: string;
@@ -26,6 +27,7 @@ const newMessage = ref("");
 const sending = ref(false);
 const showOfferModal = ref(false);
 const scrollRef = ref<HTMLDivElement | null>(null);
+let offNewMessage: (() => void) | null = null;
 
 const messages = computed(() => messagesStore.messages[props.threadId] ?? []);
 const isVendor = computed(() => authStore.user?.role === "VENDOR");
@@ -57,7 +59,7 @@ onMounted(async () => {
   if (props.dealId) {
     // Connect to the deal's WebSocket channel for live message delivery
     ws.connect(props.dealId);
-    ws.on("NEW_MESSAGE", async () => {
+    offNewMessage = ws.on("NEW_MESSAGE", async () => {
       await messagesStore.fetchMessages(props.threadId);
       await messagesStore.markRead(props.threadId);
     });
@@ -67,7 +69,10 @@ onMounted(async () => {
   if (scrollRef.value) scrollRef.value.scrollTop = scrollRef.value.scrollHeight;
 });
 
-onUnmounted(() => ws.disconnect());
+onUnmounted(() => {
+  // Deregister this component's handler only — do NOT disconnect the shared singleton
+  offNewMessage?.();
+});
 
 async function send() {
   const content = newMessage.value.trim();
@@ -112,10 +117,10 @@ async function onCallScheduled(leadId: string) {
           {{ statusLabel(dealStatus) }}
         </span>
         <span v-if="coupleWeddingDate" class="deal-meta">
-          💒 {{ coupleWeddingDate }}
+          <Gem :size="14" /> {{ coupleWeddingDate }}
         </span>
         <span v-if="coupleLocation" class="deal-meta">
-          📍 {{ coupleLocation }}
+          <MapPin :size="14" /> {{ coupleLocation }}
         </span>
       </div>
       <div class="deal-header-actions">
@@ -124,7 +129,7 @@ async function onCallScheduled(leadId: string) {
           class="offer-btn"
           @click="showOfferModal = true"
         >
-          📋 Send Offer
+          <ClipboardList :size="14" /> Send Offer
         </button>
         <button
           v-if="
@@ -136,7 +141,7 @@ async function onCallScheduled(leadId: string) {
           class="video-call-btn"
           @click="openScheduleModal"
         >
-          📅 Schedule Call
+          <Calendar :size="14" /> Schedule Call
         </button>
         <CallBanner
           v-else-if="activeCall && dealId"

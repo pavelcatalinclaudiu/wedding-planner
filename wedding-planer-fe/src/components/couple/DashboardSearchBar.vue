@@ -4,6 +4,16 @@ import { useRouter } from "vue-router";
 import { useDebounce } from "@/composables/useDebounce";
 import { vendorApi } from "@/api/vendor.api";
 import type { VendorProfile } from "@/types/vendor.types";
+import type { Component } from "vue";
+import {
+  Camera,
+  Landmark,
+  Flower2,
+  Utensils,
+  Music,
+  Search,
+  Clock,
+} from "lucide-vue-next";
 
 const router = useRouter();
 
@@ -16,12 +26,12 @@ const containerRef = ref<HTMLElement | null>(null);
 
 const debouncedQuery = useDebounce(() => query.value, 300);
 
-const categories = [
-  { key: "PHOTOGRAPHER", label: "Photography", icon: "📷" },
-  { key: "VENUE", label: "Venue", icon: "🏛️" },
-  { key: "FLORIST", label: "Florals", icon: "💐" },
-  { key: "CATERER", label: "Catering", icon: "🍽️" },
-  { key: "BAND", label: "Music", icon: "🎵" },
+const categories: { key: string; label: string; icon: Component }[] = [
+  { key: "PHOTOGRAPHER", label: "Photography", icon: Camera },
+  { key: "VENUE", label: "Venue", icon: Landmark },
+  { key: "FLORIST", label: "Florals", icon: Flower2 },
+  { key: "CATERER", label: "Catering", icon: Utensils },
+  { key: "BAND", label: "Music", icon: Music },
 ];
 
 const RECENT_KEY = "eternelle_recent_searches";
@@ -112,7 +122,7 @@ onUnmounted(() =>
 <template>
   <div class="dsb" ref="containerRef">
     <div class="dsb-input-wrap" :class="{ focused: open }">
-      <span class="dsb-icon">🔍</span>
+      <span class="dsb-icon"><Search :size="18" /></span>
       <input
         ref="inputRef"
         v-model="query"
@@ -136,7 +146,7 @@ onUnmounted(() =>
             class="dsb-row dsb-recent"
             @click="goToRecentSearch(s)"
           >
-            <span class="dsb-row-icon">🕐</span>
+            <span class="dsb-row-icon"><Clock :size="14" /></span>
             <span>{{ s }}</span>
           </button>
         </div>
@@ -149,7 +159,7 @@ onUnmounted(() =>
               class="dsb-cat-pill"
               @click="goToCategory(cat.key)"
             >
-              {{ cat.icon }} {{ cat.label }}
+              <component :is="cat.icon" :size="14" /> {{ cat.label }}
             </button>
           </div>
         </div>

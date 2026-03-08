@@ -11,6 +11,7 @@ import ro.eternelle.couple.CoupleProfile;
 import ro.eternelle.couple.CoupleRepository;
 import ro.eternelle.exception.BusinessException;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,6 +36,7 @@ public class BudgetResource {
     public Response addItem(BudgetItem item) {
         CoupleProfile couple = getCouple();
         item.couple = couple;
+        if (item.estimatedCost == null) item.estimatedCost = BigDecimal.ZERO;
         budgetRepository.persist(item);
         return Response.status(Response.Status.CREATED).entity(item).build();
     }
@@ -50,6 +52,7 @@ public class BudgetResource {
         if (updates.category != null)      item.category      = updates.category;
         if (updates.estimatedCost != null) item.estimatedCost = updates.estimatedCost;
         if (updates.actualCost != null)    item.actualCost    = updates.actualCost;
+        if (updates.notes != null)         item.notes         = updates.notes;
         item.isPaid = updates.isPaid;
         return Response.ok(item).build();
     }

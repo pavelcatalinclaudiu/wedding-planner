@@ -72,7 +72,9 @@
             :class="{ active: activeTab === tab.key }"
             @click="activeTab = tab.key"
           >
-            <span class="nav-icon">{{ tab.icon }}</span>
+            <span class="nav-icon"
+              ><component :is="tab.icon" :size="16"
+            /></span>
             <span class="nav-text">{{ tab.label }}</span>
             <span class="nav-count">{{ tabCount(tab.key) }}</span>
           </button>
@@ -86,7 +88,7 @@
           "
           class="celebration-card"
         >
-          🎉 {{ t("checklist.completedMsg") }}
+          <Sparkles :size="16" /> {{ t("checklist.completedMsg") }}
         </div>
       </aside>
 
@@ -100,7 +102,7 @@
 
         <!-- Empty -->
         <div v-else-if="checklistStore.total === 0" class="empty-state">
-          <div class="empty-icon">📋</div>
+          <div class="empty-icon"><ClipboardList :size="48" /></div>
           <h3>{{ t("checklist.noTasks") }}</h3>
           <p>{{ t("checklist.startAdding") }}</p>
           <button class="btn-primary" @click="openAdd">
@@ -156,7 +158,9 @@
                   class="check-btn"
                   @click="checklistStore.toggleItem(item.id)"
                 >
-                  <span class="check-icon">{{ item.done ? "✓" : "" }}</span>
+                  <span class="check-icon"
+                    ><Check v-if="item.done" :size="14"
+                  /></span>
                 </button>
                 <div class="task-body">
                   <span class="task-label">{{ item.label }}</span>
@@ -169,20 +173,20 @@
                       {{ dueDateLabel(item) }}
                     </span>
                     <span v-if="(item as any).notes" class="notes-chip">
-                      📝 {{ t("checklist.noteLabel") }}
+                      <FileText :size="12" /> {{ t("checklist.noteLabel") }}
                     </span>
                   </div>
                 </div>
                 <div class="task-actions">
                   <button class="icon-btn" title="Edit" @click="openEdit(item)">
-                    ✏️
+                    <Pencil :size="14" />
                   </button>
                   <button
                     class="icon-btn danger"
                     title="Delete"
                     @click="deleteTask(item.id)"
                   >
-                    🗑
+                    <Trash2 :size="14" />
                   </button>
                 </div>
               </div>
@@ -205,7 +209,9 @@
                 modal.isEdit ? t("checklist.editTask") : t("checklist.addTask")
               }}
             </h2>
-            <button class="close-btn" @click="closeModal">✕</button>
+            <button class="close-btn" @click="closeModal">
+              <X :size="18" />
+            </button>
           </div>
           <div class="modal-body">
             <div class="form-field">
@@ -262,11 +268,25 @@
 
 <script setup lang="ts">
 import { ref, computed, reactive, onMounted } from "vue";
+import type { Component } from "vue";
 import { useI18n } from "vue-i18n";
 import { useChecklistStore } from "@/stores/checklist.store";
 import { useConfirm } from "@/composables/useConfirm";
 import type { ChecklistItem } from "@/types/couple.types";
 import { format, isBefore, addDays, parseISO } from "date-fns";
+import {
+  List,
+  Clock,
+  AlertCircle,
+  CheckCircle2,
+  Check,
+  X,
+  Sparkles,
+  ClipboardList,
+  FileText,
+  Pencil,
+  Trash2,
+} from "lucide-vue-next";
 
 const { t } = useI18n();
 const checklistStore = useChecklistStore();
@@ -280,11 +300,11 @@ const TIME_PERIODS = [
   "Wedding Week",
 ];
 
-const tabs = computed(() => [
-  { key: "all", label: t("checklist.filters.all"), icon: "☰" },
-  { key: "pending", label: t("checklist.filters.pending"), icon: "⏳" },
-  { key: "overdue", label: t("checklist.filters.overdue"), icon: "🔴" },
-  { key: "done", label: t("checklist.filters.done"), icon: "✅" },
+const tabs = computed<{ key: string; label: string; icon: Component }[]>(() => [
+  { key: "all", label: t("checklist.filters.all"), icon: List },
+  { key: "pending", label: t("checklist.filters.pending"), icon: Clock },
+  { key: "overdue", label: t("checklist.filters.overdue"), icon: AlertCircle },
+  { key: "done", label: t("checklist.filters.done"), icon: CheckCircle2 },
 ]);
 
 const activeTab = ref("all");

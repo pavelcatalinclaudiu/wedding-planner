@@ -34,9 +34,20 @@ public class ConversationService {
 
     // ── Get or fetch conversation for a lead ──────────────────────────────────
 
+    @Transactional
     public ConversationDTO getByLead(UUID leadId, UUID actorUserId) {
         Conversation conv = conversationRepository.findByLead(leadId)
-                .orElseThrow(() -> new BusinessException("Conversation not found for this lead"));
+                .orElseGet(() -> {
+                    // Lazily create conversation for leads created before this feature
+                    Lead lead = leadRepository.findByIdOptional(leadId)
+                            .orElseThrow(() -> new BusinessException("Lead not found"));
+                    Conversation c = new Conversation();
+                    c.lead   = lead;
+                    c.couple = lead.couple;
+                    c.vendor = lead.vendor;
+                    conversationRepository.persist(c);
+                    return c;
+                });
         assertParticipant(conv, actorUserId);
         return ConversationDTO.from(conv);
     }

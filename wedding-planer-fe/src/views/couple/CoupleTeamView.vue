@@ -51,7 +51,7 @@ const emptySlots = computed(() =>
         <div class="vendor-info">
           <p class="vendor-name">{{ lead.vendorName }}</p>
           <p class="vendor-category">
-            {{ lead.vendorCategory?.replace(/_/g, " ") }}
+            {{ t(`categories.${lead.vendorCategory}`) }}
           </p>
         </div>
         <RouterLink :to="`/couple/enquiries`" class="view-link"
@@ -77,14 +77,14 @@ const emptySlots = computed(() =>
         >
           <div class="slot-icon">{{ slot.icon }}</div>
           <div class="vendor-info">
-            <p class="vendor-name">{{ slot.label }}</p>
+            <p class="vendor-name">{{ t(`categories.${slot.key}`) }}</p>
             <p class="vendor-category muted">{{ t("team.notYetBooked") }}</p>
           </div>
           <button
             class="find-btn"
             @click="router.push(`/vendors?category=${slot.key}`)"
           >
-            {{ t("team.findVendor", { label: slot.label }) }}
+            {{ t("team.findVendor", { label: t(`categories.${slot.key}`) }) }}
           </button>
         </div>
       </div>

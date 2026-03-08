@@ -6,6 +6,9 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import ro.eternelle.booking.Booking;
 import ro.eternelle.booking.BookingRepository;
+import ro.eternelle.budget.BudgetItem;
+import ro.eternelle.budget.BudgetRepository;
+import ro.eternelle.couple.CoupleProfile;
 import ro.eternelle.conversation.ConversationMessageType;
 import ro.eternelle.conversation.ConversationService;
 import ro.eternelle.couple.CoupleRepository;
@@ -21,6 +24,7 @@ import ro.eternelle.messaging.MessageService;
 import ro.eternelle.vendor.VendorRepository;
 import ro.eternelle.websocket.WebSocketService;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -31,6 +35,7 @@ public class OfferService {
     @Inject OfferRepository        offerRepository;
     @Inject LeadRepository         leadRepository;
     @Inject BookingRepository      bookingRepository;
+    @Inject BudgetRepository       budgetRepository;
     @Inject CoupleRepository       coupleRepository;
     @Inject VendorRepository       vendorRepository;
     @Inject NotificationService    notificationService;
@@ -107,6 +112,16 @@ public class OfferService {
         booking.totalPrice  = offer.price;
         bookingRepository.persist(booking);
 
+        // Copy event date + vendor city to couple profile if not yet set
+        CoupleProfile coupleProfile = lead.couple;
+        if (coupleProfile.weddingDate == null && lead.eventDate != null) {
+            coupleProfile.weddingDate = lead.eventDate;
+        }
+        if ((coupleProfile.weddingLocation == null || coupleProfile.weddingLocation.isBlank())
+                && lead.vendor.city != null) {
+            coupleProfile.weddingLocation = lead.vendor.city;
+        }
+
         // Block vendor availability for the wedding date
         if (lead.eventDate != null) {
             boolean alreadyBlocked = availabilityRepository
@@ -136,6 +151,23 @@ public class OfferService {
             messageService.ensureVendorInGroupThread(lead.couple, lead.vendor.user);
         } catch (Exception ignored) {}
 
+        // Auto-add to couple's budget tracker
+        try {
+            String categoryLabel = lead.vendor.category != null
+                    ? lead.vendor.category.displayName
+                    : "Other";
+            BudgetItem budgetItem = new BudgetItem();
+            budgetItem.couple        = lead.couple;
+            budgetItem.category      = categoryLabel;
+            budgetItem.name          = categoryLabel;
+            budgetItem.vendorName    = lead.vendor.businessName;
+            budgetItem.estimatedCost = offer.price;
+            budgetItem.actualCost    = offer.price;
+            budgetItem.isPaid        = false;
+            budgetItem.leadId        = lead.id;
+            budgetRepository.persist(budgetItem);
+        } catch (Exception ignored) {}
+
         OfferDTO dto = OfferDTO.from(offer);
         broadcastOfferUpdated(lead.id, dto);
         return dto;
@@ -161,6 +193,21 @@ public class OfferService {
         OfferDTO dto = OfferDTO.from(offer);
         broadcastOfferUpdated(offer.lead.id, dto);
         return dto;
+    }
+
+    // ── Mark viewed (couple action) ──────────────────────────────────────────────────────────────
+
+    @Transactional
+    public OfferDTO markViewed(UUID offerId, UUID actorUserId) {
+        Offer offer = getOfferOrThrow(offerId);
+        if (!offer.lead.couple.user.id.equals(actorUserId)) {
+            throw new BusinessException("Only the couple may mark an offer as viewed");
+        }
+        // Only set once — don't overwrite original view timestamp
+        if (offer.viewedAt == null) {
+            offer.viewedAt = Instant.now();
+        }
+        return OfferDTO.from(offer);
     }
 
     // ── Request revision (couple action) ─────────────────────────────────────────────────────────

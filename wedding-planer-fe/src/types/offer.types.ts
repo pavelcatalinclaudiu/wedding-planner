@@ -10,6 +10,7 @@ export interface Offer {
   price: number;
   expiresAt?: string;
   status: OfferStatus;
+  viewedAt?: string;
   createdAt: string;
 }
 

@@ -4,15 +4,19 @@ export type LeadStatus =
   | "IN_DISCUSSION"
   | "QUOTED"
   | "BOOKED"
-  | "DECLINED";
+  | "DECLINED"
+  | "CANCELLED";
 
 export interface Lead {
   id: string;
   coupleId: string;
   coupleName: string;
+  coupleProfilePicture?: string;
   vendorId: string;
   vendorName: string;
+  vendorProfilePicture?: string;
   vendorCategory: string;
+  vendorCity?: string;
   eventDate?: string;
   budget?: number;
   message?: string;
@@ -34,7 +38,13 @@ export interface Booking {
   notes?: string;
   createdAt: string;
   hasReview: boolean;
+  status?: string;
+  proposedDate?: string;
+  proposedNote?: string;
+  coupleName?: string;
+  coupleProfilePicture?: string;
   vendorName?: string;
+  vendorProfilePicture?: string;
   vendorCategory?: string;
 }
 
@@ -50,7 +60,9 @@ export interface VideoCall {
   status: "PENDING" | "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
   postCallAction?: string;
   coupleName?: string;
+  coupleProfilePicture?: string;
   vendorName?: string;
+  vendorProfilePicture?: string;
   vendorId?: string;
   /** "COUPLE" or "VENDOR" — whoever proposed / last rescheduled this call */
   proposedBy?: "COUPLE" | "VENDOR";

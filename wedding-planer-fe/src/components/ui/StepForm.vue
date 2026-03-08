@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
+import { Check } from "lucide-vue-next";
 
 const props = defineProps<{ steps: string[] }>();
 const emit = defineEmits<{ complete: [] }>();
@@ -28,7 +29,11 @@ defineExpose({ currentStep, next, prev });
         class="step-indicator"
         :class="{ active: i === currentStep, passed: i < currentStep }"
       >
-        <div class="step-dot">{{ i < currentStep ? "✓" : i + 1 }}</div>
+        <div class="step-dot">
+          <Check v-if="i < currentStep" :size="14" /><span v-else>{{
+            i + 1
+          }}</span>
+        </div>
         <span class="step-label">{{ step }}</span>
       </div>
     </div>

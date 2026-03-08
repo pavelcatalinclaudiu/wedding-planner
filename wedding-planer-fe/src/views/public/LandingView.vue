@@ -6,6 +6,24 @@ import { vendorApi } from "@/api/vendor.api";
 import VendorCard from "@/components/vendor/VendorCard.vue";
 import PublicNavbar from "@/components/public/PublicNavbar.vue";
 import type { VendorProfile } from "@/types/vendor.types";
+import type { Component } from "vue";
+import {
+  Camera,
+  Video,
+  Landmark,
+  Flower2,
+  Utensils,
+  Cake,
+  Music,
+  Headphones,
+  Wand2,
+  ClipboardList,
+  MapPin,
+  Search,
+  BadgeCheck,
+  Star,
+  Inbox,
+} from "lucide-vue-next";
 
 const router = useRouter();
 const { t } = useI18n();
@@ -16,30 +34,48 @@ const featuredVendors = ref<VendorProfile[]>([]);
 const loadingFeatured = ref(false);
 const featuredScrollRef = ref<HTMLElement | null>(null);
 
-const categories = computed(() => [
-  {
-    key: "PHOTOGRAPHER",
-    label: t("landing.categories.labels.PHOTOGRAPHER"),
-    icon: "📷",
-  },
-  {
-    key: "VIDEOGRAPHER",
-    label: t("landing.categories.labels.VIDEOGRAPHER"),
-    icon: "🎥",
-  },
-  { key: "VENUE", label: t("landing.categories.labels.VENUE"), icon: "🏛️" },
-  { key: "FLORIST", label: t("landing.categories.labels.FLORIST"), icon: "💐" },
-  { key: "CATERER", label: t("landing.categories.labels.CATERER"), icon: "🍽️" },
-  { key: "CAKE", label: t("landing.categories.labels.CAKE"), icon: "🎂" },
-  { key: "BAND", label: t("landing.categories.labels.BAND"), icon: "🎸" },
-  { key: "DJ", label: t("landing.categories.labels.DJ"), icon: "🎧" },
-  {
-    key: "MAKEUP_ARTIST",
-    label: t("landing.categories.labels.MAKEUP_ARTIST"),
-    icon: "💄",
-  },
-  { key: "PLANNER", label: t("landing.categories.labels.PLANNER"), icon: "📋" },
-]);
+const categories = computed<{ key: string; label: string; icon: Component }[]>(
+  () => [
+    {
+      key: "PHOTOGRAPHER",
+      label: t("landing.categories.labels.PHOTOGRAPHER"),
+      icon: Camera,
+    },
+    {
+      key: "VIDEOGRAPHER",
+      label: t("landing.categories.labels.VIDEOGRAPHER"),
+      icon: Video,
+    },
+    {
+      key: "VENUE",
+      label: t("landing.categories.labels.VENUE"),
+      icon: Landmark,
+    },
+    {
+      key: "FLORIST",
+      label: t("landing.categories.labels.FLORIST"),
+      icon: Flower2,
+    },
+    {
+      key: "CATERER",
+      label: t("landing.categories.labels.CATERER"),
+      icon: Utensils,
+    },
+    { key: "CAKE", label: t("landing.categories.labels.CAKE"), icon: Cake },
+    { key: "BAND", label: t("landing.categories.labels.BAND"), icon: Music },
+    { key: "DJ", label: t("landing.categories.labels.DJ"), icon: Headphones },
+    {
+      key: "MAKEUP_ARTIST",
+      label: t("landing.categories.labels.MAKEUP_ARTIST"),
+      icon: Wand2,
+    },
+    {
+      key: "PLANNER",
+      label: t("landing.categories.labels.PLANNER"),
+      icon: ClipboardList,
+    },
+  ],
+);
 
 const steps = computed(() => [
   {
@@ -88,23 +124,25 @@ const testimonials = [
   },
 ];
 
-const whyItems = computed(() => [
-  {
-    icon: "✦",
-    title: t("landing.why.items.verified.title"),
-    body: t("landing.why.items.verified.body"),
-  },
-  {
-    icon: "★",
-    title: t("landing.why.items.reviews.title"),
-    body: t("landing.why.items.reviews.body"),
-  },
-  {
-    icon: "📬",
-    title: t("landing.why.items.messaging.title"),
-    body: t("landing.why.items.messaging.body"),
-  },
-]);
+const whyItems = computed<{ icon: Component; title: string; body: string }[]>(
+  () => [
+    {
+      icon: BadgeCheck,
+      title: t("landing.why.items.verified.title"),
+      body: t("landing.why.items.verified.body"),
+    },
+    {
+      icon: Star,
+      title: t("landing.why.items.reviews.title"),
+      body: t("landing.why.items.reviews.body"),
+    },
+    {
+      icon: Inbox,
+      title: t("landing.why.items.messaging.title"),
+      body: t("landing.why.items.messaging.body"),
+    },
+  ],
+);
 
 function search_go() {
   router.push({
@@ -163,7 +201,7 @@ onMounted(async () => {
         </p>
         <form class="hero-search" @submit.prevent="search_go">
           <div class="hs-field">
-            <span class="hs-icon">🔍</span>
+            <span class="hs-icon"><Search :size="18" /></span>
             <input
               v-model="search"
               class="hs-input"
@@ -173,7 +211,7 @@ onMounted(async () => {
           </div>
           <div class="hs-sep" />
           <div class="hs-field">
-            <span class="hs-icon">📍</span>
+            <span class="hs-icon"><MapPin :size="18" /></span>
             <input
               v-model="city"
               class="hs-input"
@@ -205,7 +243,9 @@ onMounted(async () => {
             class="cat-tile"
             @click="goCategory(cat.key)"
           >
-            <span class="cat-icon">{{ cat.icon }}</span>
+            <span class="cat-icon"
+              ><component :is="cat.icon" :size="28"
+            /></span>
             <span class="cat-label">{{ cat.label }}</span>
           </button>
         </div>
@@ -284,7 +324,9 @@ onMounted(async () => {
         <h2 class="section-title center">{{ t("landing.why.title") }}</h2>
         <div class="why-grid">
           <div v-for="item in whyItems" :key="item.title" class="why-card">
-            <span class="why-icon">{{ item.icon }}</span>
+            <span class="why-icon"
+              ><component :is="item.icon" :size="24"
+            /></span>
             <h3 class="why-title">{{ item.title }}</h3>
             <p class="why-body">{{ item.body }}</p>
           </div>

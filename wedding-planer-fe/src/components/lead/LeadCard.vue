@@ -3,6 +3,7 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import type { Lead } from "@/types/lead.types";
 import LeadStatusBadge from "./LeadStatusBadge.vue";
+import { Calendar, Euro } from "lucide-vue-next";
 
 const { t, locale } = useI18n();
 
@@ -19,11 +20,9 @@ const emit = defineEmits<{
 
 const budget = computed(() =>
   props.lead.budget
-    ? new Intl.NumberFormat("en-GB", {
-        style: "currency",
-        currency: "GBP",
+    ? new Intl.NumberFormat(locale.value === "ro" ? "ro-RO" : "en", {
         maximumFractionDigits: 0,
-      }).format(props.lead.budget)
+      }).format(props.lead.budget) + " EUR"
     : null,
 );
 
@@ -44,15 +43,40 @@ const canAct = computed(
 <template>
   <div class="lead-card" @click="emit('open', lead)">
     <div class="lead-header">
-      <div class="lead-name">
-        {{ role === "VENDOR" ? lead.coupleName : lead.vendorName }}
+      <div class="lead-identity">
+        <div class="lc-avatar">
+          <img
+            v-if="
+              role === 'VENDOR'
+                ? lead.coupleProfilePicture
+                : lead.vendorProfilePicture
+            "
+            :src="
+              role === 'VENDOR'
+                ? lead.coupleProfilePicture
+                : lead.vendorProfilePicture
+            "
+            class="lc-avatar-img"
+            alt=""
+          />
+          <template v-else>{{
+            role === "VENDOR"
+              ? (lead.coupleName?.[0] ?? "?").toUpperCase()
+              : (lead.vendorName?.[0] ?? "?").toUpperCase()
+          }}</template>
+        </div>
+        <div class="lead-name">
+          {{ role === "VENDOR" ? lead.coupleName : lead.vendorName }}
+        </div>
       </div>
       <LeadStatusBadge :status="lead.status" :perspective="role" />
     </div>
 
     <div class="lead-meta">
-      <span v-if="formattedEventDate">📅 {{ formattedEventDate }}</span>
-      <span v-if="budget">💰 {{ budget }}</span>
+      <span v-if="formattedEventDate"
+        ><Calendar :size="13" /> {{ formattedEventDate }}</span
+      >
+      <span v-if="budget"><Euro :size="13" /> {{ budget }}</span>
       <span v-if="role === 'COUPLE'">{{ lead.vendorCategory }}</span>
     </div>
 
@@ -102,10 +126,47 @@ const canAct = computed(
   justify-content: space-between;
   margin-bottom: 8px;
 }
+.lead-identity {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+.lc-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-gold);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  position: relative;
+  transition:
+    transform 0.18s,
+    box-shadow 0.18s;
+}
+.lc-avatar:hover {
+  transform: scale(3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+}
+.lc-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 .lead-name {
   font-weight: 600;
   font-size: 0.95rem;
   color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .lead-meta {

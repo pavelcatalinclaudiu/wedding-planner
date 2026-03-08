@@ -2,12 +2,16 @@
 import { ref, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useCoupleStore } from "@/stores/couple.store";
+import { Camera, Trash2 } from "lucide-vue-next";
 
 const { t } = useI18n();
 const coupleStore = useCoupleStore();
 const saving = ref(false);
 const saved = ref(false);
 const error = ref("");
+const pictureUploading = ref(false);
+const pictureError = ref("");
+const fileInput = ref<HTMLInputElement | null>(null);
 
 const form = ref({
   partner1Name: "",
@@ -44,6 +48,35 @@ async function save() {
     saving.value = false;
   }
 }
+
+async function onFileChange(e: Event) {
+  const file = (e.target as HTMLInputElement).files?.[0];
+  if (!file) return;
+  pictureUploading.value = true;
+  pictureError.value = "";
+  try {
+    await coupleStore.uploadPicture(file);
+  } catch (err: any) {
+    pictureError.value =
+      err?.response?.data?.message ?? t("profile.couple.pictureError");
+  } finally {
+    pictureUploading.value = false;
+    if (fileInput.value) fileInput.value.value = "";
+  }
+}
+
+async function removePicture() {
+  pictureUploading.value = true;
+  pictureError.value = "";
+  try {
+    await coupleStore.deletePicture();
+  } catch (err: any) {
+    pictureError.value =
+      err?.response?.data?.message ?? t("profile.couple.pictureError");
+  } finally {
+    pictureUploading.value = false;
+  }
+}
 </script>
 
 <template>
@@ -56,7 +89,53 @@ async function save() {
     </div>
 
     <div class="form-card">
-      <p class="section-label">{{ t("profile.couple.partnersSection") }}</p>
+      <!-- Avatar section -->
+      <p class="section-label">{{ t("profile.couple.photoSection") }}</p>
+      <div class="avatar-section">
+        <div class="avatar-wrap">
+          <img
+            v-if="coupleStore.profile?.profilePicture"
+            :src="coupleStore.profile.profilePicture"
+            class="avatar-img"
+            alt="Profile picture"
+          />
+          <div v-else class="avatar-placeholder">
+            <Camera :size="28" />
+          </div>
+          <div v-if="pictureUploading" class="avatar-overlay">…</div>
+        </div>
+        <div class="avatar-actions">
+          <label class="btn-upload" :class="{ disabled: pictureUploading }">
+            <Camera :size="14" />
+            {{
+              coupleStore.profile?.profilePicture
+                ? t("profile.couple.changePicture")
+                : t("profile.couple.uploadPicture")
+            }}
+            <input
+              ref="fileInput"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              style="display: none"
+              :disabled="pictureUploading"
+              @change="onFileChange"
+            />
+          </label>
+          <button
+            v-if="coupleStore.profile?.profilePicture"
+            class="btn-remove-pic"
+            :disabled="pictureUploading"
+            @click="removePicture"
+          >
+            <Trash2 :size="14" /> {{ t("profile.couple.removePicture") }}
+          </button>
+        </div>
+        <p v-if="pictureError" class="form-error">{{ pictureError }}</p>
+      </div>
+
+      <p class="section-label" style="margin-top: 24px">
+        {{ t("profile.couple.partnersSection") }}
+      </p>
       <div class="form-grid">
         <div class="field">
           <label>{{ t("profile.couple.partner1") }}</label>
@@ -204,6 +283,94 @@ label {
   margin: 16px 0 0;
   color: var(--color-error);
   font-size: 0.85rem;
+}
+
+/* Avatar */
+.avatar-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.avatar-wrap {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  background: var(--color-bg-2, #f0ebe3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-muted);
+}
+.avatar-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.4rem;
+}
+.avatar-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.btn-upload {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-gold);
+  color: #fff;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  border: none;
+}
+.btn-upload.disabled {
+  opacity: 0.6;
+  cursor: default;
+  pointer-events: none;
+}
+.btn-upload:not(.disabled):hover {
+  opacity: 0.88;
+}
+.btn-remove-pic {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  color: var(--color-error);
+  border: 1px solid var(--color-error);
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-remove-pic:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.btn-remove-pic:not(:disabled):hover {
+  background: var(--color-error-light, #fef2f2);
 }
 
 .form-actions {

@@ -10,6 +10,8 @@ import ro.eternelle.couple.CoupleRepository;
 import ro.eternelle.vendor.VendorRepository;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Map;
 import java.util.UUID;
 
 @Path("/api/bookings")
@@ -47,8 +49,41 @@ public class BookingResource {
 
     @POST
     @Path("/{id}/deposit")
-    public Response recordDeposit(@PathParam("id") UUID id, java.util.Map<String, Object> body) {
+    public Response recordDeposit(@PathParam("id") UUID id, Map<String, Object> body) {
         BigDecimal amount = new BigDecimal(body.get("amount").toString());
         return Response.ok(bookingService.recordDeposit(id, amount)).build();
+    }
+
+    @DELETE
+    @Path("/{id}")
+    @RolesAllowed("VENDOR")
+    public Response cancelBooking(@PathParam("id") UUID id) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        return vendorRepository.findByUserId(userId)
+                .map(vp -> Response.ok(bookingService.cancelBooking(id, vp.id)).build())
+                .orElse(Response.status(403).build());
+    }
+
+    @POST
+    @Path("/{id}/reschedule")
+    @RolesAllowed("VENDOR")
+    public Response proposeReschedule(@PathParam("id") UUID id, Map<String, Object> body) {
+        UUID      userId       = UUID.fromString(jwt.getSubject());
+        LocalDate proposedDate = LocalDate.parse(body.get("proposedDate").toString());
+        String    note         = body.containsKey("note") ? (String) body.get("note") : null;
+        return vendorRepository.findByUserId(userId)
+                .map(vp -> Response.ok(bookingService.proposeReschedule(id, vp.id, proposedDate, note)).build())
+                .orElse(Response.status(403).build());
+    }
+
+    @POST
+    @Path("/{id}/reschedule/respond")
+    @RolesAllowed("COUPLE")
+    public Response respondReschedule(@PathParam("id") UUID id, Map<String, Object> body) {
+        UUID    userId = UUID.fromString(jwt.getSubject());
+        boolean accept = Boolean.TRUE.equals(body.get("accept"));
+        return coupleRepository.findByUserId(userId)
+                .map(cp -> Response.ok(bookingService.respondReschedule(id, cp.id, accept)).build())
+                .orElse(Response.status(403).build());
     }
 }

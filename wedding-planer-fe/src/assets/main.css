@@ -167,6 +167,13 @@ select {
   font-size: 0.9rem;
 }
 
+/* Hide the browser-native password-reveal eye icon (Edge / IE) so it
+   doesn't double up with the custom show/hide toggle button */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
 h1,
 h2,
 h3,

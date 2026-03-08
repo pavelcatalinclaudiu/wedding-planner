@@ -97,6 +97,7 @@
         "groupChat": "Group Chat",
         "weddingWebsite": "Wedding Website",
         "documentVault": "Document Vault",
+        "seatingChart": "Seating Chart",
         "myProfile": "My Profile"
       }
     },
@@ -200,7 +201,10 @@
       "signIn": "Sign in",
       "errorFillFields": "Please fill in all fields.",
       "errorPasswordMismatch": "Passwords do not match.",
-      "errorFailed": "Registration failed."
+      "errorFailed": "Registration failed.",
+      "knowsDateQuestion": "Do you already know your wedding date and location?",
+      "knowsDateYes": "Yes, I know the date",
+      "knowsDateNo": "Not decided yet"
     },
     "registerVendor": {
       "title": "Create your vendor profile",
@@ -411,6 +415,7 @@
     "welcomeBack": "Welcome back",
     "perfectDay": "Perfect Day",
     "daysToGo": "Days to go",
+    "setWeddingDate": "Add wedding date & location →",
     "widgets": {
       "tasksComplete": "Tasks complete",
       "dueSoon": "due soon",
@@ -510,6 +515,11 @@
     "overBudget": "over budget",
     "leftToSpend": "left to spend",
     "pctSpent": "{pct}% spent",
+    "alertOverBudget": "You're {amount} over budget.",
+    "alertUnallocated": "{amount} of your total budget hasn't been allocated to a category yet.",
+    "alertCategoryOver": "{category} is over its category budget by {amount}.",
+    "alertUnpaidOne": "1 item has actual costs recorded but hasn't been marked as paid.",
+    "alertUnpaidMany": "{count} items have actual costs recorded but haven't been marked as paid.",
     "categoryBreakdown": "Category Breakdown",
     "spendingBreakdown": "Spending Breakdown",
     "actual": "actual",
@@ -519,6 +529,9 @@
     "notes": "Notes",
     "optionalNotes": "Optional notes…",
     "markAsPaid": "Mark as paid",
+    "markAsUnpaid": "Mark as unpaid",
+    "customCategory": "Enter custom category…",
+    "custom": "Custom",
     "saveChanges": "Save Changes",
     "nameRequired": "Name is required.",
     "categoryRequired": "Category is required.",
@@ -657,7 +670,12 @@
     "pendingTasks": "Pending Tasks",
     "noBookings": "No confirmed bookings yet.",
     "noBookingsSub": "Accept a vendor's offer to confirm a date.",
-    "noCallsSub": "Schedule a call from an enquiry conversation."
+    "noCallsSub": "Schedule a call from an enquiry conversation.",
+    "reschedulePending": "Awaiting Your Approval",
+    "rescheduleProposal": "Your vendor proposed a new date: {date}",
+    "bookingCancelled": "Cancelled by vendor",
+    "acceptProposal": "Accept New Date",
+    "declineProposal": "Decline"
   },
 
   "vendors": {
@@ -721,6 +739,7 @@
 
   "leads": {
     "title": "My Enquiries",
+    "requestOfferMessage": "Could you please send me an offer?",
     "vendor": {
       "title": "Inbox",
       "newLead": "New enquiry",
@@ -735,6 +754,7 @@
       "RESPONDED": "Responded",
       "BOOKED": "Booked",
       "DECLINED": "Declined",
+      "CANCELLED": "Cancelled",
       "CLOSED": "Closed",
       "IN_DISCUSSION": "In Discussion",
       "OFFER_SENT": "Offer Sent",
@@ -774,7 +794,7 @@
     "cancelOffer": "Cancel",
     "packageDetails": "Package details",
     "packagePlaceholder": "Describe what's included...",
-    "price": "Price (£)",
+    "price": "Price",
     "expiresOn": "Expires on",
     "pendingOfferAwaiting": "A pending offer is awaiting the couple's response.",
     "cardAccept": "Accept",
@@ -1037,8 +1057,7 @@
     },
     "calendar": {
       "title": "Availability Calendar",
-      "subtitle": "Click a date to block or unblock it for bookings.",
-      "blockedDates": "Blocked Dates",
+      "subtitle": "Manage your upcoming bookings and video calls.",
       "upcomingCalls": "Upcoming Calls",
       "upcomingBookings": "Upcoming Bookings",
       "tabCalls": "Calls",
@@ -1051,14 +1070,27 @@
       "confirmed": "Confirmed",
       "legendBooked": "Booked",
       "legendCall": "Video Call",
-      "legendBlocked": "Blocked",
-      "toggleHint": "👆 Click any date to toggle availability",
       "statusNew": "New Enquiry",
       "statusViewed": "Viewed",
       "statusChat": "Chatting",
       "statusQuoted": "Offer Sent",
       "statusBooked": "Booked",
-      "statusDeclined": "Declined"
+      "statusDeclined": "Declined",
+      "reschedulePending": "Awaiting Couple Approval",
+      "reschedule": "Propose Reschedule",
+      "cancelBooking": "Cancel Booking",
+      "cancelTitle": "Cancel Booking",
+      "cancelBody": "Are you sure you want to cancel the booking with {name}?",
+      "cancelWarning": "The couple will be notified immediately and their budget tracker will be updated.",
+      "keepBooking": "Keep Booking",
+      "cancelBookingConfirm": "Yes, Cancel Booking",
+      "cancelAction": "Cancel",
+      "rescheduleTitle": "Propose New Date",
+      "rescheduleBody": "Suggest a new wedding date for {name}. They will be asked to accept or decline.",
+      "newDate": "New Date",
+      "noteOptional": "Note (optional)",
+      "notePlaceholder": "Let the couple know why you\u2019re proposing a new date\u2026",
+      "sendProposal": "Send Proposal"
     }
   },
 
@@ -1080,7 +1112,12 @@
       "saveChanges": "Save Changes",
       "savedMsg": "✓ Saved!",
       "saveError": "Could not save profile.",
-      "locationPlaceholder": "City, Venue"
+      "locationPlaceholder": "City, Venue",
+      "photoSection": "Profile Photo",
+      "uploadPicture": "Upload Photo",
+      "changePicture": "Change Photo",
+      "removePicture": "Remove",
+      "pictureError": "Failed to update photo."
     }
   },
 
@@ -1117,6 +1154,7 @@
     "replyFrom": "Response from {name}:",
     "priceOnRequest": "Price on request",
     "existingEnquiry": "✓ You already have an active enquiry with this vendor.",
+    "contactAgain": "✶ Send New Enquiry",
     "viewEnquiries": "View Enquiries",
     "sendEnquiryBtn": "✶ Send Enquiry",
     "noObligation": "No obligation.",

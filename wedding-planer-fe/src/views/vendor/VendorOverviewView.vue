@@ -3,18 +3,25 @@ import { computed, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useI18n } from "vue-i18n";
 import { useVendorOverviewStore } from "@/stores/vendorOverview.store";
+import { useVideoCallsStore } from "@/stores/videoCalls.store";
 import StatCard from "@/components/vendor/StatCard.vue";
 import MonthlyLeadsChart from "@/components/vendor/MonthlyLeadsChart.vue";
 import RecentLeadsWidget from "@/components/vendor/RecentLeadsWidget.vue";
 import UpcomingCallsWidget from "@/components/vendor/UpcomingCallsWidget.vue";
 import ProfilePerformanceWidget from "@/components/vendor/ProfilePerformanceWidget.vue";
+import { DollarSign, Inbox, Eye, Star, Zap } from "lucide-vue-next";
 
 const { t, locale } = useI18n();
 
 const store = useVendorOverviewStore();
 const { data, loading } = storeToRefs(store);
+const videoStore = useVideoCallsStore();
 
 onMounted(() => store.fetchOverview());
+
+async function joinCall(callId: string) {
+  await videoStore.joinCall(callId);
+}
 
 function formatCurrency(value?: number): string {
   if (value == null) return "—";
@@ -65,7 +72,7 @@ const responseSub = computed(() =>
     <!-- ── Stat Cards ── -->
     <div class="stat-cards-grid">
       <StatCard
-        emoji="💰"
+        :icon="DollarSign"
         :primary="formatCurrency(data?.revenue?.current)"
         :label="t('vendor.stats.revenueBooked')"
         :trend="data?.revenue?.trend"
@@ -75,7 +82,7 @@ const responseSub = computed(() =>
         :loading="loading"
       />
       <StatCard
-        emoji="📩"
+        :icon="Inbox"
         :primary="data?.leads ? String(data.leads.total) : '—'"
         :label="t('vendor.stats.totalLeads')"
         :trend="data?.leads?.trend"
@@ -85,7 +92,7 @@ const responseSub = computed(() =>
         :loading="loading"
       />
       <StatCard
-        emoji="👁️"
+        :icon="Eye"
         :primary="formatNumber(data?.profileViews?.total)"
         :label="t('vendor.stats.profileViews')"
         :trend="data?.profileViews?.trendPercent"
@@ -95,14 +102,14 @@ const responseSub = computed(() =>
         :loading="loading"
       />
       <StatCard
-        emoji="⭐"
+        :icon="Star"
         :primary="data?.avgRating ? String(data.avgRating.value) : '—'"
         :label="t('vendor.stats.avgRating')"
         :sub="ratingSub"
         :loading="loading"
       />
       <StatCard
-        emoji="⚡"
+        :icon="Zap"
         :primary="data?.responseRate ? `${data.responseRate.percent}%` : '—'"
         :label="t('vendor.stats.responseRate')"
         :trend="data?.responseRate?.trend"
@@ -129,6 +136,7 @@ const responseSub = computed(() =>
       <UpcomingCallsWidget
         :calls="data?.upcomingCalls ?? []"
         :loading="loading"
+        @join="joinCall"
       />
       <ProfilePerformanceWidget
         :data="data?.profilePerformance ?? null"

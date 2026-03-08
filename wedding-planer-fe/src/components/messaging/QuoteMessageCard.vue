@@ -4,6 +4,8 @@ import type { QuotePayload } from "@/types/message.types";
 import { useAuthStore } from "@/stores/auth.store";
 import { offersApi } from "@/api/offers.api";
 import { useLeadsStore } from "@/stores/leads.store";
+import { useBudgetStore } from "@/stores/budget.store";
+import { ClipboardList } from "lucide-vue-next";
 
 const props = defineProps<{ content: string; dealStatus?: string }>();
 const emit = defineEmits<{ (e: "refresh"): void }>();
@@ -71,6 +73,10 @@ async function accept() {
     try {
       await useLeadsStore().fetchCoupleLeads();
     } catch (_) {}
+    // Refresh budget store so the new line item appears in the budget tracker
+    try {
+      await useBudgetStore().fetchBudget();
+    } catch (_) {}
     emit("refresh");
   } catch (e: any) {
     error.value = e?.response?.data?.message ?? "Failed to accept offer";
@@ -94,7 +100,11 @@ async function decline() {
 }
 
 function formatPrice(n: number) {
-  return n?.toLocaleString(undefined, { minimumFractionDigits: 2 });
+  return new Intl.NumberFormat("en", {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0,
+  }).format(n ?? 0);
 }
 
 function formatDate(iso?: string) {
@@ -115,7 +125,7 @@ function formatDate(iso?: string) {
   >
     <!-- Collapsed summary row (click to expand) -->
     <button v-if="!expanded" class="qmc-collapsed" @click="expanded = true">
-      <span class="qmc-icon">📋</span>
+      <span class="qmc-icon"><ClipboardList :size="16" /></span>
       <span class="qmc-package">{{
         quote.packageName ?? "Custom Package"
       }}</span>
@@ -132,7 +142,7 @@ function formatDate(iso?: string) {
     <template v-else>
       <!-- Header with collapse toggle for resolved offers -->
       <div class="qmc-header">
-        <span class="qmc-icon">📋</span>
+        <span class="qmc-icon"><ClipboardList :size="16" /></span>
         <div class="qmc-title-block">
           <p class="qmc-package">{{ quote.packageName ?? "Custom Package" }}</p>
           <span class="qmc-badge" :class="quote.status.toLowerCase()">

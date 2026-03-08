@@ -3,6 +3,7 @@ import { ref, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { subscriptionsApi } from "@/api/subscriptions.api";
 import type { Subscription } from "@/api/subscriptions.api";
+import { Check } from "lucide-vue-next";
 
 const subscription = ref<Subscription | null>(null);
 const loading = ref(false);
@@ -96,7 +97,7 @@ async function cancel() {
             ) as string[]"
             :key="f"
           >
-            ✓ {{ f }}
+            <Check :size="14" /> {{ f }}
           </li>
         </ul>
         <button

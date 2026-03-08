@@ -103,6 +103,37 @@ public class NotificationService {
                 senderName + " sent you a message", conversationId);
     }
 
+    // Booking management notifications
+
+    public void notifyBookingCancelled(UUID coupleUserId, VendorProfile vendor, UUID bookingId) {
+        create(coupleUserId, "BOOKING_CANCELLED",
+                "Booking Cancelled",
+                vendor.businessName + " has cancelled your booking.",
+                bookingId);
+    }
+
+    public void notifyRescheduleProposed(UUID coupleUserId, VendorProfile vendor,
+                                          java.time.LocalDate proposedDate, UUID bookingId) {
+        create(coupleUserId, "BOOKING_RESCHEDULE_PROPOSED",
+                "Reschedule Proposed",
+                vendor.businessName + " proposed a new wedding date: " + proposedDate,
+                bookingId);
+    }
+
+    public void notifyRescheduleAccepted(UUID vendorUserId, CoupleProfile couple, UUID bookingId) {
+        create(vendorUserId, "BOOKING_RESCHEDULE_ACCEPTED",
+                "Reschedule Accepted",
+                buildCoupleName(couple) + " accepted the new date.",
+                bookingId);
+    }
+
+    public void notifyRescheduleDeclined(UUID vendorUserId, CoupleProfile couple, UUID bookingId) {
+        create(vendorUserId, "BOOKING_RESCHEDULE_DECLINED",
+                "Reschedule Declined",
+                buildCoupleName(couple) + " declined the new date. Original date kept.",
+                bookingId);
+    }
+
     //  helpers 
 
     private String buildCoupleName(CoupleProfile couple) {

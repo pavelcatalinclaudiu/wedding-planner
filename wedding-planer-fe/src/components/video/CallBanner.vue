@@ -2,6 +2,7 @@
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useVideoCallsStore } from "@/stores/videoCalls.store";
 import type { VideoCall } from "@/types/lead.types";
+import { Inbox, Clock, Video } from "lucide-vue-next";
 
 const props = defineProps<{
   call: VideoCall;
@@ -77,7 +78,9 @@ async function joinCall() {
     class="call-banner pending"
     :class="{ 'action-required': needsMyResponse }"
   >
-    <span class="banner-icon">{{ needsMyResponse ? "📬" : "⏳" }}</span>
+    <span class="banner-icon"
+      ><Inbox v-if="needsMyResponse" :size="20" /><Clock v-else :size="20"
+    /></span>
     <div class="banner-body">
       <span class="banner-date">{{ formattedDate }}</span>
       <span class="banner-pending-label">{{
@@ -95,7 +98,7 @@ async function joinCall() {
     class="call-banner"
     :class="[call.status.toLowerCase(), { imminent: isImminent }]"
   >
-    <span class="banner-icon">📹</span>
+    <span class="banner-icon"><Video :size="20" /></span>
     <div class="banner-body">
       <span class="banner-date">{{ formattedDate }}</span>
       <span

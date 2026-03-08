@@ -43,6 +43,7 @@ public class VendorService {
     public VendorProfile getById(UUID id) {
         VendorProfile vendor = vendorRepository.findById(id);
         if (vendor == null) throw new BusinessException("Vendor not found");
+        if (!vendor.isActive) throw new BusinessException("Vendor not found");
         vendor.profileViews++;
         return vendor;
     }
@@ -56,7 +57,7 @@ public class VendorService {
         } else if (keyword != null) {
             results = vendorRepository.searchByKeyword(keyword);
         } else {
-            results = vendorRepository.findAll().list();
+            results = vendorRepository.findActiveVendors();
         }
 
         // Filter by date availability if requested

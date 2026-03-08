@@ -11,6 +11,17 @@ import { useAuthRedirect } from "@/composables/useAuthRedirect";
 import EnquiryModal from "@/components/vendor/EnquiryModal.vue";
 import PublicNavbar from "@/components/public/PublicNavbar.vue";
 import type { VendorProfile, VendorPartner } from "@/types/vendor.types";
+import {
+  X,
+  MapPin,
+  Calendar,
+  Star as StarIcon,
+  Globe,
+  MessageSquare,
+  Clock,
+  Camera,
+  Users,
+} from "lucide-vue-next";
 
 const route = useRoute();
 const router = useRouter();
@@ -37,8 +48,29 @@ function formatResponseTime(hours: number | null): string {
   return t("publicVendor.rtFewDays");
 }
 
+const TERMINAL_STATUSES = ["CANCELLED", "DECLINED"] as const;
+
 const existingLead = computed(() =>
-  leadsStore.leads.find((l) => l.vendorId === vendor.value?.id),
+  leadsStore.leads.find(
+    (l) =>
+      l.vendorId === vendor.value?.id &&
+      !TERMINAL_STATUSES.includes(
+        l.status as (typeof TERMINAL_STATUSES)[number],
+      ),
+  ),
+);
+
+/** True when the couple had a past (cancelled/declined) lead but has no active one — allows re-enquiring. */
+const canContactAgain = computed(
+  () =>
+    !existingLead.value &&
+    leadsStore.leads.some(
+      (l) =>
+        l.vendorId === vendor.value?.id &&
+        TERMINAL_STATUSES.includes(
+          l.status as (typeof TERMINAL_STATUSES)[number],
+        ),
+    ),
 );
 
 const isFeatured = computed(
@@ -114,8 +146,9 @@ onMounted(async () => {
     // Clean URL immediately so back-button works correctly
     router.replace({ path: route.path });
 
-    // Honour existing lead — do not open modal redundantly
+    // Honour existing active lead — do not open modal redundantly
     if (existingLead.value) return;
+    // Do allow re-opening when the previous lead was cancelled/declined
 
     // Restore package selection from saved intent (if any)
     const intent = getEnquiryIntent();
@@ -137,7 +170,9 @@ onMounted(async () => {
     <Teleport to="body">
       <div v-if="lightboxPhoto" class="lightbox" @click="lightboxPhoto = null">
         <img :src="lightboxPhoto" class="lb-img" />
-        <button class="lb-close" @click.stop="lightboxPhoto = null">✕</button>
+        <button class="lb-close" @click.stop="lightboxPhoto = null">
+          <X :size="20" />
+        </button>
       </div>
     </Teleport>
 
@@ -193,7 +228,7 @@ onMounted(async () => {
         <div class="hero-info">
           <div class="hero-badges">
             <span v-if="isFeatured" class="badge badge-featured"
-              >✦ {{ t("publicVendor.featured") }}</span
+              ><StarIcon :size="11" /> {{ t("publicVendor.featured") }}</span
             >
             <span class="badge badge-cat">{{
               vendor.category?.replace(/_/g, " ")
@@ -201,7 +236,7 @@ onMounted(async () => {
           </div>
           <h1 class="hero-name">{{ vendor.businessName }}</h1>
           <p class="hero-meta">
-            <span>📍 {{ vendor.city }}</span>
+            <span><MapPin :size="14" /> {{ vendor.city }}</span>
             <span v-if="vendor.averageRating">
               · ★ {{ vendor.averageRating.toFixed(1) }} ({{
                 vendor.reviewCount
@@ -271,7 +306,7 @@ onMounted(async () => {
                 rel="noopener"
                 class="social-link link-web"
               >
-                <span class="social-icon">🌐</span> Website
+                <Globe :size="14" /> Website
               </a>
               <a
                 v-if="vendor.instagram"
@@ -282,7 +317,7 @@ onMounted(async () => {
                 rel="noopener"
                 class="social-link link-ig"
               >
-                <span class="social-icon">📸</span>
+                <Camera :size="14" />
                 {{
                   vendor.instagram.startsWith("@")
                     ? vendor.instagram
@@ -300,7 +335,7 @@ onMounted(async () => {
                 rel="noopener"
                 class="social-link link-fb"
               >
-                <span class="social-icon">👥</span> Facebook
+                <Users :size="14" /> Facebook
               </a>
             </div>
           </section>
@@ -464,7 +499,11 @@ onMounted(async () => {
             </div>
             <template v-else>
               <button class="ep-btn" @click="handleEnquire">
-                {{ t("publicVendor.sendEnquiryBtn") }}
+                {{
+                  canContactAgain
+                    ? t("publicVendor.contactAgain")
+                    : t("publicVendor.sendEnquiryBtn")
+                }}
               </button>
               <p class="ep-note">
                 {{ t("publicVendor.noObligation") }}
@@ -485,26 +524,25 @@ onMounted(async () => {
             <hr class="ep-sep" />
             <div class="ep-details">
               <div class="ep-detail">
-                <span>📍</span><span>{{ vendor.city }}</span>
+                <MapPin :size="14" /><span>{{ vendor.city }}</span>
               </div>
               <div v-if="vendor.yearsExperience" class="ep-detail">
-                <span>⏳</span
-                ><span>{{
+                <Clock :size="14" /><span>{{
                   t("publicVendor.yearsExperience", {
                     n: vendor.yearsExperience,
                   })
                 }}</span>
               </div>
               <div class="ep-detail">
-                <span>💬</span
-                ><span>{{
+                <MessageSquare :size="14" /><span>{{
                   vendor.languages?.join(", ") ||
                   t("publicVendor.defaultLanguage")
                 }}</span>
               </div>
               <div class="ep-detail">
-                <span>📅</span
-                ><span>{{ t("publicVendor.checkAvailability") }}</span>
+                <Calendar :size="14" /><span>{{
+                  t("publicVendor.checkAvailability")
+                }}</span>
               </div>
             </div>
           </div>

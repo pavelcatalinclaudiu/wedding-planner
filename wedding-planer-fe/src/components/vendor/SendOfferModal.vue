@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, reactive } from "vue";
 import { offersApi } from "@/api/offers.api";
+import { X } from "lucide-vue-next";
 
 const props = defineProps<{ leadId: string }>();
 const emit = defineEmits<{ (e: "close"): void; (e: "sent"): void }>();
@@ -63,7 +64,7 @@ async function submit() {
       form.packageName.trim(),
       ...form.items
         .filter((i) => i.name.trim())
-        .map((i) => `- ${i.name}: ${i.quantity}x £${i.unitPrice}`),
+        .map((i) => `- ${i.name}: ${i.quantity}x ${i.unitPrice}`),
     ].join("\n");
     await offersApi.create({
       leadId: props.leadId,
@@ -85,7 +86,9 @@ async function submit() {
     <div class="modal">
       <div class="modal-header">
         <h3>Send an Offer</h3>
-        <button class="close-btn" @click="emit('close')">✕</button>
+        <button class="close-btn" @click="emit('close')">
+          <X :size="18" />
+        </button>
       </div>
 
       <div class="modal-body">

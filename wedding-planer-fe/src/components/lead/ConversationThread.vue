@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, nextTick, watch } from "vue";
 import type { ConversationMessage } from "@/types/conversation.types";
+import { RefreshCw } from "lucide-vue-next";
 
 const props = defineProps<{
   messages: ConversationMessage[];
@@ -37,7 +38,7 @@ function submit() {
       <template v-for="msg in messages" :key="msg.id">
         <!-- System event: offer revision request -->
         <div v-if="msg.type === 'OFFER_REVISION_REQUEST'" class="system-event">
-          <span class="system-event-icon">🔄</span>
+          <span class="system-event-icon"><RefreshCw :size="14" /></span>
           <span class="system-event-text">Revision requested</span>
           <time class="system-event-time">{{
             new Date(msg.sentAt).toLocaleTimeString([], {

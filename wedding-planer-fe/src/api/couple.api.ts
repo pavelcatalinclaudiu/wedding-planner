@@ -18,6 +18,20 @@ export const coupleApi = {
   updateProfile: (data: Partial<CoupleProfileRequest>) =>
     apiClient.put<CoupleProfile>("/couples/me", data),
 
+  uploadPicture: (file: File) => {
+    const form = new FormData();
+    form.append("file", file);
+    return apiClient.post<{ profilePicture: string }>(
+      "/couples/me/picture",
+      form,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      },
+    );
+  },
+
+  deletePicture: () => apiClient.delete("/couples/me/picture"),
+
   // Checklist
   getChecklist: () => apiClient.get<ChecklistItem[]>("/checklist"),
   toggleChecklistItem: (id: string) =>

@@ -2,6 +2,7 @@
 import { onMounted, ref } from "vue";
 import { useVideoCallsStore } from "@/stores/videoCalls.store";
 import { useVideoCall } from "@/composables/useVideoCall";
+import { AlertTriangle } from "lucide-vue-next";
 
 const videoStore = useVideoCallsStore();
 const { join, leave, jitsiError } = useVideoCall();
@@ -49,7 +50,7 @@ async function endCall() {
       </div>
       <div class="call-frame">
         <div v-if="joinError" class="call-error">
-          <p>⚠️ {{ joinError }}</p>
+          <p><AlertTriangle :size="16" /> {{ joinError }}</p>
           <button @click="endCall" class="end-call-btn">Close</button>
         </div>
         <div v-else-if="connecting" class="call-connecting">

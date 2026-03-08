@@ -65,7 +65,12 @@ async function handleLogin() {
           <span class="intent-label">{{ t("auth.login.aboutToContact") }}</span>
           <span class="intent-name">{{ intent.vendorName }}</span>
           <span class="intent-meta">
-            {{ intent.vendorCategory?.replace(/_/g, " ") }} ·
+            {{
+              intent.vendorCategory
+                ? t(`categories.${intent.vendorCategory}`)
+                : ""
+            }}
+            ·
             {{ intent.vendorCity }}
           </span>
         </div>
