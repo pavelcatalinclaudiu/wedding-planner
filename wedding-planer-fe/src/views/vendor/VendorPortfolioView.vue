@@ -32,7 +32,10 @@ onMounted(() => vendorStore.fetchMyProfile());
 <template>
   <div class="portfolio-view">
     <div class="port-header">
-      <h2>{{ t("vendor.portfolio.title") }}</h2>
+      <div>
+        <h2>{{ t("vendor.portfolio.title") }}</h2>
+        <p class="page-sub">{{ t("vendor.portfolio.subtitle") }}</p>
+      </div>
       <button class="upload-btn" @click="fileInputRef?.click()">
         + {{ t("vendor.portfolio.addPhoto") }}
       </button>
@@ -68,13 +71,18 @@ onMounted(() => vendorStore.fetchMyProfile());
 <style scoped>
 .port-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   margin-bottom: 20px;
 }
 h2 {
-  margin: 0;
+  margin: 0 0 4px;
   font-size: 1.4rem;
+}
+.page-sub {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--color-muted);
 }
 .upload-btn {
   background: var(--color-gold);

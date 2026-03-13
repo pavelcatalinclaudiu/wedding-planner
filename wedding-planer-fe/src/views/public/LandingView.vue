@@ -436,7 +436,6 @@ onMounted(async () => {
   padding: 0;
 }
 .landing {
-  font-family: "Inter", system-ui, sans-serif;
   color: #1c1c1c;
   background: #fff;
 }

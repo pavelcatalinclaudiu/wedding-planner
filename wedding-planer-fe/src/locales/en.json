@@ -495,6 +495,7 @@
 
   "budget": {
     "title": "Budget",
+    "subtitle": "Track spending against your wedding budget, item by item.",
     "totalBudget": "Total budget",
     "spent": "Spent",
     "remaining": "Remaining",
@@ -557,6 +558,7 @@
 
   "guests": {
     "title": "Guest List",
+    "subtitle": "Manage RSVPs, meal preferences and seating for all your guests.",
     "addGuest": "Add guest",
     "editGuest": "Edit guest",
     "firstName": "First name",
@@ -566,6 +568,7 @@
     "table": "Table",
     "mealPreference": "Meal preference",
     "rsvpStatus": "RSVP",
+    "invite": "Invite",
     "plusOne": "+1",
     "notes": "Notes",
     "total": "Total guests",
@@ -580,7 +583,6 @@
       "CONFIRMED": "Confirmed",
       "PENDING": "Pending",
       "DECLINED": "Declined",
-      "MAYBE": "Maybe",
       "ATTENDING": "Attending",
       "NOT_ATTENDING": "Not attending"
     },
@@ -594,9 +596,7 @@
       "KOSHER": "Kosher",
       "OTHER": "Other"
     },
-    "maybe": "Maybe",
     "exportCsv": "Export CSV",
-    "songRequests": "Song Requests",
     "tablePlanner": "Table Planner",
     "searchPlaceholder": "Search name / email / table...",
     "allRsvp": "All RSVP",
@@ -605,7 +605,6 @@
     "allDietary": "All Dietary",
     "capacity": "Capacity",
     "noMatch": "No guests match your filters.",
-    "noSongRequests": "No song requests yet.",
     "noTablesAssigned": "No tables assigned yet. Use the Table column in the Guest List tab to assign guests.",
     "unassigned": "Unassigned",
     "importTitle": "Import Guests from CSV",
@@ -616,7 +615,6 @@
     "group": "Group",
     "dietary": "Dietary",
     "dietaryNotes": "Dietary Notes",
-    "songRequest": "Song Request",
     "plusOneName": "+1 Name",
     "bringingPlusOne": "Bringing a +1",
     "childGuest": "Child guest",
@@ -635,6 +633,26 @@
       "friends": "Friends",
       "colleagues": "Colleagues",
       "other": "Other"
+    },
+    "childTag": "child",
+    "setupWebsite": "⚠ Setup website",
+    "setupWebsiteTooltip": "Set up your wedding website to enable invite links",
+    "invite": {
+      "notSentTitle": "Invite the guest first",
+      "sentTitle": "Invite link was sent — waiting for guest to open it",
+      "invited": "Invited",
+      "copyLink": "Copy link",
+      "resendLink": "Resend link",
+      "copied": "Copied",
+      "noWebsiteWarning": "Please set up your wedding website and choose a subdomain first.",
+      "notPublished": "Publish website first",
+      "notPublishedTooltip": "Your wedding website must be published before sending invitations"
+    },
+    "alerts": {
+      "overCapacity": "Over capacity! {confirmed} confirmed vs {estimated} estimated.",
+      "notResponded": "{pending} guests ({percent}%) have not responded yet.",
+      "allResponded": "All guests have responded - you're all set!",
+      "dietaryReminder": "{count} guests have dietary requirements - remember to notify your caterer."
     }
   },
 
@@ -739,9 +757,11 @@
 
   "leads": {
     "title": "My Enquiries",
+    "subtitle": "Enquiries you've sent \u2014 track status and chat with each vendor.",
     "requestOfferMessage": "Could you please send me an offer?",
     "vendor": {
       "title": "Inbox",
+      "subtitle": "Track and respond to enquiries from couples interested in your services.",
       "newLead": "New enquiry",
       "enquiryFrom": "Enquiry from",
       "weddingDate": "Wedding date",
@@ -821,6 +841,7 @@
 
   "videoCalls": {
     "title": "Video Calls",
+    "subtitle": "Scheduled consultations with couples interested in your services.",
     "schedule": "Schedule call",
     "join": "Join call",
     "cancel": "Cancel call",
@@ -860,10 +881,21 @@
     "copy": "Copy link",
     "copied": "Copied!",
     "subtitle": "Share your love story and RSVP link with guests.",
-    "urlSlug": "URL Slug",
+    "urlSlug": "Your Website URL",
     "heroMessage": "Hero Message",
     "ourStory": "Our Story",
+    "coverPhoto": "Cover Photo",
+    "uploadCover": "Click to upload a cover photo",
+    "ceremony": "Ceremony Details",
+    "reception": "Reception Details",
+    "date": "Date & Time",
+    "location": "Location",
+    "shareTitle": "Share Your Website",
     "publishedLabel": "Website is published and visible to guests",
+    "unpublishedLabel": "Website is not published",
+    "publishedHint": "Your website is live and guests can view it.",
+    "unpublishedHint": "Your website is hidden from guests.",
+    "viewLive": "View live",
     "saving": "Saving…",
     "savedMsg": "✓ Saved!",
     "notFound": "Wedding website not found",
@@ -877,6 +909,7 @@
 
   "documents": {
     "title": "Document Vault",
+    "subtitle": "Securely store contracts, invoices and important files in one place.",
     "upload": "Upload document",
     "noDocuments": "No documents uploaded.",
     "download": "Download",
@@ -912,6 +945,7 @@
     },
     "overview": {
       "title": "Overview",
+      "subtitle": "Your business at a glance — revenue, leads, and upcoming events.",
       "totalLeads": "Total enquiries",
       "newLeads": "New enquiries",
       "bookedEvents": "Booked events",
@@ -942,6 +976,7 @@
     },
     "portfolio": {
       "title": "Portfolio",
+      "subtitle": "Manage the photos couples see on your public profile.",
       "addPhoto": "Add photo",
       "noPhotos": "No photos in portfolio.",
       "uploading": "Uploading...",
@@ -950,6 +985,7 @@
     },
     "reviews": {
       "title": "Reviews",
+      "subtitle": "Ratings and written feedback from your booked couples.",
       "noReviews": "No reviews yet.",
       "averageRating": "Average rating",
       "totalReviews": "Total reviews",
@@ -1001,6 +1037,7 @@
     },
     "subscription": {
       "title": "Subscription",
+      "subtitle": "Manage your plan and unlock features as your business grows.",
       "currentPlan": "Current plan",
       "plan": "Plan",
       "renews": "Renews:",
@@ -1039,6 +1076,7 @@
     },
     "profile": {
       "title": "My Profile",
+      "subtitle": "Update your business details, pricing, and public-facing information.",
       "vendorTitle": "Vendor Profile",
       "noCover": "No cover image",
       "changeCover": "Change Profile Picture",
@@ -1070,6 +1108,10 @@
       "confirmed": "Confirmed",
       "legendBooked": "Booked",
       "legendCall": "Video Call",
+      "calSectionTitle": "Availability Overview",
+      "calSectionDesc": "A visual map of your upcoming bookings and scheduled video calls.",
+      "eventsSectionTitle": "Upcoming Events",
+      "eventsSectionDesc": "Manage confirmed weddings and video call appointments.",
       "statusNew": "New Enquiry",
       "statusViewed": "Viewed",
       "statusChat": "Chatting",

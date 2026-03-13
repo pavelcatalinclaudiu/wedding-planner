@@ -20,17 +20,30 @@ import ro.eternelle.notification.NotificationService;
 import ro.eternelle.vendor.AvailabilityRepository;
 import ro.eternelle.vendor.VendorAnalyticsService;
 import ro.eternelle.vendor.VendorAvailability;
+import ro.eternelle.vendor.VendorCategory;
 import ro.eternelle.messaging.MessageService;
 import ro.eternelle.vendor.VendorRepository;
 import ro.eternelle.websocket.WebSocketService;
 
 import java.time.Instant;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class OfferService {
+
+    /** Vendor categories that are auto-added to the couple's group chat upon booking. */
+    private static final Set<VendorCategory> GROUP_CHAT_AUTO_CATEGORIES = EnumSet.of(
+            VendorCategory.VENUE,
+            VendorCategory.PHOTOGRAPHER,
+            VendorCategory.CATERER,
+            VendorCategory.VIDEOGRAPHER,
+            VendorCategory.BAND,
+            VendorCategory.DJ
+    );
 
     @Inject OfferRepository        offerRepository;
     @Inject LeadRepository         leadRepository;
@@ -146,9 +159,13 @@ public class OfferService {
             notificationService.notifyOfferAccepted(lead.vendor.user.id, lead.couple, offer.id);
         } catch (Exception ignored) {}
 
-        // Add vendor to the couple's group planning chat
+        // Auto-add priority-category vendors to the couple's group planning chat.
+        // Other categories can be added manually by the couple.
         try {
-            messageService.ensureVendorInGroupThread(lead.couple, lead.vendor.user);
+            if (lead.vendor.category != null
+                    && GROUP_CHAT_AUTO_CATEGORIES.contains(lead.vendor.category)) {
+                messageService.ensureVendorInGroupThread(lead.couple, lead.vendor.user);
+            }
         } catch (Exception ignored) {}
 
         // Auto-add to couple's budget tracker

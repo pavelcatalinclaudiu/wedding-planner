@@ -48,6 +48,7 @@ public class CoupleProfile extends PanacheEntityBase {
     public CouplePlan plan = CouplePlan.FREE;
 
     @Column(name = "website_subdomain", unique = true)
+    @JsonProperty("subdomain")
     public String websiteSubdomain;
 
     @Column(name = "profile_picture")

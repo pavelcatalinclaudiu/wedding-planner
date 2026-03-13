@@ -42,8 +42,9 @@ async function onCallScheduled() {
 
 <template>
   <div class="calls-view">
-    <div class="calls-header">
+    <div class="page-header">
       <h2>{{ t("videoCalls.title") }}</h2>
+      <p class="page-sub">{{ t("videoCalls.subtitle") }}</p>
     </div>
 
     <!-- Upcoming / active calls -->
@@ -109,16 +110,17 @@ async function onCallScheduled() {
 </template>
 
 <style scoped>
-.calls-view {
-  max-width: 800px;
-}
-
-.calls-header {
+.page-header {
   margin-bottom: 28px;
 }
 h2 {
-  margin: 0;
+  margin: 0 0 4px;
   font-size: 1.4rem;
+}
+.page-sub {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--color-muted);
 }
 
 .calls-section {

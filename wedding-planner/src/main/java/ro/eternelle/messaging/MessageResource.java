@@ -86,6 +86,21 @@ public class MessageResource {
     }
 
     /**
+     * POST /api/messages/threads/{threadId}/participants
+     * Couple manually adds a booked vendor to the group chat.
+     */
+    @POST
+    @Path("/threads/{threadId}/participants")
+    @RolesAllowed("COUPLE")
+    public Response addParticipant(
+            @PathParam("threadId") UUID threadId,
+            AddParticipantRequest req) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        messageService.addVendorToGroupThread(threadId, req.vendorId, userId);
+        return Response.noContent().build();
+    }
+
+    /**
      * DELETE /api/messages/threads/{threadId}/participants/{participantId}
      * Only the couple owner may call this.
      */
@@ -118,5 +133,9 @@ public class MessageResource {
     public static class SendMessageRequest {
         public String content;
         public MessageType type;
+    }
+
+    public static class AddParticipantRequest {
+        public UUID vendorId;
     }
 }

@@ -619,7 +619,7 @@ function isTaskOverdue(dateStr: string) {
 /* ── Two-column body ─────────────────────────────────────────── */
 .cv-body {
   display: grid;
-  grid-template-columns: 3fr 2fr;
+  grid-template-columns: 2fr 2fr;
   gap: 24px;
   align-items: start;
 }

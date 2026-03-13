@@ -47,6 +47,7 @@ public class VendorProfile extends PanacheEntityBase {
     public VendorTier tier = VendorTier.FREE;
 
     @Column(name = "avg_rating", precision = 3, scale = 2)
+    @JsonProperty("averageRating")
     public BigDecimal avgRating = BigDecimal.ZERO;
 
     @Column(name = "review_count")

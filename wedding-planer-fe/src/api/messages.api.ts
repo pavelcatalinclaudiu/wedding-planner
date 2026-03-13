@@ -34,6 +34,12 @@ export const messagesApi = {
       `/messages/threads/${threadId}/participants/${participantId}`,
     ),
 
+  /** Couple manually adds a booked vendor (vendorId = vendor profile id) */
+  addParticipant: (threadId: string, vendorId: string) =>
+    apiClient.post(`/messages/threads/${threadId}/participants`, {
+      vendorId,
+    }),
+
   /** Vendor leaves a group thread */
   leaveThread: (threadId: string) =>
     apiClient.post(`/messages/threads/${threadId}/leave`, {}),

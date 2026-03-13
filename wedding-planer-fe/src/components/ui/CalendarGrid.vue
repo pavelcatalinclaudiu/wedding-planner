@@ -139,7 +139,8 @@ function isTaskOverdue(day: Date) {
   border: 1px solid var(--color-border);
   border-radius: 14px;
   padding: 20px;
-  max-width: 480px;
+  width: 100%;
+  box-sizing: border-box;
 }
 .cal-nav {
   display: flex;

@@ -69,6 +69,10 @@ const responseSub = computed(() =>
 
 <template>
   <div class="overview">
+    <div class="page-header">
+      <h2>{{ t("vendor.overview.title") }}</h2>
+      <p class="page-sub">{{ t("vendor.overview.subtitle") }}</p>
+    </div>
     <!-- ── Stat Cards ── -->
     <div class="stat-cards-grid">
       <StatCard
@@ -147,6 +151,18 @@ const responseSub = computed(() =>
 </template>
 
 <style scoped>
+.page-header {
+  margin-bottom: 4px;
+}
+.page-header h2 {
+  margin: 0 0 4px;
+  font-size: 1.4rem;
+}
+.page-sub {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--color-muted);
+}
 .overview {
   display: flex;
   flex-direction: column;

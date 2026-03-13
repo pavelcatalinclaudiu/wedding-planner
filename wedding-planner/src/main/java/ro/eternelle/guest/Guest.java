@@ -59,6 +59,14 @@ public class Guest extends PanacheEntityBase {
     @Column(name = "dietary")
     public String dietary = "NONE";
 
+    /** Personal invite token — generated when couple clicks Copy Link */
+    @Column(name = "invite_token", unique = true)
+    public String inviteToken;
+
+    /** Set when the guest opens the personal invite link */
+    @Column(name = "invite_opened_at")
+    public Instant inviteOpenedAt;
+
     @Column(name = "dietary_notes")
     public String dietaryNotes;
 

@@ -7,6 +7,8 @@ import type {
   Guest,
   SeatingLayout,
   WeddingWebsite,
+  PublicWeddingWebsite,
+  RsvpRequest,
 } from "@/types/couple.types";
 
 export const coupleApi = {
@@ -66,10 +68,24 @@ export const coupleApi = {
 
   // Website
   getWebsite: () => apiClient.get<WeddingWebsite>("/couples/me/website"),
-  updateWebsite: (data: Partial<WeddingWebsite>) =>
+  updateWebsite: (data: Partial<WeddingWebsite> & { subdomain?: string }) =>
     apiClient.put<WeddingWebsite>("/couples/me/website", data),
-  getPublicWebsite: (slug: string) =>
-    apiClient.get<WeddingWebsite>(`/couples/website/${slug}`),
+  uploadCoverPhoto: (file: File) => {
+    const form = new FormData();
+    form.append("file", file);
+    return apiClient.post<WeddingWebsite>("/couples/me/website/photo", form, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+  previewWebsite: () =>
+    apiClient.get<PublicWeddingWebsite>("/couples/me/website/preview"),
+  getPublicWebsite: (subdomain: string) =>
+    apiClient.get<PublicWeddingWebsite>(`/couples/website/${subdomain}`),
+  submitPublicRsvp: (subdomain: string, data: RsvpRequest) =>
+    apiClient.post(`/couples/website/${subdomain}/rsvp`, data),
+
+  trackVisit: (subdomain: string) =>
+    apiClient.post(`/couples/website/${subdomain}/visit`, {}),
 
   // Documents
   getDocuments: () => apiClient.get("/couples/me/documents"),

@@ -78,7 +78,10 @@ async function uploadCover(e: Event) {
 
 <template>
   <div class="profile-view">
-    <h2>{{ t("vendor.profile.vendorTitle") }}</h2>
+    <div class="page-header">
+      <h2>{{ t("vendor.profile.vendorTitle") }}</h2>
+      <p class="page-sub">{{ t("vendor.profile.subtitle") }}</p>
+    </div>
 
     <div class="cover-section">
       <div class="cover-img-wrap">
@@ -168,8 +171,13 @@ async function uploadCover(e: Event) {
 
 <style scoped>
 h2 {
-  margin: 0 0 20px;
+  margin: 0 0 4px;
   font-size: 1.4rem;
+}
+.page-sub {
+  margin: 0 0 20px;
+  font-size: 0.88rem;
+  color: var(--color-muted);
 }
 .cover-section {
   margin-bottom: 24px;

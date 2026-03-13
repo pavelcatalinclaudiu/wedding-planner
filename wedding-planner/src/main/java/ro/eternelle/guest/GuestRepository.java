@@ -34,4 +34,8 @@ public class GuestRepository implements PanacheRepositoryBase<Guest, UUID> {
             .setParameter("cid", coupleId)
             .getResultList();
     }
+
+    public java.util.Optional<Guest> findByInviteToken(String token) {
+        return find("inviteToken = ?1", token).firstResultOptional();
+    }
 }

@@ -131,9 +131,9 @@ function handleEnquire(e: Event) {
             :key="i"
             :class="[
               'star',
-              i <= Math.round(vendor.averageRating ?? 0) ? 'filled' : '',
+              i <= Math.round(vendor.averageRating ?? 0) ? 'filled' : 'empty',
             ]"
-            >★</span
+            >{{ i <= Math.round(vendor.averageRating ?? 0) ? "★" : "☆" }}</span
           >
         </span>
         <span class="rating-num">{{ vendor.averageRating?.toFixed(1) }}</span>
@@ -306,11 +306,17 @@ function handleEnquire(e: Event) {
   gap: 1px;
 }
 .star {
+  font-family:
+    "Segoe UI Symbol", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+  font-size: 0.88rem;
   color: var(--color-border);
-  font-size: 0.78rem;
+  line-height: 1;
 }
 .star.filled {
   color: var(--color-gold);
+}
+.star.empty {
+  color: var(--color-border);
 }
 .rating-num {
   font-size: 0.8rem;

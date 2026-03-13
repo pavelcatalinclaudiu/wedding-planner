@@ -9,6 +9,7 @@ import ro.eternelle.lead.LeadStatus;
 import ro.eternelle.notification.NotificationService;
 import ro.eternelle.review.ReviewRepository;
 import ro.eternelle.vendor.AvailabilityRepository;
+import ro.eternelle.vendor.VendorAnalyticsService;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -19,11 +20,12 @@ import java.util.stream.Collectors;
 @ApplicationScoped
 public class BookingService {
 
-    @Inject BookingRepository   bookingRepository;
-    @Inject ReviewRepository    reviewRepository;
-    @Inject NotificationService notificationService;
-    @Inject BudgetRepository    budgetRepository;
-    @Inject AvailabilityRepository availabilityRepository;
+    @Inject BookingRepository      bookingRepository;
+    @Inject ReviewRepository        reviewRepository;
+    @Inject NotificationService     notificationService;
+    @Inject BudgetRepository        budgetRepository;
+    @Inject AvailabilityRepository  availabilityRepository;
+    @Inject VendorAnalyticsService  vendorAnalyticsService;
 
     private BookingDTO toDTO(Booking b) {
         return BookingDTO.from(b, reviewRepository.existsByBooking(b.id));
@@ -78,6 +80,12 @@ public class BookingService {
                 availabilityRepository
                         .findByVendorAndDate(b.lead.vendor.id, b.weddingDate)
                         .ifPresent(a -> availabilityRepository.delete(a));
+            }
+        } catch (Exception ignored) {}
+        // Invalidate analytics cache so the conversion rate reflects the cancellation immediately
+        try {
+            if (b.lead != null && b.lead.vendor != null) {
+                vendorAnalyticsService.invalidateOverview(b.lead.vendor.id);
             }
         } catch (Exception ignored) {}
         return toDTO(b);

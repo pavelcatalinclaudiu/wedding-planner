@@ -46,7 +46,10 @@ async function cancel() {
 
 <template>
   <div class="subscription-view">
-    <h2>{{ t("vendor.subscription.title") }}</h2>
+    <div class="page-header">
+      <h2>{{ t("vendor.subscription.title") }}</h2>
+      <p class="page-sub">{{ t("vendor.subscription.subtitle") }}</p>
+    </div>
 
     <div v-if="loading" class="loading">{{ t("common.loading") }}</div>
 
@@ -118,8 +121,13 @@ async function cancel() {
 
 <style scoped>
 h2 {
-  margin: 0 0 24px;
+  margin: 0 0 4px;
   font-size: 1.4rem;
+}
+.page-sub {
+  margin: 0 0 24px;
+  font-size: 0.88rem;
+  color: var(--color-muted);
 }
 .loading {
   color: var(--color-muted);

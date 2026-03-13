@@ -3,7 +3,7 @@
     <!-- Top Header Bar -->
     <div class="page-header">
       <div class="header-left">
-        <h1>{{ t("checklist.pageTitle") }}</h1>
+        <h2>{{ t("checklist.pageTitle") }}</h2>
         <p class="subtitle">{{ t("checklist.subtitle") }}</p>
       </div>
       <button class="btn-primary" @click="openAdd">
@@ -164,6 +164,7 @@
                 </button>
                 <div class="task-body">
                   <span class="task-label">{{ item.label }}</span>
+                  <p v-if="item.notes" class="task-note">{{ item.notes }}</p>
                   <div class="task-meta">
                     <span
                       v-if="item.dueDate"
@@ -171,9 +172,6 @@
                       :class="dueDateClass(item)"
                     >
                       {{ dueDateLabel(item) }}
-                    </span>
-                    <span v-if="(item as any).notes" class="notes-chip">
-                      <FileText :size="12" /> {{ t("checklist.noteLabel") }}
                     </span>
                   </div>
                 </div>
@@ -283,7 +281,6 @@ import {
   X,
   Sparkles,
   ClipboardList,
-  FileText,
   Pencil,
   Trash2,
 } from "lucide-vue-next";
@@ -460,7 +457,7 @@ function openEdit(item: ChecklistItem) {
     label: item.label,
     timePeriod: item.timePeriod || "",
     dueDate: item.dueDate || "",
-    notes: (item as any).notes || "",
+    notes: item.notes || "",
   };
   modal.open = true;
 }
@@ -495,8 +492,6 @@ onMounted(() => {
    PAGE SHELL
 ══════════════════════════════ */
 .checklist-page {
-  padding: 2rem 2rem 3rem;
-  font-family: "Inter", sans-serif;
   color: var(--color-text);
   min-height: 100%;
 }
@@ -506,13 +501,13 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: 2rem;
+  margin-bottom: 24px;
 }
 
-.page-header h1 {
-  font-size: 1.9rem;
+.page-header h2 {
+  font-size: 1.4rem;
   font-weight: 800;
-  margin: 0 0 0.2rem;
+  margin: 0 0 4px;
   letter-spacing: -0.5px;
 }
 
@@ -973,6 +968,15 @@ onMounted(() => {
   color: var(--color-text);
 }
 
+.task-note {
+  margin: 0.2rem 0 0;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  font-style: italic;
+  white-space: pre-line;
+  line-height: 1.4;
+}
+
 .task-meta {
   display: flex;
   gap: 0.4rem;
@@ -980,8 +984,7 @@ onMounted(() => {
   flex-wrap: wrap;
 }
 
-.due-chip,
-.notes-chip {
+.due-chip {
   font-size: 0.74rem;
   padding: 0.15rem 0.55rem;
   border-radius: 999px;
@@ -1003,10 +1006,6 @@ onMounted(() => {
 .due-done {
   background: var(--color-surface-alt);
   color: var(--color-muted);
-}
-.notes-chip {
-  background: var(--color-info-light);
-  color: var(--color-info);
 }
 
 /* ── Task Actions ── */
@@ -1231,9 +1230,6 @@ onMounted(() => {
 }
 
 @media (max-width: 600px) {
-  .checklist-page {
-    padding: 1.25rem 1rem 2rem;
-  }
   .page-header {
     flex-direction: column;
     align-items: flex-start;

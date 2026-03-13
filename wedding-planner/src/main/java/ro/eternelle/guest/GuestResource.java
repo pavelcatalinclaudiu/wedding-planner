@@ -1,5 +1,6 @@
 package ro.eternelle.guest;
 
+import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -95,4 +96,22 @@ public class GuestResource {
         int imported = guestService.importCsv(userId, csvBody);
         return Response.ok(java.util.Map.of("imported", imported)).build();
     }
-}
+    // ── Invite link ─────────────────────────────────────────────────────
+
+    /** Generates/re-uses invite token. Returns { token, url } for the couple to copy. */
+    @POST
+    @Path("/{id}/invite-link")
+    public Response generateInviteLink(@PathParam("id") UUID id) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        String token = guestService.generateInviteToken(id, userId);
+        return Response.ok(java.util.Map.of("token", token)).build();
+    }
+
+    /** Public: opens the invite link, marks the guest as having viewed it,
+     *  and returns guest info so the RSVP form can be prefilled. */
+    @GET
+    @Path("/invite/{token}")
+    @PermitAll
+    public Response openInviteLink(@PathParam("token") String token) {
+        return Response.ok(guestService.openInviteLink(token)).build();
+    }}

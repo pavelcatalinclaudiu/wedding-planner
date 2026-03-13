@@ -163,7 +163,10 @@ async function submitOffer() {
     <!-- Lead List Panel -->
     <aside class="lead-panel">
       <div class="panel-header">
-        <h2>{{ t("leads.vendor.title") }}</h2>
+        <div>
+          <h2>{{ t("leads.vendor.title") }}</h2>
+          <p class="panel-sub">{{ t("leads.vendor.subtitle") }}</p>
+        </div>
         <select v-model="statusFilter" class="filter-select">
           <option value="">{{ t("leads.filterAll") }}</option>
           <option value="NEW">{{ t("leads.filterNew") }}</option>
@@ -434,13 +437,19 @@ async function submitOffer() {
 }
 .panel-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   padding: 20px 20px 12px;
   border-bottom: 1px solid var(--color-border);
   position: sticky;
   top: 0;
   z-index: 1;
+}
+.panel-sub {
+  margin: 2px 0 0;
+  font-size: 0.82rem;
+  color: var(--color-muted);
+  line-height: 1.4;
 }
 .panel-header h2 {
   margin: 0;

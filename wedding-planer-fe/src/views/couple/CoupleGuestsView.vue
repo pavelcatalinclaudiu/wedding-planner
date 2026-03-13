@@ -2,7 +2,10 @@
 import { ref, computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useGuestsStore } from "@/stores/guests.store";
+import { useCoupleStore } from "@/stores/couple.store";
 import { guestsApi } from "@/api/guests.api";
+import { coupleApi } from "@/api/couple.api";
+import { useToast } from "@/composables/useToast";
 import { useDebounce } from "@/composables/useDebounce";
 import { useConfirm } from "@/composables/useConfirm";
 import type {
@@ -15,9 +18,11 @@ import type {
 
 const { t } = useI18n();
 const store = useGuestsStore();
+const coupleStore = useCoupleStore();
+const toast = useToast();
 
 // -- Tabs ------------------------------------------------------------------
-const activeTab = ref<"list" | "songs" | "tables">("list");
+const activeTab = ref<"list" | "tables">("list");
 
 // -- Filters ---------------------------------------------------------------
 const search = ref("");
@@ -78,17 +83,23 @@ const alerts = computed(() => {
   if (s.overCapacity)
     msgs.push({
       type: "error",
-      text: `Over capacity! ${s.confirmed} confirmed vs ${s.estimatedCapacity} estimated.`,
+      text: t("guests.alerts.overCapacity", {
+        confirmed: s.confirmed,
+        estimated: s.estimatedCapacity,
+      }),
     });
   if (!s.overCapacity && s.pending > 0 && s.pending / s.total > 0.2)
     msgs.push({
       type: "warn",
-      text: `${s.pending} guests (${Math.round((s.pending / s.total) * 100)}%) have not responded yet.`,
+      text: t("guests.alerts.notResponded", {
+        pending: s.pending,
+        percent: Math.round((s.pending / s.total) * 100),
+      }),
     });
-  if (s.confirmed > 0 && s.pending === 0 && s.maybe === 0)
+  if (s.confirmed > 0 && s.pending === 0)
     msgs.push({
       type: "ok",
-      text: "All guests have responded - you're all set!",
+      text: t("guests.alerts.allResponded"),
     });
   const dietaryCount = Object.entries(s.byDietary)
     .filter(([k, v]) => k !== "NONE" && v > 0)
@@ -96,13 +107,13 @@ const alerts = computed(() => {
   if (dietaryCount > 0)
     msgs.push({
       type: "warn",
-      text: `${dietaryCount} guests have dietary requirements - remember to notify your caterer.`,
+      text: t("guests.alerts.dietaryReminder", { count: dietaryCount }),
     });
   return msgs;
 });
 
 // -- RSVP quick-toggle -----------------------------------------------------
-const rsvpCycle: RsvpStatus[] = ["PENDING", "CONFIRMED", "DECLINED", "MAYBE"];
+const rsvpCycle: RsvpStatus[] = ["PENDING", "CONFIRMED", "DECLINED"];
 
 async function cycleRsvp(guest: Guest) {
   const nextIdx = (rsvpCycle.indexOf(guest.rsvpStatus) + 1) % rsvpCycle.length;
@@ -126,7 +137,6 @@ function buildRequest(g: Guest): GuestRequest {
     dietary: g.dietary,
     dietaryNotes: g.dietaryNotes,
     tableAssignment: g.tableAssignment,
-    songRequest: g.songRequest,
     notes: g.notes,
     isChildGuest: g.isChildGuest,
   };
@@ -152,7 +162,6 @@ function emptyForm(): GuestRequest {
     dietary: "NONE",
     dietaryNotes: "",
     tableAssignment: "",
-    songRequest: "",
     notes: "",
     isChildGuest: false,
   };
@@ -184,16 +193,29 @@ async function saveGuest() {
 }
 
 async function confirmDelete(g: Guest) {
+  const companion = store.guests.find((c) => c.invitedById === g.id);
   const ok = await useConfirm().ask(
-    `Remove ${g.fullName} from the guest list?`,
+    companion
+      ? `Remove ${g.fullName} and their +1 (${companion.fullName || "+1"}) from the guest list?`
+      : `Remove ${g.fullName} from the guest list?`,
     { title: "Remove Guest", confirmText: "Remove" },
   );
-  if (ok) await store.removeGuest(g.id);
+  if (ok) {
+    if (companion) await store.removeGuest(companion.id);
+    await store.removeGuest(g.id);
+  }
 }
 
 // -- Inline table assignment -----------------------------------------------
 async function setTable(g: Guest, table: string) {
   await store.updateGuest(g.id, { ...buildRequest(g), tableAssignment: table });
+  const companion = store.guests.find((c) => c.invitedById === g.id);
+  if (companion) {
+    await store.updateGuest(companion.id, {
+      ...buildRequest(companion),
+      tableAssignment: table,
+    });
+  }
 }
 
 // -- CSV Import modal ------------------------------------------------------
@@ -218,9 +240,19 @@ async function runImport() {
 }
 
 // -- Lifecycle -------------------------------------------------------------
+const websiteSubdomain = ref<string | null>(null);
+const websitePublished = ref(false);
+
 onMounted(async () => {
   await store.fetchGuests();
-  await store.fetchSongs();
+  if (!coupleStore.profile) await coupleStore.fetchProfile();
+  try {
+    const ws = await coupleApi.getWebsite();
+    websiteSubdomain.value = ws.data?.subdomain ?? null;
+    websitePublished.value = ws.data?.published ?? false;
+  } catch {
+    // website not set up yet
+  }
 });
 
 // -- CSV export ------------------------------------------------------------
@@ -242,7 +274,6 @@ const rsvpLabel = computed<Record<string, string>>(() => ({
   CONFIRMED: t("guests.statuses.CONFIRMED"),
   DECLINED: t("guests.statuses.DECLINED"),
   PENDING: t("guests.statuses.PENDING"),
-  MAYBE: t("guests.statuses.MAYBE"),
 }));
 const dietaryLabel = computed<Record<string, string>>(() => ({
   NONE: t("guests.meals.NONE"),
@@ -252,6 +283,17 @@ const dietaryLabel = computed<Record<string, string>>(() => ({
   HALAL: t("guests.meals.HALAL"),
   KOSHER: t("guests.meals.KOSHER"),
   OTHER: t("guests.meals.OTHER"),
+}));
+const sideLabel = computed<Record<string, string>>(() => ({
+  BOTH: t("guests.sideOptions.both"),
+  BRIDE: t("guests.sideOptions.bride"),
+  GROOM: t("guests.sideOptions.groom"),
+}));
+const groupLabel = computed<Record<string, string>>(() => ({
+  FAMILY: t("guests.groupOptions.family"),
+  FRIENDS: t("guests.groupOptions.friends"),
+  COLLEAGUES: t("guests.groupOptions.colleagues"),
+  OTHER: t("guests.groupOptions.other"),
 }));
 
 // -- Table Planner ---------------------------------------------------------
@@ -268,13 +310,48 @@ function guestsAtTable(table: string) {
 }
 
 const newTableName = ref("");
+
+// -- Invite link -----------------------------------------------------------
+const copyingLink = ref(new Set<string>());
+const copiedLink = ref(new Set<string>());
+
+async function copyInviteLink(g: Guest) {
+  const subdomain = websiteSubdomain.value;
+  if (!subdomain) {
+    toast.warn(t("guests.invite.noWebsiteWarning"));
+    return;
+  }
+  copyingLink.value = new Set([...copyingLink.value, g.id]);
+  try {
+    const res = await guestsApi.generateInviteLink(g.id);
+    const token = res.data.token;
+    const base = window.location.origin;
+    const url = `${base}/w/${subdomain}?guest=${token}`;
+
+    await navigator.clipboard.writeText(url);
+    await store.fetchGuests();
+    copiedLink.value = new Set([...copiedLink.value, g.id]);
+    setTimeout(() => {
+      const next = new Set(copiedLink.value);
+      next.delete(g.id);
+      copiedLink.value = next;
+    }, 2000);
+  } finally {
+    const next = new Set(copyingLink.value);
+    next.delete(g.id);
+    copyingLink.value = next;
+  }
+}
 </script>
 
 <template>
   <div class="guests-view">
     <!-- Page header -->
     <div class="page-header">
-      <h2>{{ t("guests.title") }}</h2>
+      <div>
+        <h2>{{ t("guests.title") }}</h2>
+        <p class="page-sub">{{ t("guests.subtitle") }}</p>
+      </div>
       <div class="header-actions">
         <button class="btn-outline" @click="showImport = true">
           &#8679; {{ t("guests.importCsv") }}
@@ -305,10 +382,6 @@ const newTableName = ref("");
       <div class="stat pending">
         <span class="stat-num">{{ store.stats.pending }}</span>
         <span class="stat-label">{{ t("guests.pending") }}</span>
-      </div>
-      <div class="stat maybe">
-        <span class="stat-num">{{ store.stats.maybe }}</span>
-        <span class="stat-label">{{ t("guests.maybe") }}</span>
       </div>
       <div class="progress-wrap" v-if="store.stats.estimatedCapacity > 0">
         <div class="progress-label">
@@ -345,15 +418,6 @@ const newTableName = ref("");
         {{ t("guests.title") }}
       </button>
       <button
-        :class="{ active: activeTab === 'songs' }"
-        @click="
-          activeTab = 'songs';
-          store.fetchSongs();
-        "
-      >
-        {{ t("guests.songRequests") }}
-      </button>
-      <button
         :class="{ active: activeTab === 'tables' }"
         @click="activeTab = 'tables'"
       >
@@ -378,7 +442,6 @@ const newTableName = ref("");
           </option>
           <option value="DECLINED">{{ t("guests.statuses.DECLINED") }}</option>
           <option value="PENDING">{{ t("guests.statuses.PENDING") }}</option>
-          <option value="MAYBE">{{ t("guests.statuses.MAYBE") }}</option>
         </select>
 
         <select v-model="filterSide">
@@ -412,12 +475,6 @@ const newTableName = ref("");
           <option value="KOSHER">{{ t("guests.meals.KOSHER") }}</option>
           <option value="OTHER">{{ t("guests.meals.OTHER") }}</option>
         </select>
-
-        <span class="filter-count"
-          >{{ filtered.length }} guest{{
-            filtered.length !== 1 ? "s" : ""
-          }}</span
-        >
       </div>
 
       <!-- Table -->
@@ -435,6 +492,7 @@ const newTableName = ref("");
               <th @click="sort('rsvpStatus')" class="sortable">
                 {{ t("guests.rsvpStatus") }}{{ sortHeader("rsvpStatus") }}
               </th>
+              <th>{{ t("guests.invite") }}</th>
               <th @click="sort('side')" class="sortable">
                 {{ t("guests.side") }}{{ sortHeader("side") }}
               </th>
@@ -460,16 +518,28 @@ const newTableName = ref("");
               <td>
                 <div class="guest-name">
                   {{ g.fullName }}
-                  <span v-if="g.isChildGuest" class="tag child-tag">child</span>
+                  <span v-if="g.isChildGuest" class="tag child-tag">{{
+                    t("guests.childTag")
+                  }}</span>
                 </div>
                 <div class="guest-sub" v-if="g.email">{{ g.email }}</div>
                 <div class="guest-sub" v-if="g.phone">{{ g.phone }}</div>
-                <div class="guest-sub music" v-if="g.songRequest">
-                  &#9836; {{ g.songRequest }}
-                </div>
               </td>
               <td>
+                <span
+                  v-if="(g.inviteStatus ?? 'NOT_INVITED') === 'NOT_INVITED'"
+                  class="muted rsvp-not-invited"
+                  :title="t('guests.invite.notSentTitle')"
+                  >—</span
+                >
+                <span
+                  v-else-if="g.inviteStatus === 'LINK_SENT'"
+                  class="rsvp-badge link-sent"
+                  :title="t('guests.invite.sentTitle')"
+                  >{{ t("guests.invite.invited") }}</span
+                >
                 <button
+                  v-else
                   class="rsvp-badge"
                   :class="g.rsvpStatus.toLowerCase()"
                   @click="cycleRsvp(g)"
@@ -478,11 +548,50 @@ const newTableName = ref("");
                   {{ rsvpLabel[g.rsvpStatus] }}
                 </button>
               </td>
-              <td>
-                <span class="tag">{{ g.side }}</span>
+              <td class="invite-cell">
+                <RouterLink
+                  v-if="!websiteSubdomain"
+                  to="/couple/website"
+                  class="setup-website-link"
+                  :title="t('guests.setupWebsiteTooltip')"
+                >
+                  {{ t("guests.setupWebsite") }}
+                </RouterLink>
+                <button
+                  v-else-if="!websitePublished"
+                  class="icon-btn copy-link-btn unpublished"
+                  disabled
+                  :title="t('guests.invite.notPublishedTooltip')"
+                >
+                  🔒 {{ t("guests.invite.notPublished") }}
+                </button>
+                <button
+                  v-else
+                  class="icon-btn copy-link-btn"
+                  :disabled="copyingLink.has(g.id)"
+                  @click="copyInviteLink(g)"
+                  :title="
+                    copiedLink.has(g.id)
+                      ? t('guests.invite.copied') + '!'
+                      : g.inviteStatus !== 'NOT_INVITED'
+                        ? t('guests.invite.resendLink')
+                        : t('guests.invite.copyLink')
+                  "
+                >
+                  {{
+                    copiedLink.has(g.id)
+                      ? "✓ " + t("guests.invite.copied")
+                      : g.inviteStatus !== "NOT_INVITED"
+                        ? "🔗 " + t("guests.invite.resendLink")
+                        : "🔗 " + t("guests.invite.copyLink")
+                  }}
+                </button>
               </td>
               <td>
-                <span class="tag">{{ g.guestGroup }}</span>
+                <span class="tag">{{ sideLabel[g.side] }}</span>
+              </td>
+              <td>
+                <span class="tag">{{ groupLabel[g.guestGroup] }}</span>
               </td>
               <td>
                 <span v-if="g.dietary !== 'NONE'" class="tag dietary-tag">{{
@@ -527,18 +636,6 @@ const newTableName = ref("");
       </div>
     </template>
 
-    <!-- ============ SONG REQUESTS TAB ============ -->
-    <template v-if="activeTab === 'songs'">
-      <div v-if="store.songs.length === 0" class="empty">
-        {{ t("guests.noSongRequests") }}
-      </div>
-      <ul v-else class="songs-list">
-        <li v-for="song in store.songs" :key="song" class="song-item">
-          &#9836; {{ song }}
-        </li>
-      </ul>
-    </template>
-
     <!-- ============ TABLE PLANNER TAB ============ -->
     <template v-if="activeTab === 'tables'">
       <div class="table-planner">
@@ -550,7 +647,13 @@ const newTableName = ref("");
           />
         </div>
 
-        <div v-if="tableNames.length === 0" class="empty">
+        <div
+          v-if="
+            tableNames.length === 0 &&
+            store.guests.filter((g) => !g.tableAssignment).length === 0
+          "
+          class="empty"
+        >
           {{ t("guests.noTablesAssigned") }}
         </div>
 
@@ -674,7 +777,6 @@ const newTableName = ref("");
               <option value="DECLINED">
                 {{ t("guests.statuses.DECLINED") }}
               </option>
-              <option value="MAYBE">{{ t("guests.statuses.MAYBE") }}</option>
             </select>
           </label>
           <label>
@@ -711,15 +813,6 @@ const newTableName = ref("");
               placeholder="Table 1"
             />
           </label>
-          <label>
-            {{ t("guests.songRequest") }}
-            <input
-              v-model="form.songRequest"
-              class="fi"
-              placeholder="Song you'd love to hear"
-            />
-          </label>
-
           <label style="grid-column: span 2">
             {{ t("guests.notes") }}
             <textarea
@@ -821,15 +914,20 @@ const newTableName = ref("");
 /* -- Header --------------------------------------------------------------- */
 .page-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 12px;
   margin-bottom: 20px;
 }
 .page-header h2 {
-  margin: 0;
+  margin: 0 0 4px;
   font-size: 1.4rem;
+}
+.page-sub {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--color-muted);
 }
 .header-actions {
   display: flex;
@@ -902,9 +1000,6 @@ const newTableName = ref("");
 }
 .stat.pending .stat-num {
   color: var(--color-gold);
-}
-.stat.maybe .stat-num {
-  color: #8e44ad;
 }
 .progress-wrap {
   flex: 1;
@@ -1001,11 +1096,6 @@ const newTableName = ref("");
   background: var(--color-white, #fff);
   cursor: pointer;
 }
-.filter-count {
-  font-size: 0.82rem;
-  color: var(--color-muted);
-  margin-left: 4px;
-}
 
 /* -- Guest table ---------------------------------------------------------- */
 .table-wrap {
@@ -1052,9 +1142,6 @@ const newTableName = ref("");
   color: var(--color-muted);
   margin-top: 1px;
 }
-.guest-sub.music {
-  color: #8e44ad;
-}
 .muted {
   color: var(--color-muted);
 }
@@ -1081,12 +1168,77 @@ const newTableName = ref("");
   background: var(--chip-amber-bg, #fef9e7);
   color: var(--color-gold);
 }
-.rsvp-badge.maybe {
-  background: #f5eef8;
-  color: #8e44ad;
+.rsvp-badge.link-sent {
+  background: #eaf4fb;
+  color: #2e86c1;
+  cursor: default;
 }
 .rsvp-badge:hover {
   filter: brightness(0.93);
+}
+
+/* -- Invite cell ---------------------------------------------------------- */
+.invite-cell {
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.invite-badge {
+  display: inline-block;
+  border-radius: 10px;
+  padding: 2px 9px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+.invite-badge.not-invited {
+  background: var(--color-surface);
+  color: var(--color-muted, #999);
+  border: 1px solid var(--color-border);
+}
+.invite-badge.link-sent {
+  background: #eaf4fb;
+  color: #2e86c1;
+}
+.invite-badge.pending {
+  background: var(--chip-amber-bg, #fef9e7);
+  color: var(--color-gold);
+}
+.invite-badge.accepted {
+  background: var(--chip-green-bg, #eafaf1);
+  color: var(--color-green, #27ae60);
+}
+.invite-badge.declined {
+  background: var(--chip-red-bg, #fde8e8);
+  color: var(--color-error);
+}
+.copy-link-btn {
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+.copy-link-btn.unpublished {
+  opacity: 0.55;
+  cursor: not-allowed;
+  border-color: var(--color-amber, #e67e22);
+  color: var(--color-amber, #e67e22);
+}
+.setup-website-link {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-amber, #e67e22);
+  text-decoration: none;
+  border: 1px solid var(--color-amber, #e67e22);
+  border-radius: 4px;
+  padding: 2px 8px;
+  white-space: nowrap;
+  display: inline-block;
+}
+.setup-website-link:hover {
+  background: var(--color-amber-light, #fef9e7);
+}
+.rsvp-not-invited {
+  font-size: 0.88rem;
+  padding: 3px 10px;
+  display: inline-block;
 }
 
 /* -- Tags ----------------------------------------------------------------- */
@@ -1153,23 +1305,6 @@ const newTableName = ref("");
   color: var(--color-error);
 }
 
-/* -- Songs list ----------------------------------------------------------- */
-.songs-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.song-item {
-  padding: 10px 16px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  font-size: 0.9rem;
-}
-
 /* -- Table planner -------------------------------------------------------- */
 .table-planner {
   display: flex;
@@ -1218,9 +1353,6 @@ const newTableName = ref("");
 }
 .rsvp-dot.pending {
   background: var(--color-gold);
-}
-.rsvp-dot.maybe {
-  background: #8e44ad;
 }
 .planner-add {
   width: 100%;

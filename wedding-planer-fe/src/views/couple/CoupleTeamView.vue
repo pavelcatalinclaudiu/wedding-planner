@@ -35,8 +35,10 @@ const emptySlots = computed(() =>
 
 <template>
   <div class="team-view">
-    <h2>{{ t("team.title") }}</h2>
-    <p class="subtitle">{{ t("team.subtitle") }}</p>
+    <div class="page-header">
+      <h2>{{ t("team.title") }}</h2>
+      <p class="subtitle">{{ t("team.subtitle") }}</p>
+    </div>
 
     <!-- Confirmed vendors -->
     <div v-if="confirmedVendors.length" class="vendor-grid">

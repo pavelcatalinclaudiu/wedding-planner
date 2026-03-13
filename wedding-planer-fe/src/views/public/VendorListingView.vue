@@ -411,7 +411,6 @@ onMounted(fetchVendors);
 .listing-page {
   min-height: 100vh;
   background: #f8f8f6;
-  font-family: "Inter", system-ui, sans-serif;
   padding-top: 64px;
 }
 

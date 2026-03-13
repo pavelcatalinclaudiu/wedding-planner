@@ -495,6 +495,7 @@
 
   "budget": {
     "title": "Buget",
+    "subtitle": "Urmărește cheltuielile față de bugetul de nuntă, element cu element.",
     "totalBudget": "Buget total",
     "spent": "Cheltuit",
     "remaining": "Rămas",
@@ -557,6 +558,7 @@
 
   "guests": {
     "title": "Lista de invitați",
+    "subtitle": "Gestionează RSVP-urile, preferințele alimentare și locurile pentru toți invitații.",
     "addGuest": "Adaugă invitat",
     "editGuest": "Editează invitatul",
     "firstName": "Prenume",
@@ -566,6 +568,7 @@
     "table": "Masă",
     "mealPreference": "Preferință masă",
     "rsvpStatus": "RSVP",
+    "invite": "Invitație",
     "plusOne": "+1",
     "notes": "Note",
     "total": "Total invitați",
@@ -580,7 +583,6 @@
       "CONFIRMED": "Confirmat",
       "PENDING": "În așteptare",
       "DECLINED": "Declins",
-      "MAYBE": "Poate",
       "ATTENDING": "Participă",
       "NOT_ATTENDING": "Nu participă"
     },
@@ -594,9 +596,7 @@
       "KOSHER": "Kosher",
       "OTHER": "Altele"
     },
-    "maybe": "Poate",
     "exportCsv": "Exportă CSV",
-    "songRequests": "Cereri cântece",
     "tablePlanner": "Planificator mese",
     "searchPlaceholder": "Caută nume / email / masă...",
     "allRsvp": "Toate RSVP-urile",
@@ -605,7 +605,6 @@
     "allDietary": "Toate preferințele",
     "capacity": "Capacitate",
     "noMatch": "Niciun invitat nu se potrivește cu filtrele.",
-    "noSongRequests": "Nicio cerere de cântec.",
     "noTablesAssigned": "Nicio masă alocată. Folosește coloana Masă din tabul Lista de invitați.",
     "unassigned": "Nealocat",
     "importTitle": "Importă invitați din CSV",
@@ -616,7 +615,6 @@
     "group": "Grup",
     "dietary": "Preferințe alimentare",
     "dietaryNotes": "Note alimentare",
-    "songRequest": "Cerere cântec",
     "plusOneName": "Numele persoanei +1",
     "bringingPlusOne": "Vine cu +1",
     "childGuest": "Invitat copil",
@@ -635,6 +633,26 @@
       "friends": "Prieteni",
       "colleagues": "Colegi",
       "other": "Alții"
+    },
+    "childTag": "copil",
+    "setupWebsite": "⚠ Configurează site-ul",
+    "setupWebsiteTooltip": "Configurează site-ul de nuntă pentru a activa linkurile de invitație",
+    "invite": {
+      "notSentTitle": "Invită mai întâi oaspetele",
+      "sentTitle": "Link-ul de invitație a fost trimis — în așteptarea deschiderii",
+      "invited": "Invitat",
+      "copyLink": "Copiază link",
+      "resendLink": "Retrimite link",
+      "copied": "Copiat",
+      "noWebsiteWarning": "Te rugăm să configurezi site-ul de nuntă și să alegi un subdomeniu mai întâi.",
+      "notPublished": "Publică site-ul mai întâi",
+      "notPublishedTooltip": "Site-ul de nuntă trebuie publicat înainte de a trimite invitații"
+    },
+    "alerts": {
+      "overCapacity": "Capacitate depășită! {confirmed} confirmați față de {estimated} estimați.",
+      "notResponded": "{pending} invitați ({percent}%) nu au răspuns încă.",
+      "allResponded": "Toți invitații au răspuns - ești pregătit!",
+      "dietaryReminder": "{count} invitați au cerințe alimentare - nu uita să anunți traitorul."
     }
   },
 
@@ -739,9 +757,11 @@
 
   "leads": {
     "title": "Solicitările mele",
+    "subtitle": "Solicitările trimise — urmărește statusul și discută cu fiecare furnizor.",
     "requestOfferMessage": "Ați putea să îmi trimiteți o ofertă?",
     "vendor": {
       "title": "Mesaje primite",
+      "subtitle": "Urmărește și răspunde la solicitările cuplurilor interesate de serviciile tale.",
       "newLead": "Solicitare nouă",
       "enquiryFrom": "Solicitare de la",
       "weddingDate": "Data nunții",
@@ -821,6 +841,7 @@
 
   "videoCalls": {
     "title": "Apeluri video",
+    "subtitle": "Consultații programate cu cupluri interesate de serviciile tale.",
     "schedule": "Programează apel",
     "join": "Intră în apel",
     "cancel": "Anulează apelul",
@@ -860,10 +881,21 @@
     "copy": "Copiază link",
     "copied": "Copiat!",
     "subtitle": "Împărtășește povestea de dragoste și linkul de RSVP cu invitații.",
-    "urlSlug": "Adresă URL",
+    "urlSlug": "Adresa ta web",
     "heroMessage": "Mesaj principal",
     "ourStory": "Povestea noastră",
+    "coverPhoto": "Fotografie copertă",
+    "uploadCover": "Click pentru a încărca o fotografie de copertă",
+    "ceremony": "Detalii ceremonie",
+    "reception": "Detalii recepție",
+    "date": "Data și ora",
+    "location": "Locație",
+    "shareTitle": "Distribuie site-ul",
     "publishedLabel": "Site-ul este publicat și vizibil pentru invitați",
+    "unpublishedLabel": "Site-ul nu este publicat",
+    "publishedHint": "Site-ul tău este live și invitații îl pot vizualiza.",
+    "unpublishedHint": "Site-ul tău este ascuns pentru invitați.",
+    "viewLive": "Vizualizează live",
     "saving": "Se salvează…",
     "savedMsg": "✓ Salvat!",
     "notFound": "Pagina de nuntă nu a fost găsită",
@@ -877,6 +909,7 @@
 
   "documents": {
     "title": "Documente",
+    "subtitle": "Stochează în siguranță contracte, facturi și fișiere importante.",
     "upload": "Încarcă document",
     "noDocuments": "Nu ai documente încărcate.",
     "download": "Descarcă",
@@ -912,6 +945,7 @@
     },
     "overview": {
       "title": "Prezentare generală",
+      "subtitle": "Afacerea ta dintr-o privire — venituri, solicitări și evenimente viitoare.",
       "totalLeads": "Total solicitări",
       "newLeads": "Solicitări noi",
       "bookedEvents": "Evenimente rezervate",
@@ -942,6 +976,7 @@
     },
     "portfolio": {
       "title": "Portofoliu",
+      "subtitle": "Gestionează fotografiile afișate pe profilul tău public.",
       "addPhoto": "Adaugă fotografie",
       "noPhotos": "Nu ai fotografii în portofoliu.",
       "uploading": "Încărcare...",
@@ -950,6 +985,7 @@
     },
     "reviews": {
       "title": "Recenzii",
+      "subtitle": "Recenzii și feedback scris de la cuplurile cu care ai lucrat.",
       "noReviews": "Nu ai recenzii încă.",
       "averageRating": "Rating mediu",
       "totalReviews": "Total recenzii",
@@ -1001,6 +1037,7 @@
     },
     "subscription": {
       "title": "Abonament",
+      "subtitle": "Gestionează planul tău și deblochează funcționalități pe măsură ce afacerea crește.",
       "currentPlan": "Planul curent",
       "plan": "Plan",
       "renews": "Se reînnoiește:",
@@ -1039,6 +1076,7 @@
     },
     "profile": {
       "title": "Profilul meu",
+      "subtitle": "Actualizează detaliile afacerii, prețurile și informațiile publice.",
       "vendorTitle": "Profil Vendor",
       "noCover": "Nicio imagine de copertă",
       "changeCover": "Schimbă Fotografia de Profil",
@@ -1070,6 +1108,10 @@
       "confirmed": "Confirmat",
       "legendBooked": "Rezervat",
       "legendCall": "Apel Video",
+      "calSectionTitle": "Prezentare Disponibilitate",
+      "calSectionDesc": "Harta vizuală a rezervărilor și apelurilor video viitoare.",
+      "eventsSectionTitle": "Evenimente Viitoare",
+      "eventsSectionDesc": "Gestionează nunțile confirmate și apelurile programate.",
       "statusNew": "Cerere Nouă",
       "statusViewed": "Vizualizat",
       "statusChat": "Conversație",

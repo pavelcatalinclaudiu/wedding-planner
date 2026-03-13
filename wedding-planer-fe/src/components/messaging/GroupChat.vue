@@ -3,16 +3,19 @@ import { ref, computed, onMounted, nextTick, watch } from "vue";
 import { useMessagesStore } from "@/stores/messages.store";
 import { useConfirm } from "@/composables/useConfirm";
 import { useAuthStore } from "@/stores/auth.store";
+import { useLeadsStore } from "@/stores/leads.store";
 import { messagesApi } from "@/api/messages.api";
 import type { ThreadParticipant } from "@/types/message.types";
+import type { Lead } from "@/types/lead.types";
 import MessageBubble from "./MessageBubble.vue";
-import { UserPlus, X } from "lucide-vue-next";
+import { UserPlus, X, Plus } from "lucide-vue-next";
 
 const props = defineProps<{ threadId: string }>();
 const emit = defineEmits<{ (e: "left"): void }>();
 
 const messagesStore = useMessagesStore();
 const authStore = useAuthStore();
+const leadsStore = useLeadsStore();
 
 const newMessage = ref("");
 const sending = ref(false);
@@ -21,6 +24,7 @@ const showPanel = ref(false);
 const participants = ref<ThreadParticipant[]>([]);
 const loadingParticipants = ref(false);
 const leavingOrRemoving = ref(false);
+const addingVendorId = ref<string | null>(null);
 
 const isCouple = computed(() => authStore.user?.role === "COUPLE");
 const isVendor = computed(() => authStore.user?.role === "VENDOR");
@@ -35,6 +39,17 @@ const threadName = computed(() => thread.value?.name ?? "Group Chat");
 const memberCount = computed(
   () => participants.value.length || thread.value?.participantCount || 0,
 );
+
+// Booked leads whose vendor is NOT yet a participant in the chat
+const addableVendors = computed<Lead[]>(() => {
+  if (!isCouple.value) return [];
+  const presentNames = new Set(
+    participants.value.filter((p) => p.role === "VENDOR").map((p) => p.name),
+  );
+  return leadsStore.leads.filter(
+    (l) => l.status === "BOOKED" && !presentNames.has(l.vendorName),
+  );
+});
 
 watch(
   () => messages.value.length,
@@ -66,6 +81,10 @@ async function openPanel() {
   try {
     const res = await messagesApi.getParticipants(props.threadId);
     participants.value = res.data;
+    // Ensure booked leads are loaded so the couple can add vendors manually
+    if (isCouple.value && leadsStore.leads.length === 0) {
+      await leadsStore.fetchCoupleLeads();
+    }
   } finally {
     loadingParticipants.value = false;
   }
@@ -83,6 +102,18 @@ async function removeParticipant(p: ThreadParticipant) {
     participants.value = participants.value.filter((x) => x.id !== p.id);
   } finally {
     leavingOrRemoving.value = false;
+  }
+}
+
+async function addVendor(lead: Lead) {
+  addingVendorId.value = lead.vendorId;
+  try {
+    await messagesApi.addParticipant(props.threadId, lead.vendorId);
+    // Refresh participants list
+    const res = await messagesApi.getParticipants(props.threadId);
+    participants.value = res.data;
+  } finally {
+    addingVendorId.value = null;
   }
 }
 
@@ -170,28 +201,63 @@ function avatarInitial(name: string) {
 
         <div v-if="loadingParticipants" class="panel-loading">Loading…</div>
 
-        <ul v-else class="participant-list">
-          <li v-for="p in participants" :key="p.id" class="participant-item">
-            <div class="p-avatar">
-              <img v-if="p.avatarUrl" :src="p.avatarUrl" alt="" />
-              <span v-else>{{ avatarInitial(p.name) }}</span>
-            </div>
-            <div class="p-info">
-              <span class="p-name">{{ p.name }}</span>
-              <span class="p-role">{{ p.role }}</span>
-            </div>
-            <!-- Couple can remove vendors (not themselves) -->
-            <button
-              v-if="isCouple && p.role === 'VENDOR'"
-              class="remove-btn"
-              :disabled="leavingOrRemoving"
-              title="Remove from chat"
-              @click="removeParticipant(p)"
-            >
-              <X :size="14" />
-            </button>
-          </li>
-        </ul>
+        <template v-else>
+          <ul class="participant-list">
+            <li v-for="p in participants" :key="p.id" class="participant-item">
+              <div class="p-avatar">
+                <img v-if="p.avatarUrl" :src="p.avatarUrl" alt="" />
+                <span v-else>{{ avatarInitial(p.name) }}</span>
+              </div>
+              <div class="p-info">
+                <span class="p-name">{{ p.name }}</span>
+                <span class="p-role">{{ p.role }}</span>
+              </div>
+              <!-- Couple can remove vendors (not themselves) -->
+              <button
+                v-if="isCouple && p.role === 'VENDOR'"
+                class="remove-btn"
+                :disabled="leavingOrRemoving"
+                title="Remove from chat"
+                @click="removeParticipant(p)"
+              >
+                <X :size="14" />
+              </button>
+            </li>
+          </ul>
+
+          <!-- Add vendors section (couple only) -->
+          <template v-if="isCouple && addableVendors.length > 0">
+            <div class="add-section-header">Add to chat</div>
+            <ul class="participant-list addable-list">
+              <li
+                v-for="lead in addableVendors"
+                :key="lead.vendorId"
+                class="participant-item"
+              >
+                <div class="p-avatar">
+                  <img
+                    v-if="lead.vendorProfilePicture"
+                    :src="lead.vendorProfilePicture"
+                    alt=""
+                  />
+                  <span v-else>{{ avatarInitial(lead.vendorName) }}</span>
+                </div>
+                <div class="p-info">
+                  <span class="p-name">{{ lead.vendorName }}</span>
+                  <span class="p-role">{{ lead.vendorCategory }}</span>
+                </div>
+                <button
+                  class="add-btn"
+                  :disabled="addingVendorId === lead.vendorId"
+                  title="Add to chat"
+                  @click="addVendor(lead)"
+                >
+                  <Plus :size="14" />
+                </button>
+              </li>
+            </ul>
+          </template>
+        </template>
       </div>
     </transition>
   </div>
@@ -412,6 +478,39 @@ function avatarInitial(name: string) {
   background: var(--color-error-light);
 }
 .remove-btn:disabled {
+  opacity: 0.4;
+}
+
+/* Add-vendor section */
+.add-section-header {
+  padding: 10px 16px 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+  border-top: 1px solid var(--color-border);
+  margin-top: 4px;
+}
+.addable-list {
+  border-top: none;
+}
+.add-btn {
+  background: none;
+  border: 1.5px solid var(--color-gold);
+  cursor: pointer;
+  color: var(--color-gold);
+  flex-shrink: 0;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+}
+.add-btn:hover {
+  background: var(--color-gold);
+  color: #fff;
+}
+.add-btn:disabled {
   opacity: 0.4;
 }
 

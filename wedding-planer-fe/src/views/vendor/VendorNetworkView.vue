@@ -107,8 +107,10 @@ function initials(name: string) {
 
 <template>
   <div class="network-view">
-    <h2>{{ t("vendor.network.title") }}</h2>
-    <p class="subtitle">{{ t("vendor.network.subtitle") }}</p>
+    <div class="page-header">
+      <h2>{{ t("vendor.network.title") }}</h2>
+      <p class="subtitle">{{ t("vendor.network.subtitle") }}</p>
+    </div>
 
     <!-- ── Add partner ── -->
     <div class="add-section">
@@ -230,6 +232,9 @@ h2 {
   margin: 0 0 6px;
   font-size: 1.4rem;
   font-weight: 700;
+}
+.page-header {
+  margin-bottom: 28px;
 }
 .subtitle {
   color: var(--color-muted);

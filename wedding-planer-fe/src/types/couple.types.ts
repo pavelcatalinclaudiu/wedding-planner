@@ -26,6 +26,7 @@ export interface ChecklistItem {
   id: string;
   coupleId: string;
   label: string;
+  notes?: string;
   dueDate?: string;
   done: boolean;
   timePeriod: string;
@@ -46,9 +47,15 @@ export interface BudgetItem {
   createdAt: string;
 }
 
-export type RsvpStatus = "PENDING" | "CONFIRMED" | "DECLINED" | "MAYBE";
+export type RsvpStatus = "PENDING" | "CONFIRMED" | "DECLINED";
 export type GuestSide = "BRIDE" | "GROOM" | "BOTH";
 export type GuestGroup = "FAMILY" | "FRIENDS" | "COLLEAGUES" | "OTHER";
+export type InviteStatus =
+  | "NOT_INVITED"
+  | "LINK_SENT"
+  | "PENDING"
+  | "ACCEPTED"
+  | "DECLINED";
 export type DietaryRequirement =
   | "NONE"
   | "VEGAN"
@@ -75,9 +82,10 @@ export interface Guest {
   dietary: DietaryRequirement;
   dietaryNotes?: string;
   tableAssignment?: string;
-  songRequest?: string;
   notes?: string;
   isChildGuest: boolean;
+  inviteToken?: string;
+  inviteStatus: InviteStatus;
   createdAt: string;
   updatedAt?: string;
 }
@@ -92,10 +100,11 @@ export interface GuestRequest {
   rsvpStatus?: RsvpStatus;
   plusOne?: boolean;
   plusOneName?: string;
+  plusOneDietary?: string;
+  plusOneDietaryNotes?: string;
   dietary?: DietaryRequirement;
   dietaryNotes?: string;
   tableAssignment?: string;
-  songRequest?: string;
   notes?: string;
   isChildGuest?: boolean;
 }
@@ -105,7 +114,6 @@ export interface GuestStats {
   confirmed: number;
   declined: number;
   pending: number;
-  maybe: number;
   estimatedCapacity: number;
   overCapacity: boolean;
   byDietary: Record<string, number>;
@@ -128,15 +136,47 @@ export interface SeatingTable {
 
 export interface WeddingWebsite {
   id: string;
-  coupleId: string;
-  subdomain: string;
-  template: number;
-  heroTitle: string;
-  venueName?: string;
+  subdomain?: string;
+  heroMessage?: string;
   coverPhotoUrl?: string;
-  welcomeMessage?: string;
-  views: number;
-  rsvpsSubmitted: number;
-  customDomain?: string;
+  story?: string;
+  ceremonyDate?: string;
+  ceremonyLocation?: string;
+  receptionDate?: string;
+  receptionLocation?: string;
   published: boolean;
+  rsvpsSubmitted: number;
+  visitorCount: number;
+}
+
+export interface PublicWeddingWebsite {
+  heroMessage?: string;
+  coverPhotoUrl?: string;
+  story?: string;
+  ceremonyDate?: string;
+  ceremonyLocation?: string;
+  receptionDate?: string;
+  receptionLocation?: string;
+  partner1Name?: string;
+  partner2Name?: string;
+  weddingDate?: string;
+  weddingLocation?: string;
+  couplePhoto?: string;
+  subdomain?: string;
+}
+
+export interface RsvpRequest {
+  firstName: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  attending: "CONFIRMED" | "DECLINED";
+  dietary?: string;
+  dietaryNotes?: string;
+  plusOne?: boolean;
+  plusOneName?: string;
+  plusOneDietary?: string;
+  plusOneDietaryNotes?: string;
+  message?: string;
+  inviteToken?: string;
 }

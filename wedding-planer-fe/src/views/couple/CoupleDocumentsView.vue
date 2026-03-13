@@ -57,7 +57,10 @@ onMounted(fetchDocs);
 <template>
   <div class="docs-view">
     <div class="docs-header">
-      <h2>{{ t("documents.title") }}</h2>
+      <div>
+        <h2>{{ t("documents.title") }}</h2>
+        <p class="page-sub">{{ t("documents.subtitle") }}</p>
+      </div>
       <button class="upload-btn" @click="fileInputRef?.click()">
         + {{ t("documents.upload") }}
       </button>
@@ -99,14 +102,20 @@ onMounted(fetchDocs);
 <style scoped>
 .docs-header {
   display: flex;
-  align-items: center;
+  justify-content: space-between;
+  align-items: flex-start;
   gap: 14px;
   margin-bottom: 20px;
 }
 h2 {
-  margin: 0;
+  margin: 0 0 4px;
   font-size: 1.4rem;
   flex: 1;
+}
+.page-sub {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--color-muted);
 }
 .upload-btn {
   background: var(--color-gold);

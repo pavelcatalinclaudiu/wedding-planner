@@ -35,10 +35,12 @@ onMounted(async () => {
 
 <template>
   <div class="group-chat-view">
-    <h2>{{ t("messaging.groupChatTitle") }}</h2>
-    <p class="subtitle">
-      {{ t("messaging.groupChatSubtitle") }}
-    </p>
+    <div class="page-header">
+      <h2>{{ t("messaging.groupChatTitle") }}</h2>
+      <p class="subtitle">
+        {{ t("messaging.groupChatSubtitle") }}
+      </p>
+    </div>
 
     <div class="chat-wrapper">
       <div v-if="loading" class="empty">{{ t("common.loading") }}</div>

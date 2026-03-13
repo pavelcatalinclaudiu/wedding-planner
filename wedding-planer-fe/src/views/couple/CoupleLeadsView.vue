@@ -177,7 +177,10 @@ async function onCallScheduled(leadId: string) {
     <!-- Sidebar list -->
     <aside class="lead-panel">
       <div class="panel-header">
-        <h2>{{ t("leads.title") }}</h2>
+        <div>
+          <h2>{{ t("leads.title") }}</h2>
+          <p class="panel-sub">{{ t("leads.subtitle") }}</p>
+        </div>
       </div>
 
       <div v-if="loading" class="loading">{{ t("common.loading") }}</div>
@@ -394,8 +397,14 @@ async function onCallScheduled(leadId: string) {
   z-index: 1;
 }
 .panel-header h2 {
-  margin: 0;
+  margin: 0 0 4px;
   font-size: 1.1rem;
+}
+.panel-sub {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--color-muted);
+  line-height: 1.4;
 }
 .lead-list {
   padding: 12px;

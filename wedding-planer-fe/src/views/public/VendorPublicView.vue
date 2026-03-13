@@ -563,7 +563,6 @@ onMounted(async () => {
 .vp {
   min-height: 100vh;
   background: #f8f8f6;
-  font-family: "Inter", system-ui, sans-serif;
   color: #1c1c1c;
 }
 

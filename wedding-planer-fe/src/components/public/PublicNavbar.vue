@@ -86,12 +86,14 @@ function switchTo(lang: "ro" | "en") {
   background: rgba(28, 28, 28, 0.88);
   backdrop-filter: blur(14px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  font-family: inherit;
 }
 
 /* ── Logo (left) ── */
 .pub-nav-logo {
+  font-family: "Cinzel", Georgia, serif;
   font-size: 1.45rem;
-  font-weight: 800;
+  font-weight: 600;
   color: var(--color-gold, #c9a84c);
   text-decoration: none;
   letter-spacing: -0.5px;
@@ -145,6 +147,7 @@ function switchTo(lang: "ro" | "en") {
   background: none;
   border: none;
   color: rgba(255, 255, 255, 0.45);
+  font-family: inherit;
   font-size: 0.74rem;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -196,6 +199,16 @@ function switchTo(lang: "ro" | "en") {
 
 .pub-nav-cta:hover {
   opacity: 0.88;
+}
+
+/* ── Bell icon: force white on dark navbar ── */
+:deep(.bell-btn) {
+  color: rgba(255, 255, 255, 0.85);
+}
+:deep(.bell-btn:hover),
+:deep(.bell-btn.active) {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
 }
 
 /* ── Mobile ── */

@@ -15,17 +15,41 @@ const videoStore = useVideoCallsStore();
 </template>
 
 <style>
+@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Raleway:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap");
+
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
-body {
-  margin: 0;
+html {
   font-family:
-    "Inter",
+    "Raleway",
     -apple-system,
     BlinkMacSystemFont,
     sans-serif;
+  font-weight: 400;
+}
+body {
+  margin: 0;
+  font-family: inherit;
+}
+input,
+textarea,
+button,
+select,
+a {
+  font-family: inherit;
+  font-size: inherit;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Cinzel", Georgia, serif;
+  font-weight: 500;
+  letter-spacing: 0.04em;
 }
 </style>

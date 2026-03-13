@@ -170,6 +170,43 @@ public class MessageService {
         });
     }
 
+    /**
+     * Couple manually adds a vendor (by VendorProfile id) to the group thread.
+     * Idempotent: no-op if the vendor is already a participant.
+     */
+    @Transactional
+    public void addVendorToGroupThread(UUID threadId, UUID vendorId, UUID requesterUserId) {
+        Thread t = threadRepository.findById(threadId);
+        if (t == null) throw new BusinessException("Thread not found");
+        if (t.threadType != ThreadType.GROUP) throw new BusinessException("Not a group thread");
+
+        // Only the couple owner may manually add participants
+        CoupleProfile couple = coupleRepository.findByUserId(requesterUserId)
+                .orElseThrow(() -> new BusinessException("Only the couple can add participants"));
+        if (!couple.id.equals(t.couple.id)) throw new BusinessException("Not your group thread");
+
+        var vendor = vendorRepository.findById(vendorId);
+        if (vendor == null) throw new BusinessException("Vendor not found");
+        User vendorUser = vendor.user;
+
+        boolean alreadyPresent = participantRepository
+                .findByThreadAndUser(t.id, vendorUser.id).isPresent();
+
+        if (!alreadyPresent) {
+            addParticipant(t, vendorUser);
+
+            Message sys = new Message();
+            sys.thread = t;
+            sys.sender = vendorUser;
+            sys.content = vendor.businessName + " joined the group chat";
+            sys.type = MessageType.SYSTEM;
+            messageRepository.persist(sys);
+            t.lastMessageAt = Instant.now();
+
+            webSocketService.broadcast("thread:" + t.id, "PARTICIPANT_JOINED", vendorUser.id.toString());
+        }
+    }
+
     // ─── Shared methods ───────────────────────────────────────────────────────
 
     private void addParticipant(Thread thread, User user) {

@@ -7,7 +7,6 @@ import { useToast } from "@/composables/useToast";
 export const useGuestsStore = defineStore("guests", () => {
   const guests = ref<Guest[]>([]);
   const stats = ref<GuestStats | null>(null);
-  const songs = ref<string[]>([]);
   const loading = ref(false);
 
   // ── computed ─────────────────────────────────────────────────
@@ -20,9 +19,6 @@ export const useGuestsStore = defineStore("guests", () => {
   );
   const pending = computed(
     () => guests.value.filter((g) => g.rsvpStatus === "PENDING").length,
-  );
-  const maybe = computed(
-    () => guests.value.filter((g) => g.rsvpStatus === "MAYBE").length,
   );
 
   // ── actions ────────────────────────────────────────────────
@@ -38,11 +34,6 @@ export const useGuestsStore = defineStore("guests", () => {
     } finally {
       loading.value = false;
     }
-  }
-
-  async function fetchSongs() {
-    const res = await guestsApi.getSongs();
-    songs.value = res.data;
   }
 
   async function addGuest(data: GuestRequest) {
@@ -83,15 +74,12 @@ export const useGuestsStore = defineStore("guests", () => {
   return {
     guests,
     stats,
-    songs,
     loading,
     total,
     confirmed,
     declined,
     pending,
-    maybe,
     fetchGuests,
-    fetchSongs,
     addGuest,
     updateGuest,
     removeGuest,

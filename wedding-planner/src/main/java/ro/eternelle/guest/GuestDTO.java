@@ -31,6 +31,18 @@ public class GuestDTO {
     public String notes;
     public boolean isChildGuest;
 
+    /** UUID token for personal invite link */
+    public String inviteToken;
+    /**
+     * NOT_INVITED – no link generated yet<br>
+     * LINK_SENT   – link generated but not yet opened<br>
+     * PENDING     – guest opened the link, awaiting response<br>
+     * ACCEPTED    – RSVP confirmed<br>
+     * DECLINED    – RSVP declined<br>
+     * MAYBE       – RSVP maybe
+     */
+    public String inviteStatus;
+
     public Instant createdAt;
     public Instant updatedAt;
 
@@ -58,9 +70,21 @@ public class GuestDTO {
         dto.songRequest  = g.songRequest;
         dto.notes        = g.notes;
         dto.isChildGuest = g.isChildGuest;
+        dto.inviteToken  = g.inviteToken;
+        dto.inviteStatus = computeInviteStatus(g);
         dto.createdAt    = g.createdAt;
         dto.updatedAt    = g.updatedAt;
         return dto;
+    }
+
+    private static String computeInviteStatus(Guest g) {
+        if ("CONFIRMED".equals(g.rsvpStatus)) return "ACCEPTED";
+        if ("DECLINED" .equals(g.rsvpStatus)) return "DECLINED";
+        if ("MAYBE"    .equals(g.rsvpStatus)) return "MAYBE";
+        // rsvpStatus is PENDING — check invite progress
+        if (g.inviteToken == null)        return "NOT_INVITED";
+        if (g.inviteOpenedAt == null)     return "LINK_SENT";
+        return "PENDING";
     }
 
     // ── stats inner class ───────────────────────────────────────────────────

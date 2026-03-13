@@ -2,7 +2,7 @@
 import { ref } from "vue";
 import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { guestsApi } from "@/api/guests.api";
+import { coupleApi } from "@/api/couple.api";
 import { Sparkles, Mail } from "lucide-vue-next";
 
 const route = useRoute();
@@ -12,27 +12,33 @@ const step = ref<"form" | "thanks" | "declined">("form");
 const loading = ref(false);
 const error = ref("");
 const form = ref({
-  name: "",
+  firstName: "",
+  lastName: "",
   email: "",
   attending: true,
   plusOne: false,
-  dietaryReqs: "",
+  plusOneName: "",
+  dietary: "NONE",
+  message: "",
 });
 
 async function submit() {
-  if (!form.value.name.trim()) {
+  if (!form.value.firstName.trim()) {
     error.value = t("rsvp.pleaseName");
     return;
   }
   loading.value = true;
   error.value = "";
   try {
-    await guestsApi.submitRsvp(route.params.slug as string, {
-      name: form.value.name,
+    await coupleApi.submitPublicRsvp(route.params.token as string, {
+      firstName: form.value.firstName,
+      lastName: form.value.lastName,
       email: form.value.email,
-      attending: form.value.attending,
+      attending: form.value.attending ? "CONFIRMED" : "DECLINED",
       plusOne: form.value.plusOne,
-      dietaryReqs: form.value.dietaryReqs,
+      plusOneName: form.value.plusOneName,
+      dietary: form.value.dietary,
+      message: form.value.message,
     });
     step.value = form.value.attending ? "thanks" : "declined";
   } catch (e: any) {
@@ -56,7 +62,20 @@ async function submit() {
 
         <div class="field">
           <label>{{ t("rsvp.fullNameLabel") }}</label>
-          <input v-model="form.name" class="input" placeholder="Jane Smith" />
+          <div style="display: flex; gap: 10px">
+            <input
+              v-model="form.firstName"
+              class="input"
+              placeholder="First name"
+              style="flex: 1"
+            />
+            <input
+              v-model="form.lastName"
+              class="input"
+              placeholder="Last name"
+              style="flex: 1"
+            />
+          </div>
         </div>
         <div class="field">
           <label>{{ t("rsvp.email") }}</label>
@@ -88,17 +107,40 @@ async function submit() {
         <template v-if="form.attending">
           <div class="field">
             <label>{{ t("rsvp.dietaryLabel") }}</label>
-            <input
-              v-model="form.dietaryReqs"
-              class="input"
-              placeholder="Vegetarian, gluten-free, etc."
-            />
+            <select v-model="form.dietary" class="input">
+              <option value="NONE">No restrictions</option>
+              <option value="VEGAN">Vegan</option>
+              <option value="VEGETARIAN">Vegetarian</option>
+              <option value="GLUTEN_FREE">Gluten-free</option>
+              <option value="HALAL">Halal</option>
+              <option value="KOSHER">Kosher</option>
+              <option value="OTHER">Other</option>
+            </select>
           </div>
           <label class="check-label">
             <input type="checkbox" v-model="form.plusOne" />
             {{ t("rsvp.plusOneLabel") }}
           </label>
+          <div v-if="form.plusOne" class="field">
+            <label>+1 Name</label>
+            <input
+              v-model="form.plusOneName"
+              class="input"
+              placeholder="Guest's name"
+            />
+          </div>
         </template>
+
+        <div class="field">
+          <label>Message to the couple</label>
+          <textarea
+            v-model="form.message"
+            class="input"
+            rows="2"
+            placeholder="Congratulations! 🥂"
+            style="resize: vertical"
+          ></textarea>
+        </div>
 
         <p v-if="error" class="error-msg">{{ error }}</p>
         <button class="submit-btn" :disabled="loading" @click="submit">

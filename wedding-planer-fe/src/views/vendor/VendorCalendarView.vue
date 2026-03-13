@@ -201,6 +201,14 @@ onMounted(async () => {
     <div class="cv-body">
       <!-- Calendar column -->
       <div class="cv-calendar-col">
+        <div class="cv-section-header">
+          <h3 class="cv-section-title">
+            {{ t("vendor.calendar.calSectionTitle") }}
+          </h3>
+          <p class="cv-section-desc">
+            {{ t("vendor.calendar.calSectionDesc") }}
+          </p>
+        </div>
         <CalendarGrid
           :blocked-dates="[]"
           :booking-dates="bookingDates"
@@ -219,6 +227,14 @@ onMounted(async () => {
 
       <!-- Right: Tabbed events panel -->
       <div class="cv-panel">
+        <div class="cv-section-header cv-section-header--panel">
+          <h3 class="cv-section-title">
+            {{ t("vendor.calendar.eventsSectionTitle") }}
+          </h3>
+          <p class="cv-section-desc">
+            {{ t("vendor.calendar.eventsSectionDesc") }}
+          </p>
+        </div>
         <div class="panel-tabs">
           <button
             class="panel-tab"
@@ -537,7 +553,7 @@ onMounted(async () => {
 /* ── Two-column body ─────────────────────────────────── */
 .cv-body {
   display: grid;
-  grid-template-columns: 3fr 2fr;
+  grid-template-columns: 2fr 2fr;
   gap: 24px;
   align-items: start;
 }
@@ -563,6 +579,27 @@ onMounted(async () => {
   border: 1px solid var(--color-border);
   border-radius: 16px;
   overflow: hidden;
+}
+
+/* ── Section header (title + desc) ──────────────────── */
+.cv-section-header {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--color-border);
+}
+.cv-section-header--panel {
+  background: var(--color-surface);
+}
+.cv-section-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 3px;
+}
+.cv-section-desc {
+  font-size: 0.78rem;
+  color: var(--color-muted);
+  margin: 0;
+  line-height: 1.45;
 }
 
 /* ── Legend + hint ───────────────────────────────────── */

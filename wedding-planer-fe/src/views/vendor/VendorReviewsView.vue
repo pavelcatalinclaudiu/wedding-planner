@@ -32,7 +32,10 @@ async function submitReply(reviewId: string) {
 
 <template>
   <div class="reviews-view">
-    <h2>{{ t("vendor.reviews.title") }}</h2>
+    <div class="page-header">
+      <h2>{{ t("vendor.reviews.title") }}</h2>
+      <p class="page-sub">{{ t("vendor.reviews.subtitle") }}</p>
+    </div>
     <div v-if="loading" class="loading">{{ t("common.loading") }}</div>
     <div v-else-if="reviews.length === 0" class="empty">
       {{ t("vendor.reviews.noReviews") }}
@@ -88,8 +91,13 @@ async function submitReply(reviewId: string) {
 
 <style scoped>
 h2 {
-  margin: 0 0 24px;
+  margin: 0 0 4px;
   font-size: 1.4rem;
+}
+.page-sub {
+  margin: 0 0 24px;
+  font-size: 0.88rem;
+  color: var(--color-muted);
 }
 .loading,
 .empty {

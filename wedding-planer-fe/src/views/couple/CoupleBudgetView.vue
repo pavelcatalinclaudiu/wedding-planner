@@ -329,7 +329,10 @@ function varianceClass(estimated: number, actual: number): string {
   <div class="budget-view">
     <!-- ── Header ─────────────────────────────────────────────────── -->
     <div class="page-header">
-      <h2>{{ t("budget.pageTitle") }}</h2>
+      <div>
+        <h2>{{ t("budget.pageTitle") }}</h2>
+        <p class="page-sub">{{ t("budget.subtitle") }}</p>
+      </div>
       <button class="btn-primary" @click="openAddModal()">
         + {{ t("budget.addItem") }}
       </button>
@@ -773,14 +776,19 @@ function varianceClass(estimated: number, actual: number): string {
 /* ── Header ──────────────────────────────────────────────────────────────── */
 .page-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
 }
 .page-header h2 {
-  margin: 0;
+  margin: 0 0 4px;
   font-size: 1.4rem;
   font-weight: 800;
   color: var(--color-text);
+}
+.page-sub {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--color-muted);
 }
 
 /* ── Overview Grid ───────────────────────────────────────────────────────── */

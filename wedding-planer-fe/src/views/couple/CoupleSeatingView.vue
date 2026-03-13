@@ -31,8 +31,10 @@ onMounted(async () => {
 
 <template>
   <div class="seating-view">
-    <h2>{{ t("seating.title") }}</h2>
-    <p class="subtitle">{{ t("seating.subtitle") }}</p>
+    <div class="page-header">
+      <h2>{{ t("seating.title") }}</h2>
+      <p class="subtitle">{{ t("seating.subtitle") }}</p>
+    </div>
 
     <div v-if="loading" class="loading">{{ t("common.loading") }}</div>
     <div v-else-if="!layout || layout.tables.length === 0" class="empty">
