@@ -126,6 +126,27 @@ async function toggleVisibility() {
   .hamburger {
     display: flex;
   }
+
+  .topbar {
+    padding: 0 16px;
+    height: 64px;
+  }
+
+  /* Hide the search bar on mobile — frees up topbar space */
+  .topbar-search {
+    display: none;
+  }
+
+  /* Shrink spacing between right-side icons */
+  .topbar-right {
+    gap: 8px;
+  }
+
+  /* Hide the "live/offline" chip text on mobile, keep just the dot */
+  .profile-live-chip {
+    padding: 4px 10px;
+    font-size: 0.75rem;
+  }
 }
 .topbar-search {
   flex: 1;

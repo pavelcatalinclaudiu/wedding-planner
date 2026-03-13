@@ -605,6 +605,10 @@
     "allDietary": "All Dietary",
     "capacity": "Capacity",
     "noMatch": "No guests match your filters.",
+    "noMatchText": "Try adjusting your search term or clearing some filters.",
+    "clearFilters": "Clear filters",
+    "emptyTitle": "No guests yet",
+    "emptyText": "Start building your guest list by adding your first guest or importing from CSV.",
     "noTablesAssigned": "No tables assigned yet. Use the Table column in the Guest List tab to assign guests.",
     "unassigned": "Unassigned",
     "importTitle": "Import Guests from CSV",
@@ -635,6 +639,10 @@
       "other": "Other"
     },
     "childTag": "child",
+    "filters": "Filters",
+    "guestSingular": "guest",
+    "guestPlural": "guests",
+    "tablePlaceholder": "Table…",
     "setupWebsite": "Setup website",
     "setupWebsiteTooltip": "Set up your wedding website to enable invite links",
     "invite": {

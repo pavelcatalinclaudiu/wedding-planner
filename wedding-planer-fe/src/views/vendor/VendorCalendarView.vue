@@ -1086,4 +1086,92 @@ onMounted(async () => {
   background: var(--color-gold);
   color: #fff;
 }
+
+/* ── Mobile ─────────────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  /* Booking items: wrap so date badge + info stack above status + actions */
+  .bk-item {
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+
+  .bk-date-badge {
+    width: 40px;
+    height: 44px;
+  }
+
+  .bk-day {
+    font-size: 1.1rem !important;
+  }
+
+  .bk-info {
+    flex: 1 1 calc(100% - 52px);
+    min-width: 0;
+  }
+
+  .bk-status {
+    margin-left: auto;
+  }
+
+  .bk-actions {
+    width: 100%;
+    justify-content: flex-end;
+    border-top: 1px solid var(--color-border);
+    padding-top: 8px;
+    margin-top: 2px;
+  }
+
+  .bk-act {
+    width: 32px;
+    height: 32px;
+  }
+
+  /* Modal → bottom-sheet */
+  .vcal-overlay {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+
+  .vcal-modal {
+    border-radius: 20px 20px 0 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    max-height: 92dvh !important;
+    overflow-y: auto;
+    padding: 24px 20px calc(env(safe-area-inset-bottom, 0px) + 24px) !important;
+    box-sizing: border-box;
+  }
+
+  .vcal-modal::before {
+    content: "";
+    display: block;
+    width: 40px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--color-border);
+    margin: 0 auto 18px;
+  }
+
+  /* Modal footer: stack buttons */
+  .vcal-modal-footer {
+    flex-direction: column;
+  }
+
+  .vcal-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Stats top section: tighten */
+  .cv-stats {
+    gap: 10px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Two stats: single column on tiny screens */
+  .cv-stats {
+    grid-template-columns: 1fr !important;
+  }
+}
 </style>

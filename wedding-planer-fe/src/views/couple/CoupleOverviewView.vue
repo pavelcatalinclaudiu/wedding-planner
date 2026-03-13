@@ -34,8 +34,12 @@ import {
   AlertTriangle,
   Star,
   X,
+  CheckSquare,
+  Wallet,
+  Users,
 } from "lucide-vue-next";
 
+import SkeletonLoader from "@/components/ui/SkeletonLoader.vue";
 import { useCategoryLabel } from "@/utils/vendorCategories";
 import { bookingsApi } from "@/api/bookings.api";
 import type { Booking } from "@/types/lead.types";
@@ -53,16 +57,21 @@ const messagesStore = useMessagesStore();
 const { categoryLabel } = useCategoryLabel();
 
 const bookings = ref<Booking[]>([]);
+const pageLoading = ref(true);
 
 onMounted(async () => {
-  await Promise.all([
-    coupleStore.profile || coupleStore.fetchProfile(),
-    checklistStore.items.length === 0 && checklistStore.fetchChecklist(),
-    budgetStore.items.length === 0 && budgetStore.fetchBudget(),
-    guestsStore.guests.length === 0 && guestsStore.fetchGuests(),
-    leadsStore.leads.length === 0 && leadsStore.fetchCoupleLeads(),
-    messagesStore.threads.length === 0 && messagesStore.fetchThreads(),
-  ]);
+  try {
+    await Promise.all([
+      coupleStore.profile || coupleStore.fetchProfile(),
+      checklistStore.items.length === 0 && checklistStore.fetchChecklist(),
+      budgetStore.items.length === 0 && budgetStore.fetchBudget(),
+      guestsStore.guests.length === 0 && guestsStore.fetchGuests(),
+      leadsStore.leads.length === 0 && leadsStore.fetchCoupleLeads(),
+      messagesStore.threads.length === 0 && messagesStore.fetchThreads(),
+    ]);
+  } finally {
+    pageLoading.value = false;
+  }
   bookingsApi
     .list()
     .then((r) => {
@@ -360,37 +369,85 @@ function timeAgo(dateStr?: string): string {
     </div>
 
     <!-- ── Stat Widgets ────────────────────────────────────────── -->
-    <div class="widgets-grid">
-      <div class="widget">
+    <!-- Skeleton loading state -->
+    <div v-if="pageLoading" class="widgets-grid">
+      <div v-for="i in 4" :key="i" class="widget">
+        <SkeletonLoader height="28px" width="60%" />
+        <SkeletonLoader height="38px" width="40%" />
+        <SkeletonLoader height="12px" width="80%" />
+        <SkeletonLoader height="4px" />
+        <SkeletonLoader height="12px" width="55%" />
+      </div>
+    </div>
+    <div v-else class="widgets-grid">
+      <RouterLink to="/couple/checklist" class="widget widget-link">
+        <div class="widget-icon-wrap widget-icon-green">
+          <CheckSquare :size="18" />
+        </div>
         <div class="widget-top">
           <span class="widget-value">{{ tasksDone }}/{{ tasksTotal }}</span>
         </div>
         <p class="widget-label">{{ t("overview.widgets.tasksComplete") }}</p>
+        <div class="widget-progress-track" v-if="tasksTotal > 0">
+          <div
+            class="widget-progress-fill"
+            :style="{ width: `${Math.round((tasksDone / tasksTotal) * 100)}%` }"
+          ></div>
+        </div>
         <p v-if="checklistStore.urgent > 0" class="widget-hint urgent-hint">
           <AlertTriangle :size="13" /> {{ checklistStore.urgent }}
           {{ t("overview.widgets.dueSoon") }}
         </p>
         <p v-else class="widget-hint">{{ t("overview.widgets.onTrack") }}</p>
-      </div>
-      <div class="widget">
+      </RouterLink>
+      <RouterLink to="/couple/budget" class="widget widget-link">
+        <div class="widget-icon-wrap widget-icon-gold">
+          <Wallet :size="18" />
+        </div>
         <div class="widget-top">
           <span class="widget-value">{{ formatEur(budgetSpent) }}</span>
         </div>
         <p class="widget-label">{{ t("overview.widgets.budgetSpent") }}</p>
+        <div class="widget-progress-track" v-if="budgetTotal > 0">
+          <div
+            class="widget-progress-fill"
+            :class="{ 'widget-progress-over': budgetSpent > budgetTotal }"
+            :style="{
+              width: `${Math.min(100, Math.round((budgetSpent / budgetTotal) * 100))}%`,
+            }"
+          ></div>
+        </div>
         <p class="widget-hint">
           {{ formatEur(budgetRemaining) }} {{ t("overview.widgets.remaining") }}
         </p>
-      </div>
-      <div class="widget">
+      </RouterLink>
+      <RouterLink to="/couple/guests" class="widget widget-link">
+        <div class="widget-icon-wrap widget-icon-blue">
+          <Users :size="18" />
+        </div>
         <div class="widget-top">
           <span class="widget-value">{{ guestsConfirmed }}</span>
         </div>
         <p class="widget-label">{{ t("overview.widgets.guestsConfirmed") }}</p>
+        <div
+          class="widget-progress-track"
+          v-if="guestsConfirmed + guestsPending > 0"
+        >
+          <div
+            class="widget-progress-fill widget-progress-blue"
+            :style="{
+              width: `${Math.round((guestsConfirmed / (guestsConfirmed + guestsPending)) * 100)}%`,
+            }"
+          ></div>
+        </div>
         <p class="widget-hint">
           {{ guestsPending }} {{ t("overview.widgets.awaitingRsvp") }}
         </p>
-      </div>
-      <div class="widget">
+      </RouterLink>
+      <RouterLink to="/couple/enquiries" class="widget widget-link">
+        <div class="widget-icon-wrap widget-icon-purple">
+          <Star :size="18" />
+        </div>
         <div class="widget-top">
           <span class="widget-value">{{ vendorsBooked }}</span>
         </div>
@@ -398,8 +455,9 @@ function timeAgo(dateStr?: string): string {
         <p class="widget-hint">
           {{ vendorsPendingReply }} {{ t("overview.widgets.pendingReply") }}
         </p>
-      </div>
+      </RouterLink>
     </div>
+    <!-- end v-else widgets-grid -->
 
     <!-- ── Pending Reviews Banner ──────────────────────────────── -->
     <div v-if="pendingReviewBookings.length" class="review-banner">
@@ -445,7 +503,16 @@ function timeAgo(dateStr?: string): string {
     </div>
 
     <!-- ── Bottom Grid ─────────────────────────────────────────── -->
-    <div class="bottom-grid">
+    <!-- bottom grid skeleton -->
+    <div v-if="pageLoading" class="bottom-grid">
+      <section v-for="i in 4" :key="i" class="card">
+        <div class="card-header">
+          <SkeletonLoader height="18px" width="40%" />
+        </div>
+        <SkeletonLoader :lines="4" />
+      </section>
+    </div>
+    <div v-else class="bottom-grid">
       <!-- Upcoming Tasks -->
       <section class="card tasks-card">
         <div class="card-header">
@@ -598,6 +665,7 @@ function timeAgo(dateStr?: string): string {
         </ul>
       </section>
     </div>
+    <!-- end v-else bottom-grid -->
 
     <!-- Review Modal (opened from banner) -->
     <ReviewModal
@@ -728,6 +796,71 @@ function timeAgo(dateStr?: string): string {
   border: 1px solid var(--color-border);
   border-radius: 14px;
   padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.widget-link {
+  text-decoration: none;
+  color: inherit;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+.widget-link:hover {
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+
+.widget-icon-wrap {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+}
+.widget-icon-green {
+  background: var(--color-green-light);
+  color: var(--color-green);
+}
+.widget-icon-gold {
+  background: var(--color-gold-light);
+  color: var(--color-gold);
+}
+.widget-icon-blue {
+  background: var(--chip-blue-bg);
+  color: var(--chip-blue-text);
+}
+.widget-icon-purple {
+  background: var(--chip-purple-bg);
+  color: var(--chip-purple-text);
+}
+
+.widget-progress-track {
+  height: 4px;
+  background: var(--color-border);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 4px 0;
+}
+.widget-progress-fill {
+  height: 100%;
+  background: var(--color-green);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+.widget-progress-fill.widget-progress-over {
+  background: var(--color-error);
+}
+.widget-progress-blue {
+  background: var(--chip-blue-text);
 }
 
 .widget-top {
@@ -1262,5 +1395,84 @@ function timeAgo(dateStr?: string): string {
 .rbi-dismiss:hover {
   background: var(--color-surface-alt);
   color: var(--color-text);
+}
+
+/* ── Mobile ─────────────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .overview {
+    gap: 16px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Hero banner: stack content, shrink padding */
+  .hero-banner {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    padding: 20px 18px !important;
+    gap: 16px !important;
+  }
+
+  .hero-title {
+    font-size: 1.55rem !important;
+  }
+
+  .hero-countdown {
+    width: 100%;
+    flex-direction: row !important;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px !important;
+    border-radius: 12px !important;
+  }
+
+  .countdown-number {
+    font-size: 2rem !important;
+  }
+
+  /* Widgets: 2-up on mobile */
+  .widgets-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  .widget {
+    padding: 14px 16px !important;
+  }
+
+  .widget-value {
+    font-size: 1.45rem !important;
+  }
+
+  /* Bottom grid: already 1-col at 820px, keep padding tight */
+  .bottom-grid {
+    gap: 14px !important;
+  }
+
+  .card {
+    padding: 16px 18px !important;
+  }
+
+  /* Review banner items: stack on tiny screens */
+  .rbi {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .rbi-review-btn {
+    flex: 1;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Widgets: 1-col on very small screens */
+  .widgets-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .hero-title {
+    font-size: 1.3rem !important;
+  }
 }
 </style>

@@ -1,8 +1,19 @@
 <script setup lang="ts">
+import { watch, onUnmounted } from "vue";
 import { useConfirm } from "@/composables/useConfirm";
 
 const { visible, message, title, confirmText, cancelText, danger, resolve } =
   useConfirm();
+
+function onKeyDown(e: KeyboardEvent) {
+  if (e.key === "Escape") resolve(false);
+}
+
+watch(visible, (v) => {
+  if (v) document.addEventListener("keydown", onKeyDown);
+  else document.removeEventListener("keydown", onKeyDown);
+});
+onUnmounted(() => document.removeEventListener("keydown", onKeyDown));
 </script>
 
 <template>

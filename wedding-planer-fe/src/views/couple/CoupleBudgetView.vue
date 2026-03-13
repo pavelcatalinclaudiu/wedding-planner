@@ -1496,4 +1496,88 @@ function varianceClass(estimated: number, actual: number): string {
   cursor: pointer;
   color: var(--color-muted);
 }
+
+/* ── Mobile ─────────────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  /* Overview grid: 2-col (already at 900px) — keep */
+  /* Tiny screen: 1-col */
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .page-header .btn-primary,
+  .page-header button {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+
+  /* Category header: hide the bar graph on mobile to save space */
+  .cat-bar-wrap {
+    display: none;
+  }
+
+  /* Tighten category amounts */
+  .cat-header-right {
+    gap: 8px;
+  }
+
+  /* Item rows: stack info */
+  .item-row {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* Two-column field rows → single column */
+  .field-row-2 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Modal → bottom-sheet */
+  .modal-overlay {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+
+  .modal {
+    border-radius: 20px 20px 0 0 !important;
+    max-width: 100% !important;
+    max-height: 92dvh;
+    overflow-y: auto;
+  }
+
+  .modal::before {
+    content: "";
+    display: block;
+    width: 40px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--color-border);
+    margin: 12px auto 0;
+  }
+
+  /* Modal footer buttons: full width */
+  .modal-footer {
+    flex-direction: column;
+  }
+
+  .modal-footer .btn-ghost,
+  .modal-footer .btn-primary {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .overview-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .ov-value {
+    font-size: 1.4rem !important;
+  }
+}
 </style>

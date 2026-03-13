@@ -1020,15 +1020,74 @@ onMounted(async () => {
   .nav {
     padding: 0 16px;
   }
+
+  /* Hero */
+  .hero {
+    min-height: 100svh;
+  }
+  .hero-bg {
+    background-position: 10% center;
+  }
+  .hero-content {
+    padding: 80px 18px 48px;
+    max-width: 100%;
+  }
+  .hero-eyebrow {
+    font-size: 0.72rem;
+    margin-bottom: 12px;
+  }
+  .hero-heading {
+    font-size: clamp(1.8rem, 8vw, 2.6rem);
+    letter-spacing: -0.5px;
+    margin-bottom: 12px;
+  }
+  .hero-sub {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+
+  /* Search form — vertical stack */
   .hero-search {
     flex-direction: column;
+    padding: 10px;
+    gap: 0;
+    border-radius: 16px;
+    max-width: 100%;
+  }
+  .hs-field {
+    width: 100%;
+    padding: 0 10px;
+    min-height: 48px;
+    box-sizing: border-box;
+  }
+  .hs-input {
+    font-size: 0.95rem;
+    padding: 12px 0;
+    min-height: 44px;
   }
   .hs-sep {
-    width: 95%;
+    width: calc(100% - 20px);
     height: 1px;
+    background: #f0f0f0;
+    margin: 0 10px;
+    flex-shrink: 0;
   }
   .hs-btn {
     width: 100%;
+    min-height: 48px;
+    font-size: 0.95rem;
+    border-radius: 10px;
+    margin-top: 8px;
+  }
+  .hero-hint {
+    font-size: 0.72rem;
+    margin-top: 12px;
+  }
+
+  /* Sections */
+  .section {
+    padding: 56px 0;
   }
   .category-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -1049,6 +1108,18 @@ onMounted(async () => {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
+  }
+}
+
+@media (max-width: 380px) {
+  .hero-heading {
+    font-size: 1.65rem;
+  }
+  .hero-search {
+    padding: 8px;
+  }
+  .hs-btn {
+    padding: 13px;
   }
 }
 </style>

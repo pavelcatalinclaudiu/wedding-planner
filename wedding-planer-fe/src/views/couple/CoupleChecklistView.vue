@@ -1230,6 +1230,11 @@ onMounted(() => {
     align-items: flex-start;
     gap: 0.8rem;
   }
+  .page-header .btn,
+  .page-header button {
+    width: 100%;
+    justify-content: center;
+  }
   .cl-sidebar {
     grid-template-columns: 1fr;
   }
@@ -1241,6 +1246,40 @@ onMounted(() => {
   }
   .task-actions {
     opacity: 1;
+  }
+
+  /* Modal → bottom-sheet */
+  .modal-overlay {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+
+  .modal {
+    border-radius: 20px 20px 0 0 !important;
+    max-width: 100% !important;
+    max-height: 92dvh !important;
+    overflow-y: auto;
+  }
+
+  .modal::before {
+    content: "";
+    display: block;
+    width: 40px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--color-border);
+    margin: 12px auto 4px;
+  }
+
+  /* Modal footer buttons: stack */
+  .modal-footer {
+    flex-direction: column;
+  }
+
+  .modal-footer .btn,
+  .modal-footer button {
+    width: 100%;
+    justify-content: center;
   }
 }
 </style>

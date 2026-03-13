@@ -109,6 +109,36 @@
   color-scheme: dark;
 }
 
+/* ─── Smooth theme-switch transition ─── */
+/* Applied to layout roots so the transition is scoped (doesn't flash public pages) */
+.couple-layout,
+.vendor-layout {
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+/* Transition key surfaces */
+.couple-layout *,
+.vendor-layout * {
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+/* But don't slow down other intentional transitions */
+.couple-layout .btn,
+.vendor-layout .btn,
+.couple-layout a,
+.vendor-layout a {
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    opacity 0.15s ease,
+    transform 0.1s ease;
+}
+
 /* ─── Form elements inside dark layout ─── */
 .dark
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(
@@ -455,4 +485,250 @@ img {
 .icon-btn.danger:hover {
   background: var(--color-error-light);
   color: var(--color-error);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MICRO-INTERACTIONS
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Button press – tactile scale-down feedback */
+.btn:active:not(:disabled),
+.btn-primary:active:not(:disabled),
+.btn-outline:active:not(:disabled),
+.btn-ghost:active:not(:disabled),
+.btn-danger:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* Card hover – subtle lift via shadow elevation */
+.card {
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+.card:hover {
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+/* Clickable cards get a stronger lift */
+a > .card,
+button > .card,
+[role="button"] > .card {
+  cursor: pointer;
+}
+
+/* Focus rings – consistent brand-coloured outline */
+:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 2px;
+}
+
+/* Smooth appearance for any element entering via v-if/v-show */
+.fade-in {
+  animation: fade-in 0.2s ease both;
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Slide-up entrance (used for cards / list items) */
+.slide-up {
+  animation: slide-up 0.22s ease both;
+}
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Icon spin utility (used for loading spinners) */
+.spin {
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Stagger children for list entrances */
+.stagger-list > * {
+  animation: slide-up 0.22s ease both;
+}
+.stagger-list > *:nth-child(1) {
+  animation-delay: 0.02s;
+}
+.stagger-list > *:nth-child(2) {
+  animation-delay: 0.05s;
+}
+.stagger-list > *:nth-child(3) {
+  animation-delay: 0.08s;
+}
+.stagger-list > *:nth-child(4) {
+  animation-delay: 0.11s;
+}
+.stagger-list > *:nth-child(5) {
+  animation-delay: 0.14s;
+}
+.stagger-list > *:nth-child(n + 6) {
+  animation-delay: 0.17s;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   GLOBAL MOBILE POLISH  (max-width: 767px)
+   Overrides that apply across all scoped views — keeps individual
+   view files lean while delivering a consistent mobile baseline.
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 767px) {
+  /* ── Page / section headers ── */
+  .page-header,
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 10px;
+  }
+
+  .page-header .btn,
+  .page-header button,
+  .section-header .btn,
+  .section-header button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* ── Reduce heading sizes ── */
+  .page-header h2,
+  .section-header h2,
+  .section-title {
+    font-size: 1.15rem !important;
+  }
+
+  /* ── Cards ── */
+  .card,
+  .card-lg {
+    padding: 16px 18px;
+  }
+
+  /* ── Modals → bottom-sheet on mobile ── */
+  .modal-overlay,
+  .vcal-overlay {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+
+  .modal,
+  .modal-box,
+  .vcal-modal {
+    border-radius: 20px 20px 0 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    max-height: 92dvh !important;
+    padding: 24px 20px calc(env(safe-area-inset-bottom, 0px) + 24px) !important;
+    box-sizing: border-box;
+  }
+
+  /* handle pill for bottom-sheet modals */
+  .modal::before,
+  .vcal-modal::before {
+    content: "";
+    display: block;
+    width: 40px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--color-border);
+    margin: 0 auto 18px;
+  }
+
+  /* ── Filter / tool bars ── */
+  .filter-bar {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .filter-bar > *,
+  .filter-bar select,
+  .filter-bar input {
+    flex: 1 1 140px;
+    min-width: 140px;
+  }
+
+  /* ── Scrollable tables ── */
+  .table-wrap,
+  .guest-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ── Two-column form grids → single column ── */
+  .modal-grid,
+  .form-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ── Tab bars → horizontal scroll ── */
+  .panel-tabs,
+  .tab-bar,
+  .tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .panel-tabs::-webkit-scrollbar,
+  .tab-bar::-webkit-scrollbar,
+  .tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* ── Stat / overview grids ── */
+  .stats-bar,
+  .stats-grid,
+  .overview-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  /* ── Buttons in small containers ── */
+  .btn-group {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* ── Font scaling ── */
+  html {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* ── Stat grids → single column on tiny screens ── */
+  .stats-bar,
+  .stats-grid,
+  .overview-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .modal,
+  .modal-box,
+  .vcal-modal {
+    padding: 20px 16px calc(env(safe-area-inset-bottom, 0px) + 20px) !important;
+  }
+
+  html {
+    font-size: 14px;
+  }
 }

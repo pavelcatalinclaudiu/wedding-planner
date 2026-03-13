@@ -1,10 +1,25 @@
 <script setup lang="ts">
+import { onMounted, onUnmounted } from "vue";
 import { useVideoCallsStore } from "@/stores/videoCalls.store";
 import VideoCallModal from "@/components/video/VideoCallModal.vue";
 import ToastContainer from "@/components/ui/ToastContainer.vue";
 import ConfirmModal from "@/components/ui/ConfirmModal.vue";
 
 const videoStore = useVideoCallsStore();
+
+function handleGlobalEscape(e: KeyboardEvent) {
+  if (e.key !== "Escape") return;
+  // Click backdrop of any open inline modal so its @click.self handler fires
+  const overlay = document.querySelector<HTMLElement>(
+    ".modal-overlay, .modal-backdrop, .confirm-backdrop",
+  );
+  if (overlay) {
+    overlay.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+  }
+}
+
+onMounted(() => document.addEventListener("keydown", handleGlobalEscape));
+onUnmounted(() => document.removeEventListener("keydown", handleGlobalEscape));
 </script>
 
 <template>

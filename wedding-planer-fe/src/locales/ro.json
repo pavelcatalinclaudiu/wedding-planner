@@ -604,6 +604,10 @@
     "allGroups": "Toate grupurile",
     "allDietary": "Toate preferințele",
     "capacity": "Capacitate",
+    "noMatchText": "Încearcă să ajustezi căutarea sau să ștergi filtrele.",
+    "clearFilters": "Șterge filtrele",
+    "emptyTitle": "Niciun invitat încă",
+    "emptyText": "Începe să construiești lista de invitați adăugând primul invitat sau importând din CSV.",
     "noMatch": "Niciun invitat nu se potrivește cu filtrele.",
     "noTablesAssigned": "Nicio masă alocată. Folosește coloana Masă din tabul Lista de invitați.",
     "unassigned": "Nealocat",
@@ -635,6 +639,10 @@
       "other": "Alții"
     },
     "childTag": "copil",
+    "filters": "Filtre",
+    "guestSingular": "invitat",
+    "guestPlural": "invitați",
+    "tablePlaceholder": "Masă…",
     "setupWebsite": "Configurează site-ul",
     "setupWebsiteTooltip": "Configurează site-ul de nuntă pentru a activa linkurile de invitație",
     "invite": {

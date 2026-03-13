@@ -1,7 +1,16 @@
 ﻿<script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
-import { Lock, AlertTriangle } from "lucide-vue-next";
+import {
+  Lock,
+  AlertTriangle,
+  Users,
+  Search,
+  Pencil,
+  Trash2,
+  Check,
+  Link,
+} from "lucide-vue-next";
 import { useGuestsStore } from "@/stores/guests.store";
 import { useCoupleStore } from "@/stores/couple.store";
 import { guestsApi } from "@/api/guests.api";
@@ -24,6 +33,18 @@ const toast = useToast();
 
 // -- Tabs ------------------------------------------------------------------
 const activeTab = ref<"list" | "tables">("list");
+
+// -- Filter panel toggle ---------------------------------------------------
+const showFilters = ref(false);
+const hasActiveFilters = computed(
+  () =>
+    !!(
+      filterRsvp.value ||
+      filterSide.value ||
+      filterGroup.value ||
+      filterDiet.value
+    ),
+);
 
 // -- Filters ---------------------------------------------------------------
 const search = ref("");
@@ -219,6 +240,15 @@ async function setTable(g: Guest, table: string) {
   }
 }
 
+// -- Empty state helper -------------------------------------------------------
+function clearFilters() {
+  search.value = "";
+  filterRsvp.value = "";
+  filterSide.value = "";
+  filterGroup.value = "";
+  filterDiet.value = "";
+}
+
 // -- CSV Import modal ------------------------------------------------------
 const showImport = ref(false);
 const csvText = ref("");
@@ -347,18 +377,26 @@ async function copyInviteLink(g: Guest) {
 
 <template>
   <div class="guests-view">
-    <!-- Page header -->
+    <!-- ── Page header ───────────────────────────────────────────────── -->
     <div class="page-header">
-      <div>
+      <div class="header-left">
         <h2>{{ t("guests.title") }}</h2>
         <p class="page-sub">{{ t("guests.subtitle") }}</p>
       </div>
       <div class="header-actions">
-        <button class="btn-outline" @click="showImport = true">
-          &#8679; {{ t("guests.importCsv") }}
+        <button
+          class="btn-outline btn-icon-only"
+          @click="showImport = true"
+          :title="t('guests.importCsv')"
+        >
+          &#8679;
         </button>
-        <button class="btn-outline" @click="exportCsv">
-          &#8681; {{ t("guests.exportCsv") }}
+        <button
+          class="btn-outline btn-icon-only"
+          @click="exportCsv"
+          :title="t('guests.exportCsv')"
+        >
+          &#8681;
         </button>
         <button class="btn-primary" @click="openAdd">
           + {{ t("guests.addGuest") }}
@@ -366,32 +404,31 @@ async function copyInviteLink(g: Guest) {
       </div>
     </div>
 
-    <!-- Stats bar -->
-    <div v-if="store.stats" class="stats-bar">
-      <div class="stat">
-        <span class="stat-num">{{ store.stats.total }}</span>
-        <span class="stat-label">{{ t("guests.total") }}</span>
+    <!-- ── Stats strip ──────────────────────────────────────────────────── -->
+    <div v-if="store.stats" class="stats-strip">
+      <div class="ss-item">
+        <span class="ss-num">{{ store.stats.total }}</span>
+        <span class="ss-lbl">{{ t("guests.total") }}</span>
       </div>
-      <div class="stat confirmed">
-        <span class="stat-num">{{ store.stats.confirmed }}</span>
-        <span class="stat-label">{{ t("guests.confirmed") }}</span>
+      <div class="ss-div" />
+      <div class="ss-item">
+        <span class="ss-num ss-confirmed">{{ store.stats.confirmed }}</span>
+        <span class="ss-lbl">{{ t("guests.confirmed") }}</span>
       </div>
-      <div class="stat declined">
-        <span class="stat-num">{{ store.stats.declined }}</span>
-        <span class="stat-label">{{ t("guests.declined") }}</span>
+      <div class="ss-div" />
+      <div class="ss-item">
+        <span class="ss-num ss-declined">{{ store.stats.declined }}</span>
+        <span class="ss-lbl">{{ t("guests.declined") }}</span>
       </div>
-      <div class="stat pending">
-        <span class="stat-num">{{ store.stats.pending }}</span>
-        <span class="stat-label">{{ t("guests.pending") }}</span>
+      <div class="ss-div" />
+      <div class="ss-item">
+        <span class="ss-num ss-pending">{{ store.stats.pending }}</span>
+        <span class="ss-lbl">{{ t("guests.pending") }}</span>
       </div>
-      <div class="progress-wrap" v-if="store.stats.estimatedCapacity > 0">
-        <div class="progress-label">
-          {{ t("guests.capacity") }}: {{ store.stats.confirmed }} /
-          {{ store.stats.estimatedCapacity }}
-        </div>
-        <div class="progress-bar">
+      <div v-if="store.stats.estimatedCapacity > 0" class="ss-progress">
+        <div class="ss-progress-bar">
           <div
-            class="progress-fill"
+            class="ss-progress-fill"
             :class="{ over: store.stats.overCapacity }"
             :style="{
               width:
@@ -402,15 +439,18 @@ async function copyInviteLink(g: Guest) {
             }"
           />
         </div>
+        <span class="ss-cap"
+          >{{ store.stats.confirmed }}/{{ store.stats.estimatedCapacity }}</span
+        >
       </div>
     </div>
 
-    <!-- Smart alerts -->
+    <!-- ── Smart alerts ─────────────────────────────────────────────────── -->
     <div v-for="a in alerts" :key="a.text" class="alert" :class="a.type">
       {{ a.text }}
     </div>
 
-    <!-- Tabs -->
+    <!-- ── Tabs ─────────────────────────────────────────────────────────── -->
     <div class="tabs">
       <button
         :class="{ active: activeTab === 'list' }"
@@ -428,14 +468,29 @@ async function copyInviteLink(g: Guest) {
 
     <!-- ============ GUEST LIST TAB ============ -->
     <template v-if="activeTab === 'list'">
-      <!-- Filter bar -->
-      <div class="filter-bar">
-        <input
-          v-model="search"
-          :placeholder="t('guests.searchPlaceholder')"
-          class="search-input"
-        />
+      <!-- ── Search + filter toggle ──────────────────────────────────── -->
+      <div class="search-row">
+        <div class="search-wrap">
+          <Search :size="15" class="search-icon" />
+          <input
+            v-model="search"
+            :placeholder="t('guests.searchPlaceholder')"
+            class="search-input"
+          />
+        </div>
+        <button
+          class="btn-outline filter-toggle"
+          :class="{ 'filter-toggle--active': showFilters || hasActiveFilters }"
+          @click="showFilters = !showFilters"
+        >
+          <span class="filter-toggle-icon">&#9776;</span>
+          <span class="filter-toggle-label">{{ t("guests.filters") }}</span>
+          <span v-if="hasActiveFilters" class="filter-active-dot" />
+        </button>
+      </div>
 
+      <!-- ── Collapsible filter panel ─────────────────────────────────── -->
+      <div v-if="showFilters" class="filter-panel">
         <select v-model="filterRsvp">
           <option value="">{{ t("guests.allRsvp") }}</option>
           <option value="CONFIRMED">
@@ -444,14 +499,12 @@ async function copyInviteLink(g: Guest) {
           <option value="DECLINED">{{ t("guests.statuses.DECLINED") }}</option>
           <option value="PENDING">{{ t("guests.statuses.PENDING") }}</option>
         </select>
-
         <select v-model="filterSide">
           <option value="">{{ t("guests.allSides") }}</option>
           <option value="BRIDE">{{ t("guests.sideOptions.bride") }}</option>
           <option value="GROOM">{{ t("guests.sideOptions.groom") }}</option>
           <option value="BOTH">{{ t("guests.sideOptions.both") }}</option>
         </select>
-
         <select v-model="filterGroup">
           <option value="">{{ t("guests.allGroups") }}</option>
           <option value="FAMILY">{{ t("guests.groupOptions.family") }}</option>
@@ -463,7 +516,6 @@ async function copyInviteLink(g: Guest) {
           </option>
           <option value="OTHER">{{ t("guests.groupOptions.other") }}</option>
         </select>
-
         <select v-model="filterDiet">
           <option value="">{{ t("guests.allDietary") }}</option>
           <option value="NONE">{{ t("guests.meals.NONE") }}</option>
@@ -476,14 +528,47 @@ async function copyInviteLink(g: Guest) {
           <option value="KOSHER">{{ t("guests.meals.KOSHER") }}</option>
           <option value="OTHER">{{ t("guests.meals.OTHER") }}</option>
         </select>
+        <button
+          v-if="hasActiveFilters"
+          class="filter-clear-btn"
+          @click="clearFilters"
+        >
+          ✕ {{ t("guests.clearFilters") }}
+        </button>
       </div>
+
+      <!-- ── Result count ─────────────────────────────────────────────── -->
+      <p v-if="!store.loading && sorted.length > 0" class="result-count">
+        {{ sorted.length }}
+        {{
+          sorted.length === 1
+            ? t("guests.guestSingular")
+            : t("guests.guestPlural")
+        }}
+      </p>
 
       <!-- Table -->
       <div v-if="store.loading" class="loading">{{ t("common.loading") }}</div>
-      <div v-else-if="sorted.length === 0" class="empty">
-        {{ t("guests.noMatch") }}
+      <div v-else-if="sorted.length === 0" class="empty-state">
+        <template v-if="store.guests.length === 0">
+          <div class="empty-icon"><Users :size="48" /></div>
+          <h3 class="empty-title">{{ t("guests.emptyTitle") }}</h3>
+          <p class="empty-text">{{ t("guests.emptyText") }}</p>
+          <button class="btn btn-primary" @click="openAdd">
+            {{ t("guests.addGuest") }}
+          </button>
+        </template>
+        <template v-else>
+          <div class="empty-icon"><Search :size="40" /></div>
+          <h3 class="empty-title">{{ t("guests.noMatch") }}</h3>
+          <p class="empty-text">{{ t("guests.noMatchText") }}</p>
+          <button class="btn btn-outline" @click="clearFilters">
+            {{ t("guests.clearFilters") }}
+          </button>
+        </template>
       </div>
-      <div v-else class="table-wrap">
+      <!-- ── Desktop table ───────────────────────────────────────────── -->
+      <div v-else class="table-wrap desktop-only">
         <table class="guest-table">
           <thead>
             <tr>
@@ -634,6 +719,161 @@ async function copyInviteLink(g: Guest) {
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- ── Mobile guest cards ────────────────────────────────────────── -->
+      <div
+        v-if="!store.loading && sorted.length > 0"
+        class="guest-cards mobile-only"
+      >
+        <div
+          v-for="g in sorted"
+          :key="g.id"
+          class="gc"
+          :class="{
+            'gc--plus-one': !!g.invitedById,
+            'gc--child': g.isChildGuest,
+          }"
+        >
+          <!-- Row 1: avatar · name + inline tags · RSVP -->
+          <div class="gc-top">
+            <div class="gc-avatar">
+              {{ (g.firstName?.[0] ?? g.fullName?.[0] ?? "?").toUpperCase() }}
+            </div>
+            <div class="gc-identity">
+              <div class="gc-name-row">
+                <span class="gc-name">{{ g.fullName }}</span>
+                <span v-if="g.isChildGuest" class="gc-tag gc-tag--child">{{
+                  t("guests.childTag")
+                }}</span>
+                <span v-if="g.plusOne" class="gc-tag gc-tag--plus">+1</span>
+              </div>
+              <span v-if="g.email" class="gc-email">{{ g.email }}</span>
+            </div>
+            <span
+              v-if="(g.inviteStatus ?? 'NOT_INVITED') === 'NOT_INVITED'"
+              class="gc-rsvp gc-rsvp--muted"
+              >–</span
+            >
+            <span
+              v-else-if="g.inviteStatus === 'LINK_SENT'"
+              class="gc-rsvp gc-rsvp--invited"
+              >{{ t("guests.invite.invited") }}</span
+            >
+            <button
+              v-else
+              class="gc-rsvp"
+              :class="'gc-rsvp--' + g.rsvpStatus.toLowerCase()"
+              @click="cycleRsvp(g)"
+            >
+              {{ rsvpLabel[g.rsvpStatus] }}
+            </button>
+          </div>
+
+          <!-- Row 2: structured detail grid (always shown) -->
+          <div class="gc-body">
+            <div class="gc-detail-item">
+              <span class="gc-detail-label">{{ t("guests.side") }}</span>
+              <span class="gc-detail-value">{{ sideLabel[g.side] }}</span>
+            </div>
+            <div class="gc-detail-item">
+              <span class="gc-detail-label">{{ t("guests.group") }}</span>
+              <span class="gc-detail-value">{{
+                groupLabel[g.guestGroup]
+              }}</span>
+            </div>
+            <div class="gc-detail-item">
+              <span class="gc-detail-label">{{ t("guests.dietary") }}</span>
+              <span
+                class="gc-detail-value"
+                :class="{ 'gc-detail-value--diet': g.dietary !== 'NONE' }"
+                >{{ dietaryLabel[g.dietary] }}</span
+              >
+            </div>
+            <div v-if="g.phone" class="gc-detail-item">
+              <span class="gc-detail-label">{{ t("guests.phone") }}</span>
+              <span class="gc-detail-value">{{ g.phone }}</span>
+            </div>
+            <div
+              v-if="g.plusOne && g.plusOneName"
+              class="gc-detail-item gc-detail-item--wide"
+            >
+              <span class="gc-detail-label"
+                >+1 {{ t("guests.plusOneName") }}</span
+              >
+              <span class="gc-detail-value">{{ g.plusOneName }}</span>
+            </div>
+            <div v-if="g.tableAssignment" class="gc-detail-item">
+              <span class="gc-detail-label">{{ t("guests.table") }}</span>
+              <span class="gc-detail-value gc-detail-value--table">{{
+                g.tableAssignment
+              }}</span>
+            </div>
+          </div>
+
+          <!-- Row 3: notes / dietary notes (if any) -->
+          <div v-if="g.dietaryNotes || g.notes" class="gc-notes">
+            <p v-if="g.dietaryNotes" class="gc-note-row">
+              <span class="gc-note-lbl">{{ t("guests.dietaryNotes") }}:</span>
+              {{ g.dietaryNotes }}
+            </p>
+            <p v-if="g.notes" class="gc-note-row">
+              <span class="gc-note-lbl">{{ t("guests.notes") }}:</span>
+              {{ g.notes }}
+            </p>
+          </div>
+
+          <!-- Row 4: table edit · invite · actions -->
+          <div class="gc-footer">
+            <input
+              class="gc-table-input"
+              :value="g.tableAssignment ?? ''"
+              :placeholder="t('guests.tablePlaceholder')"
+              @blur="setTable(g, ($event.target as HTMLInputElement).value)"
+              @keydown.enter="($event.target as HTMLInputElement).blur()"
+            />
+            <RouterLink
+              v-if="!websiteSubdomain"
+              to="/couple/website"
+              class="gc-act"
+              :title="t('guests.setupWebsite')"
+            >
+              <AlertTriangle :size="13" style="color: var(--color-amber)" />
+            </RouterLink>
+            <RouterLink
+              v-else-if="!websitePublished"
+              to="/couple/website"
+              class="gc-act"
+              :title="t('guests.invite.notPublishedTooltip')"
+            >
+              <Lock :size="13" style="color: var(--color-amber)" />
+            </RouterLink>
+            <button
+              v-else
+              class="gc-invite gc-invite--link"
+              :disabled="copyingLink.has(g.id)"
+              @click="copyInviteLink(g)"
+            >
+              <Check v-if="copiedLink.has(g.id)" :size="11" />
+              <Link v-else :size="11" />
+              {{
+                copiedLink.has(g.id)
+                  ? t("guests.invite.copied")
+                  : g.inviteStatus !== "NOT_INVITED"
+                    ? t("guests.invite.resendLink")
+                    : t("guests.invite.copyLink")
+              }}
+            </button>
+            <div class="gc-actions">
+              <button class="gc-act" @click="openEdit(g)">
+                <Pencil :size="13" />
+              </button>
+              <button class="gc-act gc-act--danger" @click="confirmDelete(g)">
+                <Trash2 :size="13" />
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </template>
 
@@ -915,25 +1155,30 @@ async function copyInviteLink(g: Guest) {
 /* -- Header --------------------------------------------------------------- */
 .page-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
   gap: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
-.page-header h2 {
-  margin: 0 0 4px;
-  font-size: 1.4rem;
+.header-left h2 {
+  margin: 0 0 2px;
+  font-size: 1.35rem;
 }
 .page-sub {
   margin: 0;
-  font-size: 0.88rem;
+  font-size: 0.85rem;
   color: var(--color-muted);
 }
 .header-actions {
   display: flex;
   gap: 8px;
-  flex-wrap: wrap;
+  align-items: center;
+  flex-shrink: 0;
+}
+.btn-icon-only {
+  padding: 7px 11px;
+  font-size: 1.05rem;
+  line-height: 1;
 }
 
 /* -- Buttons -------------------------------------------------------------- */
@@ -964,67 +1209,86 @@ async function copyInviteLink(g: Guest) {
   color: var(--color-gold);
 }
 
-/* -- Stats bar ------------------------------------------------------------ */
-.stats-bar {
+/* -- Stats strip ---------------------------------------------------------- */
+.stats-strip {
   display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
   align-items: center;
-  background: var(--color-surface);
+  background: var(--color-white);
   border: 1px solid var(--color-border);
   border-radius: 12px;
-  padding: 14px 20px;
+  padding: 12px 20px;
   margin-bottom: 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  gap: 0;
 }
-.stat {
+.stats-strip::-webkit-scrollbar {
+  display: none;
+}
+.ss-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 52px;
+  padding: 0 18px;
+  flex-shrink: 0;
 }
-.stat-num {
-  font-size: 1.4rem;
+.ss-num {
+  font-size: 1.5rem;
   font-weight: 800;
-  line-height: 1;
+  line-height: 1.1;
+  color: var(--color-text);
 }
-.stat-label {
-  font-size: 0.72rem;
-  color: var(--color-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-.stat.confirmed .stat-num {
+.ss-confirmed {
   color: var(--color-green, #27ae60);
 }
-.stat.declined .stat-num {
+.ss-declined {
   color: var(--color-error);
 }
-.stat.pending .stat-num {
+.ss-pending {
   color: var(--color-gold);
 }
-.progress-wrap {
-  flex: 1;
-  min-width: 160px;
-}
-.progress-label {
-  font-size: 0.8rem;
+.ss-lbl {
+  font-size: 0.65rem;
   color: var(--color-muted);
-  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 1px;
+  white-space: nowrap;
 }
-.progress-bar {
-  height: 8px;
+.ss-div {
+  width: 1px;
+  height: 30px;
   background: var(--color-border);
-  border-radius: 4px;
+  flex-shrink: 0;
+}
+.ss-progress {
+  flex: 1;
+  min-width: 100px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 18px;
+}
+.ss-progress-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--color-border);
+  border-radius: 3px;
   overflow: hidden;
 }
-.progress-fill {
+.ss-progress-fill {
   height: 100%;
   background: var(--color-gold);
-  border-radius: 4px;
+  border-radius: 3px;
   transition: width 0.4s;
 }
-.progress-fill.over {
+.ss-progress-fill.over {
   background: var(--color-error);
+}
+.ss-cap {
+  font-size: 0.72rem;
+  color: var(--color-muted);
+  white-space: nowrap;
 }
 
 /* -- Alerts --------------------------------------------------------------- */
@@ -1073,29 +1337,110 @@ async function copyInviteLink(g: Guest) {
   border-bottom-color: var(--color-gold);
 }
 
-/* -- Filter bar ----------------------------------------------------------- */
-.filter-bar {
+/* -- Search row ----------------------------------------------------------- */
+.search-row {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 16px;
+  gap: 8px;
   align-items: center;
+  margin-bottom: 8px;
+}
+.search-wrap {
+  flex: 1;
+  position: relative;
+}
+.search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-muted);
+  pointer-events: none;
 }
 .search-input {
-  padding: 7px 12px;
+  width: 100%;
+  padding: 8px 12px 8px 34px;
   border: 1.5px solid var(--color-border);
   border-radius: 8px;
   font-size: 0.88rem;
-  min-width: 200px;
-  flex: 1;
+  box-sizing: border-box;
+  background: var(--color-white);
+  color: var(--color-text);
+  outline: none;
+  transition: border-color 0.15s;
 }
-.filter-bar select {
-  padding: 7px 10px;
+.search-input:focus {
+  border-color: var(--color-gold);
+}
+.filter-toggle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 13px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+  position: relative;
+  flex-shrink: 0;
+}
+.filter-toggle--active {
+  border-color: var(--color-gold);
+  color: var(--color-gold);
+}
+.filter-active-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-gold);
+  position: absolute;
+  top: 4px;
+  right: 4px;
+}
+
+/* -- Filter panel --------------------------------------------------------- */
+.filter-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  margin-bottom: 12px;
+  align-items: center;
+}
+.filter-panel select {
+  padding: 6px 10px;
   border: 1.5px solid var(--color-border);
   border-radius: 8px;
-  font-size: 0.85rem;
-  background: var(--color-white, #fff);
+  font-size: 0.82rem;
+  background: var(--color-white);
   cursor: pointer;
+  flex: 1;
+  min-width: 120px;
+}
+.filter-panel select:focus {
+  outline: none;
+  border-color: var(--color-gold);
+}
+.filter-clear-btn {
+  background: none;
+  border: none;
+  font-size: 0.78rem;
+  color: var(--color-muted);
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: color 0.15s;
+}
+.filter-clear-btn:hover {
+  color: var(--color-error);
+}
+
+/* -- Result count --------------------------------------------------------- */
+.result-count {
+  font-size: 0.78rem;
+  color: var(--color-muted);
+  margin: 0 0 10px;
 }
 
 /* -- Guest table ---------------------------------------------------------- */
@@ -1468,8 +1813,374 @@ textarea.fi {
   padding: 40px;
 }
 .empty {
+  width: 100%;
   text-align: center;
   color: var(--color-muted);
   padding: 40px;
+}
+
+/* ── Show / hide helpers ────────────────────────────────────────────────── */
+.desktop-only {
+  display: block !important;
+}
+.mobile-only {
+  display: none !important;
+}
+
+/* ── Guest card name row ─────────────────────────────────────────────── */
+.gc-name-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+/* ── Guest cards ────────────────────────────────────────────────────────── */
+.guest-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gc {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: box-shadow 0.18s;
+}
+.gc:hover {
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.06));
+}
+.gc--plus-one {
+  border-left: 3px solid var(--color-gold);
+  padding-left: 11px;
+}
+.gc--child {
+  border-left: 3px solid #7c3aed;
+  padding-left: 11px;
+}
+
+/* top row */
+.gc-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.gc-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-gold-light);
+  color: var(--color-gold);
+  font-weight: 700;
+  font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.gc-identity {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.gc-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gc-email {
+  font-size: 0.73rem;
+  color: var(--color-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* RSVP badge */
+.gc-rsvp {
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1.4;
+}
+.gc-rsvp--muted {
+  background: transparent;
+  color: var(--color-muted);
+  cursor: default;
+}
+.gc-rsvp--invited {
+  background: var(--chip-blue-bg);
+  color: var(--chip-blue-text);
+}
+.gc-rsvp--confirmed {
+  background: var(--color-green-light);
+  color: var(--color-green);
+}
+.gc-rsvp--declined {
+  background: var(--color-error-light);
+  color: var(--color-error);
+}
+.gc-rsvp--pending {
+  background: var(--color-amber-light);
+  color: var(--color-amber);
+}
+
+/* ── Inline name tags (child / +1 badges) ────────────────────────────── */
+.gc-tag {
+  font-size: 0.63rem;
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: 20px;
+  line-height: 1.6;
+  flex-shrink: 0;
+}
+.gc-tag--child {
+  background: #fdf4ff;
+  color: #7e22ce;
+}
+.gc-tag--plus {
+  background: var(--color-gold-light);
+  color: var(--color-gold);
+}
+
+/* ── Detail grid ────────────────────────────────────────────────────────── */
+.gc-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 14px;
+  padding: 10px 12px;
+  background: var(--color-surface);
+  border-radius: 10px;
+}
+.gc-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.gc-detail-item--wide {
+  grid-column: 1 / -1;
+}
+.gc-detail-label {
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.gc-detail-value {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gc-detail-value--diet {
+  color: #854d0e;
+  font-weight: 600;
+}
+.gc-detail-value--table {
+  color: var(--color-gold);
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+
+/* ── Notes block ────────────────────────────────────────────────────────── */
+.gc-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 12px;
+  background: #fffbeb;
+  border: 1px solid #fef3c7;
+  border-radius: 8px;
+}
+.gc-note-row {
+  font-size: 0.75rem;
+  color: var(--color-text);
+  margin: 0;
+  line-height: 1.4;
+}
+.gc-note-lbl {
+  font-weight: 600;
+  color: var(--color-muted);
+  margin-right: 3px;
+}
+
+/* footer */
+.gc-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.gc-table-input {
+  flex: 1;
+  min-width: 80px;
+  max-width: 120px;
+  font-size: 0.78rem;
+  padding: 5px 9px;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  outline: none;
+}
+.gc-table-input:focus {
+  border-color: var(--color-gold);
+  border-style: solid;
+}
+.gc-invite {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  background: transparent;
+  transition: opacity 0.15s;
+}
+.gc-invite--warn {
+  border-color: var(--color-amber);
+  color: var(--color-amber);
+}
+.gc-invite--link {
+  border-color: var(--color-gold);
+  color: var(--color-gold);
+}
+.gc-invite:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.gc-actions {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+.gc-act {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--color-muted);
+  transition: all 0.15s;
+}
+.gc-act:hover {
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+}
+.gc-act--danger:hover {
+  border-color: var(--color-error);
+  color: var(--color-error);
+  background: var(--color-error-light);
+}
+
+/* ── Mobile breakpoint ───────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .desktop-only {
+    display: none !important;
+  }
+  .mobile-only {
+    display: block !important;
+  }
+
+  /* page header stays row, subtitle hidden */
+  .page-sub {
+    display: none;
+  }
+  .header-left h2 {
+    font-size: 1.1rem;
+  }
+
+  /* stats strip: tighter padding, smaller numbers */
+  .stats-strip {
+    padding: 10px 12px;
+  }
+  .ss-item {
+    padding: 0 10px;
+  }
+  .ss-num {
+    font-size: 1.15rem;
+  }
+  .ss-lbl {
+    font-size: 0.6rem;
+  }
+
+  /* filter panel: full-width selects */
+  .filter-panel {
+    gap: 6px;
+  }
+  .filter-panel select {
+    min-width: 100%;
+    flex: 1 1 100%;
+  }
+
+  /* cards */
+  .guest-cards {
+    gap: 8px;
+  }
+  .gc {
+    padding: 12px;
+    gap: 8px;
+    border-radius: 12px;
+  }
+  .gc-footer {
+    gap: 6px;
+  }
+  .gc-table-input {
+    max-width: 80px;
+  }
+
+  /* modal: bottom-sheet + single-col */
+  .modal-overlay {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+  .modal {
+    border-radius: 20px 20px 0 0 !important;
+    max-width: 100% !important;
+    max-height: 92dvh;
+    overflow-y: auto;
+    padding: 20px 18px 32px !important;
+  }
+  .modal::before {
+    content: "";
+    display: block;
+    width: 40px;
+    height: 4px;
+    background: var(--color-border);
+    border-radius: 2px;
+    margin: 0 auto 16px;
+  }
+  .modal-grid {
+    grid-template-columns: 1fr !important;
+  }
 }
 </style>

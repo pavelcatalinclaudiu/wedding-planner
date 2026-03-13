@@ -1,11 +1,37 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted } from "vue";
+import { computed, onMounted, onUnmounted } from "vue";
+import { isToday, isYesterday, format } from "date-fns";
 import { useNotificationsStore } from "@/stores/notifications.store";
 import NotificationItem from "./NotificationItem.vue";
 
 const emit = defineEmits<{ close: [] }>();
 const notificationsStore = useNotificationsStore();
 
+// ── Group by day ───────────────────────────────────────────────────────────
+type Group = { label: string; items: typeof notificationsStore.notifications };
+
+const grouped = computed<Group[]>(() => {
+  const map = new Map<string, Group>();
+  const slice = notificationsStore.notifications.slice(0, 40);
+
+  for (const n of slice) {
+    const d = new Date(n.createdAt);
+    let label: string;
+    if (isToday(d)) label = "Today";
+    else if (isYesterday(d)) label = "Yesterday";
+    else label = format(d, "dd MMMM yyyy");
+
+    if (!map.has(label)) map.set(label, { label, items: [] });
+    map.get(label)!.items.push(n);
+  }
+
+  return Array.from(map.values());
+});
+
+// ── Close on Escape or outside click ──────────────────────────────────────
+function handleKeyDown(e: KeyboardEvent) {
+  if (e.key === "Escape") emit("close");
+}
 function handleClickOutside(e: MouseEvent) {
   const target = e.target as HTMLElement;
   if (
@@ -16,10 +42,14 @@ function handleClickOutside(e: MouseEvent) {
   }
 }
 
-onMounted(() => document.addEventListener("mousedown", handleClickOutside));
-onUnmounted(() =>
-  document.removeEventListener("mousedown", handleClickOutside),
-);
+onMounted(() => {
+  document.addEventListener("mousedown", handleClickOutside);
+  document.addEventListener("keydown", handleKeyDown);
+});
+onUnmounted(() => {
+  document.removeEventListener("mousedown", handleClickOutside);
+  document.removeEventListener("keydown", handleKeyDown);
+});
 </script>
 
 <template>
@@ -37,16 +67,20 @@ onUnmounted(() =>
     <div class="dropdown-body">
       <div
         v-if="notificationsStore.notifications.length === 0"
-        class="empty-state"
+        class="empty-notif"
       >
-        No notifications
+        <span class="empty-notif-icon">🔔</span>
+        <p class="empty-notif-text">You're all caught up!</p>
       </div>
-      <NotificationItem
-        v-for="n in notificationsStore.notifications.slice(0, 30)"
-        :key="n.id"
-        :notification="n"
-        @close="emit('close')"
-      />
+      <template v-for="group in grouped" :key="group.label">
+        <div class="day-separator">{{ group.label }}</div>
+        <NotificationItem
+          v-for="n in group.items"
+          :key="n.id"
+          :notification="n"
+          @close="emit('close')"
+        />
+      </template>
     </div>
   </div>
 </template>
@@ -88,13 +122,37 @@ onUnmounted(() =>
   text-decoration: underline;
 }
 .dropdown-body {
-  max-height: 400px;
+  max-height: 420px;
   overflow-y: auto;
 }
-.empty-state {
-  padding: 32px;
-  text-align: center;
+.day-separator {
+  padding: 6px 16px 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   color: var(--color-muted);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.empty-notif {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 36px 24px;
+  text-align: center;
+}
+.empty-notif-icon {
+  font-size: 2rem;
+  opacity: 0.5;
+}
+.empty-notif-text {
+  margin: 0;
   font-size: 0.9rem;
+  color: var(--color-muted);
 }
 </style>
