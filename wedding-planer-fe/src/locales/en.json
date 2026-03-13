@@ -833,6 +833,7 @@
     "unread": "unread",
     "groupChat": "Group Chat",
     "selectConversation": "Select a conversation to read messages",
+    "allConversations": "All conversations",
     "groupChatTitle": "Group Chat — Planning Team",
     "groupChatSubtitle": "All your vendors and planning team in one conversation.",
     "groupChatError": "Could not load group chat.",

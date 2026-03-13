@@ -4,7 +4,14 @@ import { useI18n } from "vue-i18n";
 import { videoCallsApi } from "@/api/videoCalls.api";
 import { bookingsApi } from "@/api/bookings.api";
 import CalendarGrid from "@/components/ui/CalendarGrid.vue";
-import { format, parseISO, isAfter, startOfToday, compareAsc } from "date-fns";
+import {
+  format,
+  parseISO,
+  isAfter,
+  isBefore,
+  startOfToday,
+  compareAsc,
+} from "date-fns";
 import type { Booking, VideoCall } from "@/types/lead.types";
 import { Calendar, Video, X, CalendarClock } from "lucide-vue-next";
 
@@ -45,17 +52,27 @@ async function fetchBookings() {
 /* ── Bookings ─────────────────────────────────────────────────────────────── */
 const today = startOfToday();
 
+/** For a RESCHEDULE_PENDING booking the proposed date is the relevant date. */
+function effectiveDate(b: Booking): string | undefined {
+  if (b.status === "RESCHEDULE_PENDING" && b.proposedDate)
+    return b.proposedDate;
+  return b.weddingDate ?? undefined;
+}
+
 const upcomingBookings = computed<Booking[]>(() =>
   bookings.value
     .filter(
       (b) =>
         b.status !== "CANCELLED" &&
-        !!b.weddingDate &&
-        isAfter(parseISO(b.weddingDate), today),
+        (b.status === "RESCHEDULE_PENDING" ||
+          (!!effectiveDate(b) &&
+            !isBefore(parseISO(effectiveDate(b)!), today))),
     )
-    .sort((a, b) =>
-      compareAsc(parseISO(a.weddingDate!), parseISO(b.weddingDate!)),
-    ),
+    .sort((a, b) => {
+      const da = effectiveDate(a) ?? "9999-12-31";
+      const db = effectiveDate(b) ?? "9999-12-31";
+      return compareAsc(parseISO(da), parseISO(db));
+    }),
 );
 
 function bookingStatusClass(status?: string) {
@@ -149,8 +166,8 @@ const videoCallDates = computed<string[]>(() =>
 
 const bookingDates = computed<string[]>(() =>
   bookings.value
-    .filter((b) => b.status !== "CANCELLED" && !!b.weddingDate)
-    .map((b) => b.weddingDate!),
+    .filter((b) => b.status !== "CANCELLED" && !!effectiveDate(b))
+    .map((b) => effectiveDate(b)!),
 );
 
 function callTime(iso: string) {
@@ -277,8 +294,10 @@ onMounted(async () => {
                 :class="{ 'is-reschedule': b.status === 'RESCHEDULE_PENDING' }"
               >
                 <div class="bk-date-badge bk-date-badge--booking">
-                  <span class="bk-month">{{ monthAbbr(b.weddingDate!) }}</span>
-                  <span class="bk-day">{{ dayNum(b.weddingDate!) }}</span>
+                  <span class="bk-month">{{
+                    monthAbbr(effectiveDate(b)!)
+                  }}</span>
+                  <span class="bk-day">{{ dayNum(effectiveDate(b)!) }}</span>
                 </div>
                 <div class="bk-info">
                   <div class="pf-av" :title="b.coupleName ?? 'Couple'">
@@ -294,7 +313,7 @@ onMounted(async () => {
                   </div>
                   <div>
                     <p class="bk-couple">{{ b.coupleName ?? "Couple" }}</p>
-                    <p class="bk-weekday">{{ weekday(b.weddingDate!) }}</p>
+                    <p class="bk-weekday">{{ weekday(effectiveDate(b)!) }}</p>
                   </div>
                 </div>
                 <span class="bk-status" :class="bookingStatusClass(b.status)">

@@ -4,6 +4,7 @@ import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useMessagesStore } from "@/stores/messages.store";
 import type { Thread } from "@/types/message.types";
+import { ChevronLeft } from "lucide-vue-next";
 import ThreadList from "@/components/messaging/ThreadList.vue";
 import MessageWindow from "@/components/messaging/MessageWindow.vue";
 
@@ -12,10 +13,20 @@ const { t } = useI18n();
 const route = useRoute();
 const messagesStore = useMessagesStore();
 const selectedThreadId = ref<string | null>(null);
+const showDetail = ref(false);
 
 const selectedThread = computed<Thread | undefined>(() =>
   messagesStore.threads.find((t) => t.id === selectedThreadId.value),
 );
+
+function selectThread(id: string) {
+  selectedThreadId.value = id;
+  showDetail.value = true;
+}
+
+function closeDetail() {
+  showDetail.value = false;
+}
 
 onMounted(async () => {
   await messagesStore.fetchThreads();
@@ -26,9 +37,13 @@ onMounted(async () => {
 
   if (threadParam) {
     selectedThreadId.value = threadParam;
+    showDetail.value = true;
   } else if (dealParam) {
     const match = messagesStore.threads.find((t) => t.dealId === dealParam);
-    if (match) selectedThreadId.value = match.id;
+    if (match) {
+      selectedThreadId.value = match.id;
+      showDetail.value = true;
+    }
   } else if (messagesStore.threads.length > 0) {
     selectedThreadId.value = messagesStore.threads[0].id;
   }
@@ -45,10 +60,13 @@ watch(selectedThreadId, async (id) => {
       <ThreadList
         :threads="messagesStore.threads"
         :selected-id="selectedThreadId"
-        @select="(id: string) => (selectedThreadId = id)"
+        @select="selectThread"
       />
     </div>
-    <div class="message-panel">
+    <div class="message-panel" :class="{ 'detail-visible': showDetail }">
+      <button v-if="showDetail" class="mobile-back" @click="closeDetail">
+        <ChevronLeft :size="18" /> {{ t("messaging.allConversations") }}
+      </button>
       <MessageWindow
         v-if="selectedThreadId"
         :thread-id="selectedThreadId"
@@ -92,5 +110,50 @@ watch(selectedThreadId, async (id) => {
   justify-content: center;
   color: var(--color-muted);
   font-size: 0.9rem;
+}
+
+/* ─── Mobile back button (hidden on desktop) ─── */
+.mobile-back {
+  display: none;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-gold);
+  cursor: pointer;
+  padding: 10px 16px;
+  flex-shrink: 0;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .messages-view {
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    border-radius: 0;
+  }
+  .threads-panel {
+    width: 100%;
+    flex: 1;
+    border-right: none;
+  }
+  .message-panel {
+    position: absolute;
+    inset: 0;
+    background: var(--color-white);
+    transform: translateX(100%);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10;
+  }
+  .message-panel.detail-visible {
+    transform: translateX(0);
+  }
+  .mobile-back {
+    display: flex;
+  }
 }
 </style>

@@ -13,7 +13,12 @@ import OfferCard from "@/components/lead/OfferCard.vue";
 import CallBanner from "@/components/video/CallBanner.vue";
 import ScheduleCallModal from "@/components/video/ScheduleCallModal.vue";
 import type { Lead } from "@/types/lead.types";
-import { MessageSquare, ClipboardList, Lock } from "lucide-vue-next";
+import {
+  MessageSquare,
+  ClipboardList,
+  Lock,
+  ChevronLeft,
+} from "lucide-vue-next";
 import { Calendar } from "lucide-vue-next";
 
 const { t } = useI18n();
@@ -26,6 +31,7 @@ const videoStore = useVideoCallsStore();
 const selectedLead = ref<Lead | null>(null);
 const activeTab = ref<"chat" | "offers">("chat");
 const statusFilter = ref("");
+const showDetail = ref(false);
 const showOfferForm = ref(false);
 const offerFormData = ref({ packageDetails: "", price: "", expiresAt: "" });
 const route = useRoute();
@@ -102,9 +108,15 @@ async function handleDeepLink() {
   }
 }
 
+function closeDetail() {
+  showDetail.value = false;
+  selectedLead.value = null;
+}
+
 async function openLead(lead: Lead) {
   selectedLead.value = lead;
   activeTab.value = "chat";
+  showDetail.value = true;
   showOfferForm.value = false;
   const tasks: Promise<unknown>[] = [];
   if (["IN_DISCUSSION", "QUOTED", "BOOKED"].includes(lead.status)) {
@@ -199,7 +211,7 @@ async function submitOffer() {
     </aside>
 
     <!-- Detail Panel -->
-    <main class="detail-panel">
+    <main class="detail-panel" :class="{ 'detail-visible': showDetail }">
       <template v-if="!selectedLead">
         <div class="placeholder">
           <p>{{ t("leads.selectLead") }}</p>
@@ -208,6 +220,9 @@ async function submitOffer() {
 
       <template v-else>
         <div class="detail-header">
+          <button class="mobile-back" @click="closeDetail">
+            <ChevronLeft :size="18" /> {{ t("leads.vendor.title") }}
+          </button>
           <div class="detail-title">
             <div class="dh-avatar">
               <img
@@ -426,6 +441,7 @@ async function submitOffer() {
   grid-template-columns: 340px 1fr;
   height: calc(100vh - 116px);
   overflow: hidden;
+  position: relative;
 }
 
 /* Lead Panel */
@@ -812,5 +828,64 @@ async function submitOffer() {
 .btn-decline:hover {
   border-color: var(--color-error);
   color: var(--color-error);
+}
+
+/* ─── Mobile back button (hidden on desktop) ─── */
+.mobile-back {
+  display: none;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-gold);
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+@media (max-width: 768px) {
+  .inbox-layout {
+    grid-template-columns: 1fr;
+  }
+  .lead-panel {
+    height: 100%;
+  }
+  .detail-panel {
+    position: absolute;
+    inset: 0;
+    background: var(--color-surface);
+    transform: translateX(100%);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10;
+  }
+  .detail-panel.detail-visible {
+    transform: translateX(0);
+  }
+  .detail-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 12px 16px;
+  }
+  .mobile-back {
+    display: flex;
+  }
+  .detail-actions {
+    width: 100%;
+  }
+  .btn-video {
+    width: 100%;
+    justify-content: center;
+  }
+  .panel-header {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .filter-select {
+    width: 100%;
+  }
 }
 </style>
