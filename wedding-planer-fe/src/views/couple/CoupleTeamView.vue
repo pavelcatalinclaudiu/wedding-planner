@@ -1,27 +1,93 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { ref, computed, onMounted } from "vue";
+import type { Component } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useLeadsStore } from "@/stores/leads.store";
+import { useCoupleStore } from "@/stores/couple.store";
+import { bookingsApi } from "@/api/bookings.api";
+import type { Booking } from "@/types/lead.types";
+import ReviewModal from "@/components/couple/ReviewModal.vue";
+import {
+  Camera,
+  Video,
+  Landmark,
+  Flower2,
+  Utensils,
+  CakeSlice,
+  Music,
+  Headphones,
+  Star,
+  CheckCircle2,
+} from "lucide-vue-next";
 
 const { t } = useI18n();
 
 const router = useRouter();
 const leadsStore = useLeadsStore();
+const coupleStore = useCoupleStore();
+
+// ── Bookings ──────────────────────────────────────────────────────────────
+const bookings = ref<Booking[]>([]);
+
+onMounted(async () => {
+  if (leadsStore.leads.length === 0) await leadsStore.fetchCoupleLeads();
+  try {
+    const res = await bookingsApi.list();
+    bookings.value = res.data;
+  } catch {
+    bookings.value = [];
+  }
+});
+
+function bookingForLead(leadId: string): Booking | undefined {
+  return bookings.value.find((b) => b.leadId === leadId);
+}
+
+function canReview(leadId: string): boolean {
+  const b = bookingForLead(leadId);
+  if (!b || b.hasReview) return false;
+  const weddingDate = coupleStore.profile?.weddingDate;
+  if (!weddingDate) return false;
+  return new Date(weddingDate) < new Date();
+}
+
+function isReviewed(leadId: string): boolean {
+  return bookingForLead(leadId)?.hasReview === true;
+}
+
+// ── Review modal state ─────────────────────────────────────────────────────
+const reviewModal = ref<{ bookingId: string; vendorName: string } | null>(null);
+
+function openReview(leadId: string, vendorName: string) {
+  const b = bookingForLead(leadId);
+  if (!b) return;
+  reviewModal.value = { bookingId: b.id, vendorName };
+}
+
+function onReviewSubmitted() {
+  // Optimistically mark as reviewed in local bookings list
+  if (reviewModal.value) {
+    const b = bookings.value.find((x) => x.id === reviewModal.value!.bookingId);
+    if (b) b.hasReview = true;
+  }
+  reviewModal.value = null;
+}
+
+// ── Categories / slots ────────────────────────────────────────────────────
 const confirmedVendors = computed(() =>
   leadsStore.leads.filter((l) => l.status === "BOOKED"),
 );
 
-// Key categories shown as empty slots when not yet filled
-const KEY_CATEGORIES = [
-  { key: "PHOTOGRAPHER", label: "Photographer", icon: "📷" },
-  { key: "VIDEOGRAPHER", label: "Videographer", icon: "🎥" },
-  { key: "VENUE", label: "Venue", icon: "🏛️" },
-  { key: "FLORIST", label: "Florist", icon: "💐" },
-  { key: "CATERER", label: "Caterer", icon: "🍽️" },
-  { key: "CAKE", label: "Cake & Pastry", icon: "🎂" },
-  { key: "BAND", label: "Live Music", icon: "🎸" },
-  { key: "DJ", label: "DJ", icon: "🎧" },
+const KEY_CATEGORIES: { key: string; label: string; icon: Component }[] = [
+  { key: "PHOTOGRAPHER", label: "Photographer", icon: Camera },
+  { key: "VIDEOGRAPHER", label: "Videographer", icon: Video },
+  { key: "VENUE", label: "Venue", icon: Landmark },
+  { key: "FLORIST", label: "Florist", icon: Flower2 },
+  { key: "CATERER", label: "Caterer", icon: Utensils },
+  { key: "CAKE", label: "Cake & Pastry", icon: CakeSlice },
+  { key: "BAND", label: "Live Music", icon: Music },
+  { key: "DJ", label: "DJ", icon: Headphones },
 ];
 
 const filledCategories = computed(
@@ -56,9 +122,24 @@ const emptySlots = computed(() =>
             {{ t(`categories.${lead.vendorCategory}`) }}
           </p>
         </div>
-        <RouterLink :to="`/couple/enquiries`" class="view-link"
-          >{{ t("team.viewProfile") }} →</RouterLink
+
+        <!-- Review status / action -->
+        <div v-if="isReviewed(lead.id)" class="reviewed-badge">
+          <CheckCircle2 :size="14" />
+          {{ t("review.reviewed") }}
+        </div>
+        <button
+          v-else-if="canReview(lead.id)"
+          class="review-btn"
+          @click="openReview(lead.id, lead.vendorName)"
         >
+          <Star :size="14" />
+          {{ t("review.leaveReview") }}
+        </button>
+
+        <RouterLink :to="`/couple/enquiries`" class="view-link">
+          {{ t("team.viewProfile") }} →
+        </RouterLink>
       </div>
     </div>
 
@@ -77,7 +158,7 @@ const emptySlots = computed(() =>
           :key="slot.key"
           class="vendor-card empty-slot"
         >
-          <div class="slot-icon">{{ slot.icon }}</div>
+          <div class="slot-icon"><component :is="slot.icon" :size="22" /></div>
           <div class="vendor-info">
             <p class="vendor-name">{{ t(`categories.${slot.key}`) }}</p>
             <p class="vendor-category muted">{{ t("team.notYetBooked") }}</p>
@@ -91,6 +172,15 @@ const emptySlots = computed(() =>
         </div>
       </div>
     </div>
+
+    <!-- Review Modal -->
+    <ReviewModal
+      v-if="reviewModal"
+      :booking-id="reviewModal.bookingId"
+      :vendor-name="reviewModal.vendorName"
+      @submitted="onReviewSubmitted"
+      @close="reviewModal = null"
+    />
   </div>
 </template>
 
@@ -144,7 +234,7 @@ h2 {
   height: 52px;
   background: var(--color-surface);
   border-radius: 50%;
-  font-size: 1.4rem;
+  color: var(--color-gold);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -203,5 +293,41 @@ h2 {
   text-transform: uppercase;
   letter-spacing: 0.04em;
   margin: 0 0 16px;
+}
+
+/* ── Review ── */
+.review-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--color-gold);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+
+.review-btn:hover {
+  filter: brightness(1.08);
+}
+
+.reviewed-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-green);
+  padding: 6px 12px;
+  background: var(--color-green-light);
+  border-radius: 8px;
+  width: 100%;
 }
 </style>

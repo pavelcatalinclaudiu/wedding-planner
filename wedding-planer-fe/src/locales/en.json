@@ -60,7 +60,8 @@
     "hrsAgo": "{h}h ago",
     "daysAgo": "{d}d ago",
     "inMins": "in {m}m",
-    "inHrs": "in {h}h"
+    "inHrs": "in {h}h",
+    "saving": "Saving"
   },
 
   "brand": {
@@ -869,6 +870,28 @@
     "startBuilding": "Start building your team",
     "notYetBooked": "Not yet booked",
     "findVendor": "Find a {label} →"
+  },
+
+  "review": {
+    "title": "Leave a Review",
+    "leaveReview": "Leave a Review",
+    "reviewed": "Reviewed",
+    "ratingLabel": "How would you rate your experience?",
+    "commentLabel": "Tell others about your experience",
+    "commentPlaceholder": "What did you love? What could be improved?",
+    "charsMin": "characters minimum",
+    "submit": "Submit Review",
+    "submitError": "Failed to submit review. Please try again.",
+    "dismiss": "Dismiss",
+    "bannerTitle": "How was your wedding experience?",
+    "bannerSubtitle": "You have {count} vendor(s) waiting for your review",
+    "stars": {
+      "1": "Poor",
+      "2": "Fair",
+      "3": "Good",
+      "4": "Very Good",
+      "5": "Excellent!"
+    }
   },
 
   "website": {

@@ -160,6 +160,7 @@ h2 {
   display: flex;
   flex-direction: column;
   gap: 3px;
+  flex: 1;
 }
 .past-couple {
   font-weight: 600;

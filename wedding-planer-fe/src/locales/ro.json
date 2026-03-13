@@ -60,7 +60,8 @@
     "hrsAgo": "{h}h în urmă",
     "daysAgo": "{d}z în urmă",
     "inMins": "în {m}m",
-    "inHrs": "în {h}h"
+    "inHrs": "în {h}h",
+    "saving": "Se salvează"
   },
 
   "brand": {
@@ -869,6 +870,28 @@
     "startBuilding": "Începe să-ți construiești echipa",
     "notYetBooked": "Nerezervat încă",
     "findVendor": "Găsește un {label} →"
+  },
+
+  "review": {
+    "title": "Lasă o recenzie",
+    "leaveReview": "Lasă o recenzie",
+    "reviewed": "Recenzat",
+    "ratingLabel": "Cum îi evaluezi experiența?",
+    "commentLabel": "Spune-le altora despre experiența ta",
+    "commentPlaceholder": "Ce ți-a plăcut? Ce s-ar putea îmbunătăți?",
+    "charsMin": "caractere minim",
+    "submit": "Trimite recenzia",
+    "submitError": "Recenzia nu a putut fi trimisă. Încearcă din nou.",
+    "dismiss": "Ignoră",
+    "bannerTitle": "Cum a fost nunta ta?",
+    "bannerSubtitle": "Ai {count} furnizor(i) care aşteaptă recenzia ta",
+    "stars": {
+      "1": "Slab",
+      "2": "Acceptabil",
+      "3": "Bun",
+      "4": "Foarte bun",
+      "5": "Excelent!"
+    }
   },
 
   "website": {

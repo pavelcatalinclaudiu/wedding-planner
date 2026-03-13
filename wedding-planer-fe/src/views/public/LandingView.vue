@@ -512,21 +512,17 @@ onMounted(async () => {
 .hero-bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    135deg,
-    #1a0a00 0%,
-    #3a1f08 40%,
-    #5c3215 70%,
-    #7a4020 100%
-  );
+  background-image: url("../../../public/image.png");
+  background-size: cover;
+  background-position: center;
 }
 .hero-overlay {
   position: absolute;
   inset: 0;
-  background: radial-gradient(
-    ellipse at 60% 50%,
-    rgba(200, 151, 74, 0.12) 0%,
-    transparent 60%
+  background: linear-gradient(
+    to bottom,
+    rgba(10, 4, 1, 0.52) 0%,
+    rgba(15, 6, 1, 0.72) 100%
   );
 }
 .hero-content {

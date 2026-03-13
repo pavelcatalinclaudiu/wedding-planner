@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
+import { computed, onMounted, ref } from "vue";
 import {
   differenceInCalendarDays,
   differenceInMinutes,
@@ -32,9 +32,14 @@ import {
   MapPin,
   MessageCircle,
   AlertTriangle,
+  Star,
+  X,
 } from "lucide-vue-next";
 
 import { useCategoryLabel } from "@/utils/vendorCategories";
+import { bookingsApi } from "@/api/bookings.api";
+import type { Booking } from "@/types/lead.types";
+import ReviewModal from "@/components/couple/ReviewModal.vue";
 
 const { t, locale } = useI18n();
 
@@ -47,6 +52,8 @@ const messagesStore = useMessagesStore();
 
 const { categoryLabel } = useCategoryLabel();
 
+const bookings = ref<Booking[]>([]);
+
 onMounted(async () => {
   await Promise.all([
     coupleStore.profile || coupleStore.fetchProfile(),
@@ -56,7 +63,57 @@ onMounted(async () => {
     leadsStore.leads.length === 0 && leadsStore.fetchCoupleLeads(),
     messagesStore.threads.length === 0 && messagesStore.fetchThreads(),
   ]);
+  bookingsApi
+    .list()
+    .then((r) => {
+      bookings.value = r.data;
+    })
+    .catch(() => {});
 });
+
+// ── Pending Reviews ────────────────────────────────────────────────────────
+const DISMISS_KEY = (id: string) => `review_dismissed_${id}`;
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+
+function isDismissed(bookingId: string): boolean {
+  const raw = localStorage.getItem(DISMISS_KEY(bookingId));
+  if (!raw) return false;
+  return Date.now() - Number(raw) < THIRTY_DAYS_MS;
+}
+
+function dismissReview(bookingId: string) {
+  localStorage.setItem(DISMISS_KEY(bookingId), String(Date.now()));
+  // force re-evaluation
+  bookings.value = [...bookings.value];
+}
+
+const pendingReviewBookings = computed(() => {
+  const wDate = coupleStore.profile?.weddingDate;
+  if (!wDate || new Date(wDate) >= new Date()) return [];
+  return bookings.value.filter((b) => !b.hasReview && !isDismissed(b.id));
+});
+
+// ── Review modal (from banner) ─────────────────────────────────────────────
+const bannerReviewModal = ref<{ bookingId: string; vendorName: string } | null>(
+  null,
+);
+
+function openBannerReview(b: Booking) {
+  bannerReviewModal.value = {
+    bookingId: b.id,
+    vendorName: b.vendorName ?? "Vendor",
+  };
+}
+
+function onBannerReviewSubmitted() {
+  if (bannerReviewModal.value) {
+    const b = bookings.value.find(
+      (x) => x.id === bannerReviewModal.value!.bookingId,
+    );
+    if (b) b.hasReview = true;
+  }
+  bannerReviewModal.value = null;
+}
 
 // ── Banner ─────────────────────────────────────────────────────────────────
 const partner1 = computed(() => coupleStore.profile?.partner1Name ?? "");
@@ -344,6 +401,49 @@ function timeAgo(dateStr?: string): string {
       </div>
     </div>
 
+    <!-- ── Pending Reviews Banner ──────────────────────────────── -->
+    <div v-if="pendingReviewBookings.length" class="review-banner">
+      <div class="review-banner-header">
+        <Star :size="20" class="review-banner-icon" />
+        <div>
+          <h3>{{ t("review.bannerTitle") }}</h3>
+          <p>
+            {{
+              t("review.bannerSubtitle", {
+                count: pendingReviewBookings.length,
+              })
+            }}
+          </p>
+        </div>
+      </div>
+      <div class="review-banner-list">
+        <div v-for="b in pendingReviewBookings" :key="b.id" class="rbi">
+          <div class="rbi-avatar">
+            <img
+              v-if="b.vendorProfilePicture"
+              :src="b.vendorProfilePicture"
+              alt=""
+            />
+            <span v-else>{{ (b.vendorName?.[0] ?? "V").toUpperCase() }}</span>
+          </div>
+          <div class="rbi-info">
+            <span class="rbi-name">{{ b.vendorName }}</span>
+            <span class="rbi-cat">{{ b.vendorCategory }}</span>
+          </div>
+          <button class="rbi-review-btn" @click="openBannerReview(b)">
+            {{ t("review.leaveReview") }}
+          </button>
+          <button
+            class="rbi-dismiss"
+            :title="t('review.dismiss')"
+            @click="dismissReview(b.id)"
+          >
+            <X :size="14" />
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- ── Bottom Grid ─────────────────────────────────────────── -->
     <div class="bottom-grid">
       <!-- Upcoming Tasks -->
@@ -498,6 +598,15 @@ function timeAgo(dateStr?: string): string {
         </ul>
       </section>
     </div>
+
+    <!-- Review Modal (opened from banner) -->
+    <ReviewModal
+      v-if="bannerReviewModal"
+      :booking-id="bannerReviewModal.bookingId"
+      :vendor-name="bannerReviewModal.vendorName"
+      @submitted="onBannerReviewSubmitted"
+      @close="bannerReviewModal = null"
+    />
   </div>
 </template>
 
@@ -1025,5 +1134,133 @@ function timeAgo(dateStr?: string): string {
   background: #d4a843;
   flex-shrink: 0;
   margin-top: 6px;
+}
+
+/* ── Pending Reviews Banner ──────────────────────────────────────────────── */
+.review-banner {
+  background: var(--color-white);
+  border: 1.5px solid var(--color-gold);
+  border-radius: 16px;
+  padding: 18px 20px;
+  margin-bottom: 24px;
+}
+
+.review-banner-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.review-banner-icon {
+  color: var(--color-gold);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.review-banner-header h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 2px;
+  color: var(--color-text);
+}
+
+.review-banner-header p {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  margin: 0;
+}
+
+.review-banner-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rbi {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--color-surface);
+  border-radius: 10px;
+}
+
+.rbi-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-gold);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.rbi-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.rbi-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.rbi-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.rbi-cat {
+  font-size: 0.75rem;
+  color: var(--color-muted);
+  text-transform: capitalize;
+}
+
+.rbi-review-btn {
+  padding: 7px 14px;
+  background: var(--color-gold);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: filter 0.15s;
+  flex-shrink: 0;
+}
+
+.rbi-review-btn:hover {
+  filter: brightness(1.08);
+}
+
+.rbi-dismiss {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-muted);
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.rbi-dismiss:hover {
+  background: var(--color-surface-alt);
+  color: var(--color-text);
 }
 </style>
