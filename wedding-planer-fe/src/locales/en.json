@@ -455,7 +455,7 @@
       "done": "Done",
       "dueSoon": "Due Soon"
     },
-    "addTask": "Add task",
+    "addTask": "+ Add task",
     "editTask": "Edit task",
     "taskTitle": "Task title",
     "taskNote": "Note (optional)",
@@ -568,7 +568,6 @@
     "table": "Table",
     "mealPreference": "Meal preference",
     "rsvpStatus": "RSVP",
-    "invite": "Invite",
     "plusOne": "+1",
     "notes": "Notes",
     "total": "Total guests",
@@ -635,9 +634,10 @@
       "other": "Other"
     },
     "childTag": "child",
-    "setupWebsite": "⚠ Setup website",
+    "setupWebsite": "Setup website",
     "setupWebsiteTooltip": "Set up your wedding website to enable invite links",
     "invite": {
+      "label": "Invite",
       "notSentTitle": "Invite the guest first",
       "sentTitle": "Invite link was sent — waiting for guest to open it",
       "invited": "Invited",

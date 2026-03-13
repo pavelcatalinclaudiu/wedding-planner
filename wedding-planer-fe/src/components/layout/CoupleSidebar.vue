@@ -33,7 +33,9 @@ const leadsStore = useLeadsStore();
 const messagesStore = useMessagesStore();
 const { sidebarOpen, close } = useSidebar();
 
-const activeLeadsCount = computed(() => leadsStore.activeLeads.length);
+const pendingLeadsCount = computed(
+  () => leadsStore.leads.filter((l) => l.status === "QUOTED").length,
+);
 const unreadCount = computed(() => messagesStore.totalUnread());
 
 const navItems = computed(() => [
@@ -131,7 +133,7 @@ function isActive(path: string) {
 
 function getBadge(key: string) {
   if (key === "enquiries") {
-    const total = (activeLeadsCount.value || 0) + (unreadCount.value || 0);
+    const total = (pendingLeadsCount.value || 0) + (unreadCount.value || 0);
     return total || null;
   }
   return null;

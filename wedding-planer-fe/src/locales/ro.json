@@ -455,7 +455,7 @@
       "done": "Finalizate",
       "dueSoon": "Scadente curând"
     },
-    "addTask": "Adaugă sarcină",
+    "addTask": "+ Adaugă sarcină",
     "editTask": "Editează sarcina",
     "taskTitle": "Titlu sarcină",
     "taskNote": "Notă (opțional)",
@@ -568,7 +568,6 @@
     "table": "Masă",
     "mealPreference": "Preferință masă",
     "rsvpStatus": "RSVP",
-    "invite": "Invitație",
     "plusOne": "+1",
     "notes": "Note",
     "total": "Total invitați",
@@ -635,9 +634,10 @@
       "other": "Alții"
     },
     "childTag": "copil",
-    "setupWebsite": "⚠ Configurează site-ul",
+    "setupWebsite": "Configurează site-ul",
     "setupWebsiteTooltip": "Configurează site-ul de nuntă pentru a activa linkurile de invitație",
     "invite": {
+      "label": "Invitație",
       "notSentTitle": "Invită mai întâi oaspetele",
       "sentTitle": "Link-ul de invitație a fost trimis — în așteptarea deschiderii",
       "invited": "Invitat",

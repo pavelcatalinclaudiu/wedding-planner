@@ -51,6 +51,9 @@ public class CoupleProfile extends PanacheEntityBase {
     @JsonProperty("subdomain")
     public String websiteSubdomain;
 
+    @Column(name = "subdomain_customized", nullable = false)
+    public boolean subdomainCustomized = false;
+
     @Column(name = "profile_picture")
     public String profilePicture;
 

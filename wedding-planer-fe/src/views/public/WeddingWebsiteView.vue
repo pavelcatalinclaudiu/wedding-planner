@@ -426,16 +426,17 @@ async function submitRsvp() {
                   </div>
                 </template>
 
-              <!-- Message -->
-              <div class="rsvp-field">
-                <label>Message to the couple</label>
-                <textarea
-                  v-model="rsvp.message"
-                  class="ri"
-                  rows="3"
-                  placeholder="Congratulations, we're so excited! 🥂"
-                ></textarea>
-              </div>
+                <!-- Message -->
+                <div class="rsvp-field">
+                  <label>Message to the couple</label>
+                  <textarea
+                    v-model="rsvp.message"
+                    class="ri"
+                    rows="3"
+                    placeholder="Congratulations, we're so excited! 🥂"
+                  ></textarea>
+                </div>
+              </template>
             </div>
 
             <p v-if="rsvpError" class="rsvp-err">{{ rsvpError }}</p>

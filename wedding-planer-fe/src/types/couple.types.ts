@@ -147,6 +147,7 @@ export interface WeddingWebsite {
   published: boolean;
   rsvpsSubmitted: number;
   visitorCount: number;
+  subdomainCustomized: boolean;
 }
 
 export interface PublicWeddingWebsite {

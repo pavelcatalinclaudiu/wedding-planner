@@ -81,6 +81,15 @@ public class WeddingWebsiteResource {
         return Response.ok(websiteService.getPreview(userId)).build();
     }
 
+    @GET
+    @Path("/me/website/check-subdomain")
+    @RolesAllowed("COUPLE")
+    public Response checkSubdomain(@QueryParam("slug") String slug) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        boolean available = websiteService.isSubdomainAvailable(userId, slug);
+        return Response.ok(java.util.Map.of("available", available)).build();
+    }
+
     // ── Public endpoints ───────────────────────────────────────────────────
 
     @GET

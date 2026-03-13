@@ -22,6 +22,7 @@ public class WeddingWebsiteDTO {
         public int rsvpsSubmitted;
         public int visitorCount;
         public String subdomain;
+        public boolean subdomainCustomized;
 
         public static Response from(WeddingWebsite w) {
             Response r = new Response();
@@ -37,6 +38,7 @@ public class WeddingWebsiteDTO {
             r.rsvpsSubmitted    = w.rsvpsSubmitted;
             r.visitorCount      = w.visitorCount;
             r.subdomain         = w.couple.websiteSubdomain;
+            r.subdomainCustomized = w.couple.subdomainCustomized;
             return r;
         }
     }

@@ -15,6 +15,8 @@ import {
   RefreshCw,
   Star,
   Bell,
+  Calendar,
+  MessageSquare,
 } from "lucide-vue-next";
 
 const props = defineProps<{ notification: Notification }>();
@@ -35,24 +37,24 @@ function formatTime(date: string) {
   return d.toLocaleDateString();
 }
 
-const iconMap: Record<string, string> = {
-  NEW_LEAD: "\uD83D\uDCCB",
-  LEAD_ACCEPTED: "\u2705",
-  LEAD_DECLINED: "\u274C",
-  NEW_OFFER: "\uD83D\uDC8C",
-  OFFER_ACCEPTED: "\uD83C\uDF89",
-  NEW_MESSAGE: "\u2709\uFE0F",
-  call_reminder: "\uD83D\uDCDE",
-  VIDEO_CALL_PROPOSED: "\uD83D\uDCF9",
-  VIDEO_CALL_RESCHEDULED: "\uD83D\uDD04",
-  VIDEO_CALL_ACCEPTED: "\u2705",
-  VIDEO_CALL_CANCELLED: "\u274C",
-  review_request: "\u2B50",
-  // Booking
-  BOOKING_CANCELLED: "\uD83D\uDEAB",
-  BOOKING_RESCHEDULE_PROPOSED: "\uD83D\uDCC5",
-  BOOKING_RESCHEDULE_ACCEPTED: "\u2705",
-  BOOKING_RESCHEDULE_DECLINED: "\u274C",
+const iconMap: Record<string, Component> = {
+  NEW_LEAD: ClipboardList,
+  LEAD_ACCEPTED: CheckCircle,
+  LEAD_DECLINED: XCircle,
+  NEW_OFFER: Mail,
+  OFFER_ACCEPTED: Sparkles,
+  OFFER_REVISION_REQUESTED: RefreshCw,
+  NEW_MESSAGE: MessageSquare,
+  call_reminder: Phone,
+  VIDEO_CALL_PROPOSED: Video,
+  VIDEO_CALL_RESCHEDULED: RefreshCw,
+  VIDEO_CALL_ACCEPTED: CheckCircle,
+  VIDEO_CALL_CANCELLED: XCircle,
+  review_request: Star,
+  BOOKING_CANCELLED: XCircle,
+  BOOKING_RESCHEDULE_PROPOSED: Calendar,
+  BOOKING_RESCHEDULE_ACCEPTED: CheckCircle,
+  BOOKING_RESCHEDULE_DECLINED: XCircle,
 };
 
 function resolveRoute(): string | null {
@@ -123,7 +125,7 @@ function handleClick() {
     @click="handleClick"
   >
     <div class="notif-icon">
-      {{ iconMap[notification.type] ?? "\uD83D\uDD14" }}
+      <component :is="iconMap[notification.type] ?? Bell" :size="17" />
     </div>
     <div class="notif-body">
       <p class="notif-title">{{ notification.title }}</p>
@@ -139,7 +141,6 @@ function handleClick() {
 <style scoped>
 .notification-item {
   display: flex;
-  align-items: flex-start;
   gap: 10px;
   padding: 12px 16px;
   cursor: pointer;
@@ -156,9 +157,12 @@ function handleClick() {
   background: var(--color-gold-light, #fdf8ee);
 }
 .notif-icon {
-  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
   margin-top: 2px;
+  color: var(--color-gold);
 }
 .notif-body {
   flex: 1;

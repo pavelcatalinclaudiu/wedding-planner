@@ -7,7 +7,7 @@
         <p class="subtitle">{{ t("checklist.subtitle") }}</p>
       </div>
       <button class="btn-primary" @click="openAdd">
-        <span class="btn-icon">+</span> {{ t("checklist.addTask") }}
+        {{ t("checklist.addTask") }}
       </button>
     </div>
 
@@ -580,7 +580,7 @@ onMounted(() => {
   left: 50%;
   transform: translate(-50%, -42%);
   text-align: center;
-  color: var(--color-white);
+  color: #fff;
   pointer-events: none;
 }
 
@@ -942,7 +942,7 @@ onMounted(() => {
   transition: all 0.15s;
   font-size: 0.8rem;
   font-weight: 700;
-  color: var(--color-white);
+  color: #fff;
 }
 
 .task-row.task-done .check-btn {
@@ -1043,28 +1043,24 @@ onMounted(() => {
 ══════════════════════════════ */
 .btn-primary {
   background: var(--color-gold);
-  color: var(--color-white);
+  color: #fff;
   border: none;
-  padding: 0.65rem 1.4rem;
-  border-radius: 12px;
+  padding: 9px 20px;
+  border-radius: 8px;
   font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
-  transition:
-    background 0.2s,
-    transform 0.1s;
-  display: inline-flex;
+  transition: filter 0.15s;
   align-items: center;
   gap: 0.4rem;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--color-gold-dark);
-  transform: translateY(-1px);
+  filter: brightness(1.08);
 }
 
 .btn-primary:disabled {
-  opacity: 0.5;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
@@ -1075,19 +1071,19 @@ onMounted(() => {
 }
 
 .btn-secondary {
-  background: var(--color-surface-alt);
+  background: none;
   color: var(--color-text);
-  border: none;
-  padding: 0.65rem 1.4rem;
-  border-radius: 12px;
+  border: 1.5px solid var(--color-border);
+  padding: 9px 18px;
+  border-radius: 8px;
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.15s;
 }
 
 .btn-secondary:hover {
-  background: var(--color-border);
+  background: var(--color-surface);
 }
 
 /* ══════════════════════════════
@@ -1106,10 +1102,10 @@ onMounted(() => {
 
 .modal {
   background: var(--color-white);
-  border-radius: 20px;
+  border-radius: 16px;
   width: 100%;
   max-width: 490px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.18);
   overflow: hidden;
 }
 
@@ -1117,7 +1113,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.25rem 1.5rem;
+  padding: 18px 22px;
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -1144,7 +1140,7 @@ onMounted(() => {
 }
 
 .modal-body {
-  padding: 1.4rem 1.5rem;
+  padding: 20px 22px;
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -1166,14 +1162,14 @@ onMounted(() => {
 .form-field select,
 .form-field textarea {
   border: 1.5px solid var(--color-border);
-  border-radius: 10px;
-  padding: 0.6rem 0.95rem;
+  border-radius: 8px;
+  padding: 9px 12px;
   font-size: 0.9rem;
   outline: none;
-  transition: border-color 0.18s;
+  transition: border-color 0.15s;
   font-family: inherit;
   color: var(--color-text);
-  background: var(--color-white);
+  background: var(--color-surface);
 }
 
 .form-field input:focus,
@@ -1190,9 +1186,8 @@ onMounted(() => {
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
-  padding: 1rem 1.5rem;
+  padding: 14px 22px;
   border-top: 1px solid var(--color-border);
-  background: var(--color-surface);
 }
 
 /* ══════════════════════════════
@@ -1225,7 +1220,7 @@ onMounted(() => {
   .ring-label {
     position: static;
     transform: none;
-    color: var(--color-white);
+    color: #fff;
   }
 }
 

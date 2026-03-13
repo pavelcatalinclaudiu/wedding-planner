@@ -395,10 +395,12 @@ async function onCallScheduled(leadId: string) {
   position: sticky;
   top: 0;
   z-index: 1;
+  background: var(--color-surface);
 }
 .panel-header h2 {
   margin: 0 0 4px;
   font-size: 1.1rem;
+  color: var(--color-text);
 }
 .panel-sub {
   margin: 0;

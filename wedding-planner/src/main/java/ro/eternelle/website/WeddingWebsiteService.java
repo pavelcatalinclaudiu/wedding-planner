@@ -11,6 +11,9 @@ import ro.eternelle.exception.BusinessException;
 
 import java.util.Locale;
 import java.util.UUID;
+import java.security.SecureRandom;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @ApplicationScoped
 public class WeddingWebsiteService {
@@ -31,6 +34,9 @@ public class WeddingWebsiteService {
     private WeddingWebsite createNew(CoupleProfile couple) {
         WeddingWebsite site = new WeddingWebsite();
         site.couple = couple;
+        if (couple.websiteSubdomain == null || couple.websiteSubdomain.isBlank()) {
+            couple.websiteSubdomain = generateUniqueSlug(couple);
+        }
         websiteRepository.persist(site);
         return site;
     }
@@ -44,6 +50,9 @@ public class WeddingWebsiteService {
         // Update subdomain on CoupleProfile if changed
         if (req.subdomain != null && !req.subdomain.isBlank()) {
             String slug = toSlug(req.subdomain);
+            if (couple.subdomainCustomized) {
+                throw new BusinessException("Your website URL has already been customized and cannot be changed again.");
+            }
             // Check uniqueness (excluding current couple)
             coupleRepository.findBySubdomain(slug).ifPresent(other -> {
                 if (!other.id.equals(couple.id)) {
@@ -51,6 +60,7 @@ public class WeddingWebsiteService {
                 }
             });
             couple.websiteSubdomain = slug;
+            couple.subdomainCustomized = true;
         }
 
         WeddingWebsite site = websiteRepository.findByCouple(couple.id)
@@ -120,6 +130,44 @@ public class WeddingWebsiteService {
     }
 
     // ── Helpers ────────────────────────────────────────────────────────────
+
+    public boolean isSubdomainAvailable(UUID coupleUserId, String slug) {
+        if (slug == null || slug.isBlank()) return false;
+        CoupleProfile couple = requireCouple(coupleUserId);
+        String normalized = toSlug(slug);
+        return coupleRepository.findBySubdomain(normalized)
+                .map(other -> other.id.equals(couple.id))
+                .orElse(true);
+    }
+
+    private static final SecureRandom RANDOM = new SecureRandom();
+    private static final String SLUG_CHARS = "abcdefghijklmnopqrstuvwxyz0123456789";
+
+    private String generateUniqueSlug(CoupleProfile couple) {
+        String base = Stream.of(couple.partner1Name, couple.partner2Name)
+                .filter(n -> n != null && !n.isBlank())
+                .map(n -> toSlug(firstWord(n)))
+                .collect(Collectors.joining("-si-"));
+        if (base.isBlank()) base = "nunta";
+        // Keep trying until we land on a free slug (collision is astronomically rare)
+        String slug;
+        do {
+            slug = base + "-" + randomSuffix(4);
+        } while (coupleRepository.findBySubdomain(slug).isPresent());
+        return slug;
+    }
+
+    private static String randomSuffix(int length) {
+        StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            sb.append(SLUG_CHARS.charAt(RANDOM.nextInt(SLUG_CHARS.length())));
+        }
+        return sb.toString();
+    }
+
+    private static String firstWord(String name) {
+        return name.trim().split("\\s+")[0];
+    }
 
     private CoupleProfile requireCouple(UUID userId) {
         return coupleRepository.findByUserId(userId)

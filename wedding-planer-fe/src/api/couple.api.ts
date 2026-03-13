@@ -70,6 +70,10 @@ export const coupleApi = {
   getWebsite: () => apiClient.get<WeddingWebsite>("/couples/me/website"),
   updateWebsite: (data: Partial<WeddingWebsite> & { subdomain?: string }) =>
     apiClient.put<WeddingWebsite>("/couples/me/website", data),
+  checkSubdomain: (slug: string) =>
+    apiClient.get<{ available: boolean }>(
+      `/couples/me/website/check-subdomain?slug=${encodeURIComponent(slug)}`,
+    ),
   uploadCoverPhoto: (file: File) => {
     const form = new FormData();
     form.append("file", file);

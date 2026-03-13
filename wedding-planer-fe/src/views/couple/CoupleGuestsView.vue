@@ -1,6 +1,7 @@
 ﻿<script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
+import { Lock, AlertTriangle } from "lucide-vue-next";
 import { useGuestsStore } from "@/stores/guests.store";
 import { useCoupleStore } from "@/stores/couple.store";
 import { guestsApi } from "@/api/guests.api";
@@ -492,7 +493,7 @@ async function copyInviteLink(g: Guest) {
               <th @click="sort('rsvpStatus')" class="sortable">
                 {{ t("guests.rsvpStatus") }}{{ sortHeader("rsvpStatus") }}
               </th>
-              <th>{{ t("guests.invite") }}</th>
+              <th>{{ t("guests.invite.label") }}</th>
               <th @click="sort('side')" class="sortable">
                 {{ t("guests.side") }}{{ sortHeader("side") }}
               </th>
@@ -555,16 +556,16 @@ async function copyInviteLink(g: Guest) {
                   class="setup-website-link"
                   :title="t('guests.setupWebsiteTooltip')"
                 >
-                  {{ t("guests.setupWebsite") }}
+                  <AlertTriangle :size="12" /> {{ t("guests.setupWebsite") }}
                 </RouterLink>
-                <button
+                <RouterLink
                   v-else-if="!websitePublished"
+                  to="/couple/website"
                   class="icon-btn copy-link-btn unpublished"
-                  disabled
                   :title="t('guests.invite.notPublishedTooltip')"
                 >
-                  🔒 {{ t("guests.invite.notPublished") }}
-                </button>
+                  <Lock :size="13" /> {{ t("guests.invite.notPublished") }}
+                </RouterLink>
                 <button
                   v-else
                   class="icon-btn copy-link-btn"
@@ -1216,10 +1217,11 @@ async function copyInviteLink(g: Guest) {
   cursor: pointer;
 }
 .copy-link-btn.unpublished {
-  opacity: 0.55;
-  cursor: not-allowed;
+  opacity: 0.75;
+  cursor: pointer;
   border-color: var(--color-amber, #e67e22);
   color: var(--color-amber, #e67e22);
+  text-decoration: none;
 }
 .setup-website-link {
   font-size: 0.72rem;
@@ -1230,7 +1232,9 @@ async function copyInviteLink(g: Guest) {
   border-radius: 4px;
   padding: 2px 8px;
   white-space: nowrap;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 .setup-website-link:hover {
   background: var(--color-amber-light, #fef9e7);
@@ -1295,6 +1299,10 @@ async function copyInviteLink(g: Guest) {
   border-radius: 4px;
   opacity: 0.7;
   margin-right: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
 }
 .icon-btn:hover {
   opacity: 1;

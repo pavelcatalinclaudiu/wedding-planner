@@ -31,6 +31,7 @@ import {
   Tag,
   MapPin,
   MessageCircle,
+  AlertTriangle,
 } from "lucide-vue-next";
 
 import { useCategoryLabel } from "@/utils/vendorCategories";
@@ -309,7 +310,8 @@ function timeAgo(dateStr?: string): string {
         </div>
         <p class="widget-label">{{ t("overview.widgets.tasksComplete") }}</p>
         <p v-if="checklistStore.urgent > 0" class="widget-hint urgent-hint">
-          ⚠ {{ checklistStore.urgent }} {{ t("overview.widgets.dueSoon") }}
+          <AlertTriangle :size="13" /> {{ checklistStore.urgent }}
+          {{ t("overview.widgets.dueSoon") }}
         </p>
         <p v-else class="widget-hint">{{ t("overview.widgets.onTrack") }}</p>
       </div>
@@ -650,6 +652,9 @@ function timeAgo(dateStr?: string): string {
 
 .urgent-hint {
   color: #d97706;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 /* ── Bottom Grid ─────────────────────────────────────────────────────────── */

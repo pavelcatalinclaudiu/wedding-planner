@@ -4,7 +4,6 @@ import { useI18n } from "vue-i18n";
 import { coupleApi } from "@/api/couple.api";
 import type { WeddingWebsite } from "@/types/couple.types";
 import {
-  Link,
   Camera,
   Eye,
   ExternalLink,
@@ -21,7 +20,6 @@ const photoUploading = ref(false);
 const copied = ref(false);
 
 const form = ref({
-  subdomain: "",
   heroMessage: "",
   story: "",
   ceremonyDate: "",
@@ -39,7 +37,6 @@ onMounted(async () => {
     const res = await coupleApi.getWebsite();
     website.value = res.data;
     if (website.value) {
-      form.value.subdomain = website.value.subdomain ?? "";
       form.value.heroMessage = website.value.heroMessage ?? "";
       form.value.story = website.value.story ?? "";
       form.value.ceremonyDate = website.value.ceremonyDate ?? "";
@@ -82,11 +79,9 @@ async function onPhotoChange(e: Event) {
 
 const publicUrl = computed(() => {
   const base = window.location.origin;
-  const sub = form.value.subdomain || "your-names";
+  const sub = website.value?.subdomain || "your-names";
   return `${base}/w/${sub}`;
 });
-
-const origin = window.location.origin;
 
 async function copyLink() {
   await navigator.clipboard.writeText(publicUrl.value);
@@ -97,13 +92,6 @@ async function copyLink() {
 function shareWhatsApp() {
   window.open(
     `https://wa.me/?text=${encodeURIComponent("You're invited to our wedding! " + publicUrl.value)}`,
-    "_blank",
-  );
-}
-
-function shareEmail() {
-  window.open(
-    `mailto:?subject=You're Invited!&body=Please RSVP here: ${encodeURIComponent(publicUrl.value)}`,
     "_blank",
   );
 }
@@ -122,7 +110,7 @@ const coverPhoto = computed(
       </div>
       <div class="header-actions">
         <a
-          v-if="form.subdomain"
+          v-if="website?.subdomain"
           :href="`${publicUrl}?preview=true`"
           target="_blank"
           class="preview-btn"
@@ -130,31 +118,13 @@ const coverPhoto = computed(
           <Eye :size="15" /> {{ t("website.preview") }}
         </a>
         <a
-          v-if="form.subdomain && website?.published"
+          v-if="website?.subdomain && website?.published"
           :href="publicUrl"
           target="_blank"
           class="preview-btn live"
         >
           <ExternalLink :size="15" /> {{ t("website.viewLive") }}
         </a>
-      </div>
-    </div>
-
-    <!-- Stats strip -->
-    <div v-if="website" class="stats-strip">
-      <div class="stat">
-        <span class="stat-value">{{ website.visitorCount }}</span>
-        <span class="stat-label">Page views</span>
-      </div>
-      <div class="stat">
-        <span class="stat-value">{{ website.rsvpsSubmitted }}</span>
-        <span class="stat-label">RSVPs received</span>
-      </div>
-      <div class="stat">
-        <span class="stat-value" :class="website.published ? 'live' : 'draft'">
-          {{ website.published ? "Live" : "Draft" }}
-        </span>
-        <span class="stat-label">Status</span>
       </div>
     </div>
 
@@ -188,22 +158,6 @@ const coverPhoto = computed(
           />
         </div>
 
-        <!-- URL -->
-        <div class="card">
-          <h3 class="card-title">
-            <Link :size="15" /> {{ t("website.urlSlug") }}
-          </h3>
-          <div class="slug-row">
-            <span class="slug-pre">{{ origin }}/w/</span>
-            <input
-              v-model="form.subdomain"
-              class="input slug-input"
-              placeholder="your-names"
-            />
-          </div>
-          <p class="url-hint">{{ publicUrl }}</p>
-        </div>
-
         <!-- Hero message -->
         <div class="card">
           <h3 class="card-title">{{ t("website.heroMessage") }}</h3>
@@ -215,7 +169,7 @@ const coverPhoto = computed(
         </div>
 
         <!-- Our Story -->
-        <div class="card">
+        <div class="card story-card">
           <h3 class="card-title">{{ t("website.ourStory") }}</h3>
           <textarea
             v-model="form.story"
@@ -299,7 +253,10 @@ const coverPhoto = computed(
         </div>
 
         <!-- Share -->
-        <div class="card share-card" v-if="form.subdomain">
+        <div
+          class="card share-card"
+          v-if="website?.subdomain && website?.published"
+        >
           <h3 class="card-title">
             <Share2 :size="15" /> {{ t("website.shareTitle") }}
           </h3>
@@ -311,7 +268,6 @@ const coverPhoto = computed(
             <button class="share-btn whatsapp" @click="shareWhatsApp">
               WhatsApp
             </button>
-            <button class="share-btn email" @click="shareEmail">Email</button>
           </div>
         </div>
 
@@ -376,36 +332,6 @@ h2 {
 .preview-btn.live:hover {
   opacity: 0.88;
   color: #fff;
-}
-
-.stats-strip {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 20px;
-}
-.stat {
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
-  border-radius: 10px;
-  padding: 14px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.stat-value {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: var(--color-text);
-}
-.stat-value.live {
-  color: #22c55e;
-}
-.stat-value.draft {
-  color: var(--color-muted);
-}
-.stat-label {
-  font-size: 0.75rem;
-  color: var(--color-muted);
 }
 
 .form-grid {
@@ -481,33 +407,6 @@ h2 {
   font-size: 0.9rem;
 }
 
-.slug-row {
-  display: flex;
-  align-items: center;
-  border: 1.5px solid var(--color-border);
-  border-radius: 8px;
-  overflow: hidden;
-}
-.slug-pre {
-  padding: 10px 10px;
-  background: var(--color-surface);
-  font-size: 0.8rem;
-  color: var(--color-muted);
-  border-right: 1px solid var(--color-border);
-  white-space: nowrap;
-}
-.slug-input {
-  border: none !important;
-  border-radius: 0 !important;
-  flex: 1;
-}
-.url-hint {
-  margin: 6px 0 0;
-  font-size: 0.78rem;
-  color: var(--color-gold);
-  word-break: break-all;
-}
-
 .input {
   width: 100%;
   padding: 10px 14px;
@@ -524,6 +423,15 @@ h2 {
 }
 .textarea {
   resize: vertical;
+}
+.story-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.story-card .textarea {
+  flex: 1;
+  min-height: 120px;
 }
 
 .field-group {
@@ -620,10 +528,6 @@ h2 {
 }
 .share-btn.whatsapp {
   background: #25d366;
-  color: #fff;
-}
-.share-btn.email {
-  background: #4f46e5;
   color: #fff;
 }
 
