@@ -49,6 +49,7 @@ export interface VendorPhoto {
   vendorId: string;
   url: string;
   order: number;
+  caption?: string;
 }
 
 export interface VendorPackage {

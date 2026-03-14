@@ -3,9 +3,10 @@ import { ref, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useVendorStore } from "@/stores/vendor.store";
 import { useFileUpload } from "@/composables/useFileUpload";
+import type { VendorCategory } from "@/types/vendor.types";
 
 const vendorStore = useVendorStore();
-const { upload, uploading } = useFileUpload();
+const { upload, uploading, progress } = useFileUpload();
 const { t } = useI18n();
 const saving = ref(false);
 const saved = ref(false);
@@ -13,7 +14,7 @@ const coverInputRef = ref<HTMLInputElement | null>(null);
 
 const form = ref({
   businessName: "",
-  category: "",
+  category: undefined as VendorCategory | undefined,
   city: "",
   description: "",
   basePrice: 0,

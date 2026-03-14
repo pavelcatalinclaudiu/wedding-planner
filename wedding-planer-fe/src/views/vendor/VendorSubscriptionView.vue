@@ -14,7 +14,8 @@ const { t, tm } = useI18n();
 onMounted(async () => {
   loading.value = true;
   try {
-    subscription.value = await subscriptionsApi.get();
+    const response = await subscriptionsApi.get();
+    subscription.value = response.data;
   } catch {
     subscription.value = null;
   } finally {
@@ -25,21 +26,22 @@ onMounted(async () => {
 async function checkout(plan: string) {
   checkingOut.value = true;
   try {
-    const { url } = await subscriptionsApi.checkout(plan);
-    window.location.href = url;
+    const response = await subscriptionsApi.checkout(plan);
+    window.location.href = response.data.url;
   } finally {
     checkingOut.value = false;
   }
 }
 
 async function openPortal() {
-  const { url } = await subscriptionsApi.portal();
-  window.open(url, "_blank");
+  const response = await subscriptionsApi.portal();
+  window.open(response.data.url, "_blank");
 }
 
 async function cancel() {
   await subscriptionsApi.cancel();
-  subscription.value = await subscriptionsApi.get();
+  const response = await subscriptionsApi.get();
+  subscription.value = response.data;
   cancelConfirm.value = false;
 }
 </script>
