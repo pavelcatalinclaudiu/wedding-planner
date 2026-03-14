@@ -213,11 +213,12 @@ const routes: RouteRecordRaw[] = [
         component: VendorProfileView,
         meta: { title: "nav.vendor.items.myProfile" },
       },
-      {
-        path: "subscription",
-        component: VendorSubscriptionView,
-        meta: { title: "nav.vendor.items.subscription" },
-      },
+      // TODO: re-enable when paid plans are launched
+      // {
+      //   path: "subscription",
+      //   component: VendorSubscriptionView,
+      //   meta: { title: "nav.vendor.items.subscription" },
+      // },
       {
         path: "group-chat",
         component: VendorGroupChatView,

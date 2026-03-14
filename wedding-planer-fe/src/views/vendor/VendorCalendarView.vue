@@ -625,7 +625,7 @@ onMounted(async () => {
 .cv-legend {
   display: flex;
   align-items: center;
-  gap: 6px 14px;
+  gap: 6px 6px;
   padding: 12px 20px;
   border-top: 1px solid var(--color-border);
   background: var(--color-surface);

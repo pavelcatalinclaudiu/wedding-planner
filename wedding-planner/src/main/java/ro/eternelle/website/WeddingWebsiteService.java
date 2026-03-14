@@ -21,13 +21,13 @@ public class WeddingWebsiteService {
     @Inject WeddingWebsiteRepository websiteRepository;
     @Inject CoupleRepository coupleRepository;
 
-    // ── Get or create for authenticated couple ──────────────────────────────
+    // ── Get (read-only, no auto-create) ────────────────────────────────────
 
     @Transactional(REQUIRED)
-    public WeddingWebsiteDTO.Response getOrCreate(UUID coupleUserId) {
+    public WeddingWebsiteDTO.Response get(UUID coupleUserId) {
         CoupleProfile couple = requireCouple(coupleUserId);
         WeddingWebsite site = websiteRepository.findByCouple(couple.id)
-                .orElseGet(() -> createNew(couple));
+                .orElseThrow(NotFoundException::new);
         return WeddingWebsiteDTO.Response.from(site);
     }
 

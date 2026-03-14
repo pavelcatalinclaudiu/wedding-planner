@@ -13,7 +13,7 @@ export interface Subscription {
 }
 
 export const subscriptionsApi = {
-  get: () => apiClient.get<Subscription>("/subscriptions"),
+  get: () => apiClient.get<Subscription>("/subscriptions/me"),
   checkout: (plan: string) =>
     apiClient.post<{ url: string }>("/subscriptions/checkout", { plan }),
   portal: () => apiClient.post<{ url: string }>("/subscriptions/portal"),

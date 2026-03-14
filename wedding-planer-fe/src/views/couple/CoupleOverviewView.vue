@@ -66,7 +66,7 @@ const pageLoading = ref(true);
 onMounted(async () => {
   try {
     await Promise.all([
-      coupleStore.profile || coupleStore.fetchProfile(),
+      coupleStore.fetchProfile(),
       checklistStore.items.length === 0 && checklistStore.fetchChecklist(),
       budgetStore.items.length === 0 && budgetStore.fetchBudget(),
       guestsStore.guests.length === 0 && guestsStore.fetchGuests(),

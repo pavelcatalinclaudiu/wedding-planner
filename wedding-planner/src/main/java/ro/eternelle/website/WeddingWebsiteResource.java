@@ -41,7 +41,7 @@ public class WeddingWebsiteResource {
     @RolesAllowed("COUPLE")
     public Response getMyWebsite() {
         UUID userId = UUID.fromString(jwt.getSubject());
-        return Response.ok(websiteService.getOrCreate(userId)).build();
+        return Response.ok(websiteService.get(userId)).build();
     }
 
     @PUT

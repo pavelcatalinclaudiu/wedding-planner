@@ -7,6 +7,8 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 import ro.eternelle.dto.auth.AuthResponse;
 import ro.eternelle.exception.BusinessException;
+import ro.eternelle.subscription.Subscription;
+import ro.eternelle.subscription.SubscriptionRepository;
 import ro.eternelle.user.User;
 import ro.eternelle.user.UserRepository;
 import ro.eternelle.user.UserRole;
@@ -30,6 +32,9 @@ public class AuthService {
 
     @Inject
     JwtService jwtService;
+
+    @Inject
+    SubscriptionRepository subscriptionRepository;
 
     @Inject
     EmailService emailService;
@@ -58,6 +63,13 @@ public class AuthService {
         user.emailVerificationExpires = Instant.now().plus(24, ChronoUnit.HOURS);
 
         userRepository.persist(user);
+
+        // Auto-provision a FREE subscription for every new account
+        Subscription freeSub = new Subscription();
+        freeSub.user = user;
+        freeSub.planName = "FREE";
+        freeSub.status = "active";
+        subscriptionRepository.persist(freeSub);
 
         // Fire-and-forget: don't fail registration if email delivery fails
         try {

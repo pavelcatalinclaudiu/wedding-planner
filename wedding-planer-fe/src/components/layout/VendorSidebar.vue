@@ -85,11 +85,15 @@ const navItems = computed(() => [
         path: "/vendor/network",
         icon: Network,
       },
-      {
-        label: t("nav.vendor.items.groupChat"),
-        path: "/vendor/group-chat",
-        icon: MessageCircle,
-      },
+      ...(messagesStore.groupChatCount > 0
+        ? [
+            {
+              label: t("nav.vendor.items.groupChat"),
+              path: "/vendor/group-chat",
+              icon: MessageCircle,
+            },
+          ]
+        : []),
     ],
   },
   {
@@ -100,11 +104,12 @@ const navItems = computed(() => [
         path: "/vendor/analytics",
         icon: BarChart2,
       },
-      {
-        label: t("nav.vendor.items.subscription"),
-        path: "/vendor/subscription",
-        icon: CreditCard,
-      },
+      // TODO: re-enable when paid plans are launched
+      // {
+      //   label: t("nav.vendor.items.subscription"),
+      //   path: "/vendor/subscription",
+      //   icon: CreditCard,
+      // },
       {
         label: t("nav.vendor.items.myProfile"),
         path: "/vendor/profile",
@@ -128,6 +133,7 @@ function getBadge(key: string) {
 
 onMounted(() => {
   if (!vendorStore.profile) vendorStore.fetchMyProfile();
+  messagesStore.fetchGroupChatCount();
 });
 
 function logout() {
@@ -302,6 +308,9 @@ function switchLang() {
   font-style: normal;
   font-size: 0.95rem;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .nav-label {
   flex: 1;

@@ -3,6 +3,7 @@ import { ref, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useVendorStore } from "@/stores/vendor.store";
 import { useFileUpload } from "@/composables/useFileUpload";
+import { Camera } from "lucide-vue-next";
 import type { VendorCategory } from "@/types/vendor.types";
 
 const vendorStore = useVendorStore();
@@ -79,39 +80,44 @@ async function uploadCover(e: Event) {
 
 <template>
   <div class="profile-view">
-    <div class="page-header">
-      <h2>{{ t("vendor.profile.vendorTitle") }}</h2>
-      <p class="page-sub">{{ t("vendor.profile.subtitle") }}</p>
-    </div>
-
-    <div class="cover-section">
-      <div class="cover-img-wrap">
-        <img
-          v-if="vendorStore.profile?.coverPhoto"
-          :src="vendorStore.profile.coverPhoto"
-          class="cover-img"
-          alt="Cover"
-        />
-        <div v-else class="cover-placeholder">
-          {{ t("vendor.profile.noCover") }}
-        </div>
-      </div>
-
-      <div class="cover-actions">
-        <button class="change-cover-btn" @click="coverInputRef?.click()">
-          {{ t("vendor.profile.changeCover") }}
-        </button>
-        <input
-          ref="coverInputRef"
-          type="file"
-          accept="image/*"
-          hidden
-          @change="uploadCover"
-        />
-      </div>
+    <div class="pv-header">
+      <h2 class="pv-title">{{ t("vendor.profile.vendorTitle") }}</h2>
+      <p class="pv-sub">{{ t("vendor.profile.subtitle") }}</p>
     </div>
 
     <div class="form-card">
+      <!-- Cover photo section -->
+      <p class="section-label">{{ t("vendor.profile.coverSection") }}</p>
+      <div class="cover-section">
+        <div class="cover-img-wrap">
+          <img
+            v-if="vendorStore.profile?.coverPhoto"
+            :src="vendorStore.profile.coverPhoto"
+            class="cover-img"
+            alt="Cover"
+          />
+          <div v-else class="cover-placeholder">
+            {{ t("vendor.profile.noCover") }}
+          </div>
+        </div>
+        <div class="cover-actions">
+          <label class="btn-upload">
+            <Camera :size="14" />
+            {{ t("vendor.profile.changeCover") }}
+            <input
+              ref="coverInputRef"
+              type="file"
+              accept="image/*"
+              style="display: none"
+              @change="uploadCover"
+            />
+          </label>
+        </div>
+      </div>
+
+      <p class="section-label" style="margin-top: 24px">
+        {{ t("vendor.profile.businessName") }}
+      </p>
       <div class="form-grid">
         <div class="field">
           <label>{{ t("vendor.profile.businessName") }}</label>
@@ -171,17 +177,39 @@ async function uploadCover(e: Event) {
 </template>
 
 <style scoped>
-h2 {
+.pv-header {
+  margin-bottom: 24px;
+}
+.pv-title {
   margin: 0 0 4px;
   font-size: 1.4rem;
+  font-weight: 700;
 }
-.page-sub {
-  margin: 0 0 20px;
+.pv-sub {
+  margin: 0;
   font-size: 0.88rem;
   color: var(--color-muted);
 }
+
+.form-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  padding: 28px;
+}
+
+.section-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-muted);
+  margin: 0 0 14px;
+}
+
+/* Cover photo */
 .cover-section {
-  margin-bottom: 24px;
+  margin-bottom: 8px;
 }
 .cover-img-wrap {
   width: 100%;
@@ -190,10 +218,7 @@ h2 {
   overflow: hidden;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  margin-bottom: 0;
-}
-.cover-actions {
-  margin-top: 10px;
+  margin-bottom: 12px;
 }
 .cover-img {
   width: 100%;
@@ -208,27 +233,40 @@ h2 {
   color: var(--color-muted);
   font-size: 0.9rem;
 }
-.change-cover-btn {
-  background: none;
-  border: 1.5px solid var(--color-border);
-  border-radius: 7px;
-  padding: 6px 16px;
+.cover-actions {
+  display: flex;
+}
+.btn-upload {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-gold);
+  color: #fff;
+  border-radius: 8px;
+  padding: 8px 16px;
   font-size: 0.85rem;
+  font-weight: 600;
   cursor: pointer;
+  transition: opacity 0.15s;
+  border: none;
 }
-.form-card {
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
-  border-radius: 14px;
-  padding: 28px;
-  margin-top: 16px;
+.btn-upload:hover {
+  opacity: 0.88;
 }
+
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 18px;
   margin-bottom: 24px;
 }
+
+@media (max-width: 600px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .field {
   display: flex;
   flex-direction: column;
@@ -248,7 +286,10 @@ label {
   border-radius: 7px;
   font-size: 0.9rem;
   font-family: inherit;
+  background: var(--color-surface);
+  color: var(--color-text);
   outline: none;
+  transition: border-color 0.15s;
 }
 .input:focus {
   border-color: var(--color-gold);
@@ -258,6 +299,7 @@ label {
 }
 .form-actions {
   display: flex;
+  margin-top: 24px;
 }
 .save-btn {
   background: var(--color-gold);
@@ -265,10 +307,16 @@ label {
   border: none;
   border-radius: 8px;
   padding: 10px 28px;
+  font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
+  transition: opacity 0.15s;
 }
 .save-btn:disabled {
   opacity: 0.6;
+  cursor: default;
+}
+.save-btn:not(:disabled):hover {
+  opacity: 0.88;
 }
 </style>

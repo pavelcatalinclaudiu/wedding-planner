@@ -573,6 +573,10 @@ async function submitOffer() {
   cursor: pointer;
   font-size: 0.85rem;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
 }
 .btn-video:hover:not(:disabled) {
   background: #2459c4;

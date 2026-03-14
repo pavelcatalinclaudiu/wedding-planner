@@ -32,8 +32,10 @@ const notifSocket = useNotificationSocket();
 
 const { isDark } = useTheme();
 
-const ONBOARDING_KEY = "onboarding_completed";
 const showOnboarding = ref(false);
+const ONBOARDING_KEY = computed(
+  () => `onboarding_completed_${authStore.user?.id ?? "guest"}`,
+);
 
 const pageTitle = computed(() => {
   const key = route.meta.title as string | undefined;
@@ -81,11 +83,8 @@ onMounted(async () => {
   if (userId) {
     notifSocket.connect(userId, () => notificationsStore.bumpUnread());
   }
-  // Show onboarding for first-time users (no profile setup done)
-  if (
-    !localStorage.getItem(ONBOARDING_KEY) &&
-    !coupleStore.profile?.weddingDate
-  ) {
+  // Show onboarding for first-time users
+  if (!localStorage.getItem(ONBOARDING_KEY.value)) {
     setTimeout(() => {
       showOnboarding.value = true;
     }, 800);

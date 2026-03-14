@@ -9,6 +9,7 @@ export const useMessagesStore = defineStore("messages", () => {
   const currentThread = ref<Thread | null>(null);
   const messages = ref<Record<string, Message[]>>({});
   const unreadCounts = ref<Record<string, number>>({});
+  const groupChatCount = ref(0);
 
   async function fetchThreads() {
     const res = await messagesApi.getThreads();
@@ -66,6 +67,16 @@ export const useMessagesStore = defineStore("messages", () => {
     return res.data;
   }
 
+  async function fetchGroupChatCount() {
+    try {
+      const res = await messagesApi.getGroupChat();
+      const data = res.data as Thread[];
+      groupChatCount.value = Array.isArray(data) ? data.length : 1;
+    } catch {
+      groupChatCount.value = 0;
+    }
+  }
+
   function appendMessage(threadId: string, message: Message) {
     if (!messages.value[threadId]) messages.value[threadId] = [];
     messages.value[threadId].push(message);
@@ -88,6 +99,7 @@ export const useMessagesStore = defineStore("messages", () => {
     currentThread.value = null;
     messages.value = {};
     unreadCounts.value = {};
+    groupChatCount.value = 0;
   }
 
   return {
@@ -95,6 +107,7 @@ export const useMessagesStore = defineStore("messages", () => {
     currentThread,
     messages,
     unreadCounts,
+    groupChatCount,
     fetchThreads,
     fetchMessages,
     openThread,
@@ -102,6 +115,7 @@ export const useMessagesStore = defineStore("messages", () => {
     markRead,
     startThread,
     fetchGroupThread,
+    fetchGroupChatCount,
     appendMessage,
     totalUnread,
     reset,

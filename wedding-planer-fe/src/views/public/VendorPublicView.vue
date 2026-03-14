@@ -7,6 +7,7 @@ import { networkApi } from "@/api/network.api";
 import { useAuthStore } from "@/stores/auth.store";
 import { useLeadsStore } from "@/stores/leads.store";
 import { reviewsApi } from "@/api/reviews.api";
+import { nameToColor } from "@/utils/avatarColor";
 import { useAuthRedirect } from "@/composables/useAuthRedirect";
 import EnquiryModal from "@/components/vendor/EnquiryModal.vue";
 import PublicNavbar from "@/components/public/PublicNavbar.vue";
@@ -435,10 +436,35 @@ onMounted(async () => {
               <div class="reviews-list">
                 <div v-for="r in reviews" :key="r.id" class="review-card">
                   <div class="review-header">
+                    <div class="review-author">
+                      <div
+                        class="review-av"
+                        :style="
+                          r.coupleProfilePicture
+                            ? {}
+                            : {
+                                background: nameToColor(r.coupleName).bg,
+                                color: nameToColor(r.coupleName).text,
+                              }
+                        "
+                      >
+                        <img
+                          v-if="r.coupleProfilePicture"
+                          :src="r.coupleProfilePicture"
+                          alt=""
+                        />
+                        <template v-else>{{
+                          (r.coupleName?.[0] ?? "?").toUpperCase()
+                        }}</template>
+                      </div>
+                      <div>
+                        <p class="review-author-name">{{ r.coupleName }}</p>
+                        <span class="review-date">{{
+                          new Date(r.createdAt).toLocaleDateString("en-GB")
+                        }}</span>
+                      </div>
+                    </div>
                     <span class="review-stars">{{ "★".repeat(r.rating) }}</span>
-                    <span class="review-date">{{
-                      new Date(r.createdAt).toLocaleDateString("en-GB")
-                    }}</span>
                   </div>
                   <p class="review-text">{{ r.comment }}</p>
                   <div v-if="r.vendorReply" class="vendor-reply">
@@ -1000,7 +1026,36 @@ onMounted(async () => {
 .review-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 8px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.review-author {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.review-av {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.review-av img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.review-author-name {
+  margin: 0 0 1px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #333;
 }
 .review-stars {
   color: #c8974a;
@@ -1150,6 +1205,8 @@ onMounted(async () => {
   }
   .vp-about {
     order: 2;
+    width: 100%;
+    margin-bottom: 0px;
   }
   .vp-main {
     order: 3;

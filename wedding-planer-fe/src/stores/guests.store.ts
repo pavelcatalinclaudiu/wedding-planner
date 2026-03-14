@@ -71,6 +71,11 @@ export const useGuestsStore = defineStore("guests", () => {
     stats.value = res.data;
   }
 
+  function reset() {
+    guests.value = [];
+    stats.value = null;
+  }
+
   return {
     guests,
     stats,
@@ -84,5 +89,6 @@ export const useGuestsStore = defineStore("guests", () => {
     updateGuest,
     removeGuest,
     importCsv,
+    reset,
   };
 });

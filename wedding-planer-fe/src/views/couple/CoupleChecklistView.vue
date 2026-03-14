@@ -719,6 +719,9 @@ onMounted(() => {
   font-size: 0.85rem;
   width: 18px;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .nav-text {

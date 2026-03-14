@@ -79,6 +79,12 @@ export const useCoupleStore = defineStore("couple", () => {
     budget.value = budget.value.filter((b) => b.id !== id);
   }
 
+  function reset() {
+    profile.value = null;
+    checklist.value = [];
+    budget.value = [];
+  }
+
   return {
     profile,
     checklist,
@@ -95,5 +101,6 @@ export const useCoupleStore = defineStore("couple", () => {
     deleteBudgetItem,
     uploadPicture,
     deletePicture,
+    reset,
   };
 });

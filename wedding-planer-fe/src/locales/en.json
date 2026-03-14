@@ -1112,6 +1112,7 @@
       "subtitle": "Update your business details, pricing, and public-facing information.",
       "vendorTitle": "Vendor Profile",
       "noCover": "No cover image",
+      "coverSection": "Profile picture",
       "changeCover": "Change Profile Picture",
       "businessName": "Business name",
       "category": "Category",

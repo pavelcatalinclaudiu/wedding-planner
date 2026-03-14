@@ -88,7 +88,7 @@ async function toggleVisibility() {
   border-bottom: 1px solid var(--color-border);
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   padding: 0 28px;
   gap: 16px;
   z-index: 50;
@@ -122,6 +122,7 @@ async function toggleVisibility() {
   .topbar {
     padding: 0 16px;
     height: 64px;
+    justify-content: space-between;
   }
 
   /* Hide the search bar on mobile — frees up topbar space */

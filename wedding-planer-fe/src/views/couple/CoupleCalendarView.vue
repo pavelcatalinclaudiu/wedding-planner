@@ -657,7 +657,7 @@ function isTaskOverdue(dateStr: string) {
 .cv-legend {
   display: flex;
   align-items: center;
-  gap: 6px 16px;
+  gap: 6px 6px;
   padding: 12px 20px;
   border-top: 1px solid var(--color-border);
   background: var(--color-surface);

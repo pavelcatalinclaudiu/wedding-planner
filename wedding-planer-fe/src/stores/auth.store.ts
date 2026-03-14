@@ -5,6 +5,8 @@ import { useLeadsStore } from "@/stores/leads.store";
 import { useMessagesStore } from "@/stores/messages.store";
 import { useNotificationsStore } from "@/stores/notifications.store";
 import { useVendorOverviewStore } from "@/stores/vendorOverview.store";
+import { useCoupleStore } from "@/stores/couple.store";
+import { useGuestsStore } from "@/stores/guests.store";
 import type { User, LoginRequest, RegisterRequest } from "@/types/user.types";
 
 export const useAuthStore = defineStore("auth", () => {
@@ -46,13 +48,17 @@ export const useAuthStore = defineStore("auth", () => {
     messagesStore.reset();
     notificationsStore.reset();
     vendorOverviewStore.reset();
+    useCoupleStore().reset();
+    useGuestsStore().reset();
 
     // Clear state synchronously first — no await, no network call that could
     // re-trigger the 401 interceptor and cause infinite recursion.
+    const userId = user.value?.id;
     user.value = null;
     accessToken.value = null;
     localStorage.removeItem("access_token");
     localStorage.removeItem("auth_user");
+    if (userId) localStorage.removeItem(`onboarding_completed_${userId}`);
     // Fire-and-forget: notify the backend but don't block or retry on failure.
     authApi.logout().catch(() => {});
   }
