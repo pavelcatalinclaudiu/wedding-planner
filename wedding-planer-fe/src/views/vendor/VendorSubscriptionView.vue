@@ -61,7 +61,11 @@ async function cancel() {
       </div>
       <p class="plan-renews">
         {{ t("vendor.subscription.renews") }}
-        {{ subscription.currentPeriodEnd ? new Date(subscription.currentPeriodEnd).toLocaleDateString() : "" }}
+        {{
+          subscription.currentPeriodEnd
+            ? new Date(subscription.currentPeriodEnd).toLocaleDateString()
+            : ""
+        }}
       </p>
       <button class="portal-btn" @click="openPortal">
         {{ t("vendor.subscription.manageBilling") }}
