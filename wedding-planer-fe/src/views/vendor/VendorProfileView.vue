@@ -6,7 +6,7 @@ import { useFileUpload } from "@/composables/useFileUpload";
 import type { VendorCategory } from "@/types/vendor.types";
 
 const vendorStore = useVendorStore();
-const { upload, uploading, progress } = useFileUpload();
+const { upload } = useFileUpload();
 const { t } = useI18n();
 const saving = ref(false);
 const saved = ref(false);
