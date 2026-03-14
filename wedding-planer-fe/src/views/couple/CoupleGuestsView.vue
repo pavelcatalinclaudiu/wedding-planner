@@ -18,6 +18,7 @@ import { coupleApi } from "@/api/couple.api";
 import { useToast } from "@/composables/useToast";
 import { useDebounce } from "@/composables/useDebounce";
 import { useConfirm } from "@/composables/useConfirm";
+import { useKeyboardShortcuts } from "@/composables/useKeyboardShortcuts";
 import type {
   Guest,
   GuestRequest,
@@ -30,6 +31,13 @@ const { t } = useI18n();
 const store = useGuestsStore();
 const coupleStore = useCoupleStore();
 const toast = useToast();
+
+// -- Keyboard shortcuts ----------------------------------------------------
+const searchInputEl = ref<HTMLInputElement | null>(null);
+useKeyboardShortcuts({
+  n: () => openAdd(),
+  "/": () => searchInputEl.value?.focus(),
+});
 
 // -- Tabs ------------------------------------------------------------------
 const activeTab = ref<"list" | "tables">("list");
@@ -473,6 +481,7 @@ async function copyInviteLink(g: Guest) {
         <div class="search-wrap">
           <Search :size="15" class="search-icon" />
           <input
+            ref="searchInputEl"
             v-model="search"
             :placeholder="t('guests.searchPlaceholder')"
             class="search-input"

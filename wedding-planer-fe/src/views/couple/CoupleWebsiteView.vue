@@ -1,7 +1,8 @@
 ﻿<script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { coupleApi } from "@/api/couple.api";
+import { useUnsavedChanges } from "@/composables/useUnsavedChanges";
 import type { WeddingWebsite } from "@/types/couple.types";
 import {
   Camera,
@@ -29,6 +30,19 @@ const form = ref({
   published: false,
 });
 
+// -- Unsaved changes guard -------------------------------------------------
+const isDirty = ref(false);
+// Mark dirty whenever the form is touched (but not on initial load)
+let formReady = false;
+watch(
+  form,
+  () => {
+    if (formReady) isDirty.value = true;
+  },
+  { deep: true },
+);
+useUnsavedChanges(isDirty);
+
 const photoInputEl = ref<HTMLInputElement | null>(null);
 const photoPreview = ref<string | null>(null);
 
@@ -45,6 +59,8 @@ onMounted(async () => {
       form.value.receptionLocation = website.value.receptionLocation ?? "";
       form.value.published = website.value.published ?? false;
     }
+    // Allow the watcher to fire only after data has been loaded
+    formReady = true;
   } catch {
     /* not yet created */
   }
@@ -56,6 +72,7 @@ async function save() {
     const res = await coupleApi.updateWebsite(form.value);
     website.value = res.data;
     saved.value = true;
+    isDirty.value = false;
     setTimeout(() => (saved.value = false), 2500);
   } finally {
     saving.value = false;

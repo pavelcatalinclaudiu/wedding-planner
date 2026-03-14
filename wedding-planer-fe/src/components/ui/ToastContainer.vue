@@ -156,16 +156,30 @@ const icons: Record<string, Component> = {
   transition: transform 0.2s ease;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 767px) {
   .toast-container {
-    bottom: 16px;
-    right: 12px;
-    left: 12px;
+    /* Switch from bottom-right to top-center on mobile */
+    bottom: auto;
+    right: auto;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100vw - 32px);
+    max-width: 430px;
+  }
+  .toast-stack {
+    align-items: stretch;
   }
   .toast {
     min-width: unset;
     max-width: unset;
     width: 100%;
+  }
+  /* Slide in from top instead of from the right */
+  .toast-enter-from,
+  .toast-leave-to {
+    opacity: 0;
+    transform: translateY(-16px);
   }
 }
 </style>

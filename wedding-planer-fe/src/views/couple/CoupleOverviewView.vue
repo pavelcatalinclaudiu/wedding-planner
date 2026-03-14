@@ -37,6 +37,10 @@ import {
   CheckSquare,
   Wallet,
   Users,
+  Check,
+  Circle,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-vue-next";
 
 import SkeletonLoader from "@/components/ui/SkeletonLoader.vue";
@@ -170,7 +174,56 @@ const formattedWeddingDate = computed(() => {
   );
 });
 
-// ── Widgets ────────────────────────────────────────────────────────────────
+// ── Setup Progress ─────────────────────────────────────────────────────────────────────────────
+const setupOpen = ref(true);
+
+const setupSteps = computed(() => [
+  {
+    key: "date",
+    done: !!coupleStore.profile?.weddingDate,
+    label: locale.value === "ro" ? "Setează data nunţii" : "Set wedding date",
+    route: "/couple/profile",
+  },
+  {
+    key: "budget",
+    done: Number(coupleStore.profile?.totalBudget ?? 0) > 0,
+    label: locale.value === "ro" ? "Setează bugetul" : "Set your budget",
+    route: "/couple/budget",
+  },
+  {
+    key: "website",
+    done: !!coupleStore.profile?.subdomain,
+    label:
+      locale.value === "ro"
+        ? "Creează-ți site-ul de nuntă"
+        : "Create your wedding website",
+    route: "/couple/website",
+  },
+  {
+    key: "guests",
+    done: guestsStore.guests.length > 0,
+    label:
+      locale.value === "ro" ? "Adaugă primul invitat" : "Add your first guest",
+    route: "/couple/guests",
+  },
+  {
+    key: "vendor",
+    done: leadsStore.leads.length > 0,
+    label:
+      locale.value === "ro" ? "Contactează un furnizor" : "Contact a vendor",
+    route: "/vendors",
+  },
+]);
+
+const setupDone = computed(() => setupSteps.value.filter((s) => s.done).length);
+const setupComplete = computed(
+  () => setupDone.value === setupSteps.value.length,
+);
+const setupProgress = computed(() =>
+  Math.round((setupDone.value / setupSteps.value.length) * 100),
+);
+
+// ── Widgets ─────────────────────────────────────────────────────────────────────────────
 const tasksDone = computed(() => checklistStore.done);
 const tasksTotal = computed(() => checklistStore.total);
 
@@ -366,6 +419,61 @@ function timeAgo(dateStr?: string): string {
         <span class="countdown-number">{{ daysToGo }}</span>
         <span class="countdown-label">{{ t("overview.daysToGo") }}</span>
       </div>
+    </div>
+
+    <!-- ── Setup Progress ───────────────────────────── -->
+    <div v-if="!pageLoading && !setupComplete" class="setup-card">
+      <button
+        class="setup-header"
+        :aria-expanded="setupOpen"
+        @click="setupOpen = !setupOpen"
+      >
+        <div class="setup-header-left">
+          <div class="setup-bar-wrap">
+            <div class="setup-bar-track">
+              <div
+                class="setup-bar-fill"
+                :style="{ width: setupProgress + '%' }"
+              />
+            </div>
+            <span class="setup-counter"
+              >{{ setupDone }}/{{ setupSteps.length }}</span
+            >
+          </div>
+          <span class="setup-title">
+            {{
+              locale === "ro"
+                ? "Configurează-ți planificarea"
+                : "Finish setting up your planning"
+            }}
+          </span>
+        </div>
+        <ChevronUp v-if="setupOpen" :size="18" class="setup-chevron" />
+        <ChevronDown v-else :size="18" class="setup-chevron" />
+      </button>
+
+      <Transition name="setup-collapse">
+        <ul v-if="setupOpen" class="setup-steps">
+          <li
+            v-for="step in setupSteps"
+            :key="step.key"
+            class="setup-step"
+            :class="{ 'step-done': step.done }"
+          >
+            <span class="step-indicator">
+              <Check v-if="step.done" :size="14" />
+              <Circle v-else :size="14" />
+            </span>
+            <RouterLink
+              v-if="!step.done"
+              :to="step.route"
+              class="step-label step-link"
+              >{{ step.label }}</RouterLink
+            >
+            <span v-else class="step-label">{{ step.label }}</span>
+          </li>
+        </ul>
+      </Transition>
     </div>
 
     <!-- ── Stat Widgets ────────────────────────────────────────── -->
@@ -776,6 +884,158 @@ function timeAgo(dateStr?: string): string {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   margin-top: 4px;
+}
+
+/* ── Setup Progress Card ─────────────────────────────────────────────────── */
+.setup-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.setup-header {
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  text-align: left;
+  color: var(--color-text);
+  transition: background 0.15s;
+}
+.setup-header:hover {
+  background: var(--color-bg);
+}
+
+.setup-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.setup-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.setup-bar-track {
+  flex: 1;
+  height: 5px;
+  background: var(--color-border);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.setup-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #d4a843, #b8963a);
+  border-radius: 99px;
+  transition: width 0.4s ease;
+}
+
+.setup-counter {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-muted);
+  flex-shrink: 0;
+}
+
+.setup-title {
+  font-size: 0.82rem;
+  color: var(--color-muted);
+  font-weight: 500;
+}
+
+.setup-chevron {
+  flex-shrink: 0;
+  color: var(--color-muted);
+  transition: transform 0.2s;
+}
+
+.setup-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0 22px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.setup-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  transition: background 0.15s;
+}
+.setup-step:not(.step-done):hover {
+  background: var(--color-bg);
+}
+
+.step-indicator {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  background: var(--color-border);
+  color: var(--color-muted);
+  border: 1.5px solid var(--color-border);
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+.step-done .step-indicator {
+  background: #d4a843;
+  color: #fff;
+  border-color: #d4a843;
+}
+
+.step-label {
+  font-size: 0.88rem;
+  color: var(--color-text);
+  flex: 1;
+}
+.step-done .step-label {
+  color: var(--color-muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--color-border);
+}
+.step-link {
+  text-decoration: none;
+  color: var(--color-text);
+  font-weight: 500;
+  transition: color 0.15s;
+}
+.step-link:hover {
+  color: #d4a843;
+}
+
+/* Collapse transition */
+.setup-collapse-enter-active,
+.setup-collapse-leave-active {
+  transition:
+    max-height 0.28s ease,
+    opacity 0.2s ease;
+  max-height: 300px;
+  overflow: hidden;
+}
+.setup-collapse-enter-from,
+.setup-collapse-leave-to {
+  max-height: 0;
+  opacity: 0;
 }
 
 /* ── Widgets ─────────────────────────────────────────────────────────────── */

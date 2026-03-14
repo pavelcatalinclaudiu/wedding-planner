@@ -568,7 +568,7 @@ onMounted(() => {
 
 .ring-fill {
   fill: none;
-  stroke: var(--color-white);
+  stroke: #fff;
   stroke-width: 8;
   stroke-linecap: round;
   transition: stroke-dashoffset 0.5s ease;
