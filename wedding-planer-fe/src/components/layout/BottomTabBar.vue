@@ -114,5 +114,6 @@ function isActive(path: string) {
 }
 .tab-label {
   line-height: 1;
+  text-align: center;
 }
 </style>

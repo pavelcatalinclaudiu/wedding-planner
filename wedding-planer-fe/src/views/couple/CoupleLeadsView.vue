@@ -747,7 +747,8 @@ async function onCallScheduled(leadId: string) {
   .detail-header {
     flex-direction: column;
     align-items: flex-start;
-    padding: 12px 16px;
+    padding: 0;
+    margin-bottom: 10px;
   }
   .mobile-back {
     display: flex;
@@ -757,7 +758,9 @@ async function onCallScheduled(leadId: string) {
   }
   .btn-video {
     width: 100%;
+    display: flex;
     justify-content: center;
+    gap: 5px;
   }
 }
 </style>

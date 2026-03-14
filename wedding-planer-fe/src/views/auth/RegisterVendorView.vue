@@ -98,6 +98,9 @@ async function handleSubmit() {
 
 <template>
   <div class="auth-page">
+    <div v-if="step !== 2" class="auth-back">
+      <RouterLink to="/">← Back to home</RouterLink>
+    </div>
     <div class="auth-card">
       <RouterLink to="/" class="auth-logo">Eternelle</RouterLink>
 
@@ -244,6 +247,7 @@ async function handleSubmit() {
 
 <style scoped>
 .auth-page {
+  position: relative;
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -406,5 +410,36 @@ async function handleSubmit() {
   font-size: 0.85rem;
   color: var(--color-muted);
   margin: 0;
+}
+.auth-back {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  font-size: 0.875rem;
+
+  padding: 8px 8px;
+  border-radius: 8px;
+  transition:
+    background 0.2s,
+    color 0.2s;
+  border: 1px solid var(--color-gold);
+}
+.auth-back a,
+.back-btn {
+  color: var(--color-gold);
+  text-decoration: none;
+  cursor: pointer;
+}
+.auth-back a:hover,
+.back-btn:hover {
+  color: var(--color-gold);
+}
+
+@media (max-width: 600px) {
+  .auth-card {
+    background: none;
+    box-shadow: none;
+    padding: 24px;
+  }
 }
 </style>

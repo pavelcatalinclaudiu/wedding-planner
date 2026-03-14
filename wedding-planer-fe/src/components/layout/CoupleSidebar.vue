@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useAuthStore } from "@/stores/auth.store";
@@ -32,6 +32,12 @@ const coupleStore = useCoupleStore();
 const leadsStore = useLeadsStore();
 const messagesStore = useMessagesStore();
 const { sidebarOpen, close } = useSidebar();
+
+onMounted(() => close());
+watch(
+  () => route.path,
+  () => close(),
+);
 
 const pendingLeadsCount = computed(
   () => leadsStore.leads.filter((l) => l.status === "QUOTED").length,

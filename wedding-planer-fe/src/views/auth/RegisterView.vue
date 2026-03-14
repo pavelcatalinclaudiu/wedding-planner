@@ -16,6 +16,7 @@ const intentQuery = computed(() =>
 
 <template>
   <div class="auth-page">
+    <RouterLink to="/" class="auth-back">← Back to home</RouterLink>
     <div class="auth-card register-choice">
       <RouterLink to="/" class="auth-logo">Eternelle</RouterLink>
       <h1 class="auth-title">{{ t("auth.register.title") }}</h1>
@@ -47,6 +48,7 @@ const intentQuery = computed(() =>
 
 <style scoped>
 .auth-page {
+  position: relative;
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -124,5 +126,30 @@ const intentQuery = computed(() =>
 .auth-links a {
   color: var(--color-gold);
   text-decoration: none;
+}
+.auth-back {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  font-size: 0.875rem;
+  color: var(--color-gold);
+  text-decoration: none;
+  padding: 8px 8px;
+  border-radius: 8px;
+  transition:
+    background 0.2s,
+    color 0.2s;
+  border: 1px solid var(--color-gold);
+}
+.auth-back:hover {
+  color: var(--color-gold);
+}
+
+@media (max-width: 600px) {
+  .auth-card {
+    background: none;
+    box-shadow: none;
+    padding: 24px;
+  }
 }
 </style>

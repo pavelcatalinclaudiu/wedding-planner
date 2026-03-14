@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from "vue";
+import { X } from "lucide-vue-next";
 import { useVideoCallsStore } from "@/stores/videoCalls.store";
 import { useAuthStore } from "@/stores/auth.store";
 import { videoCallsApi } from "@/api/videoCalls.api";
@@ -152,7 +153,9 @@ async function confirm() {
                 : "Confirm Request"
           }}
         </h3>
-        <button class="close-btn" @click="emit('close')">x</button>
+        <button class="close-btn" @click="emit('close')">
+          <X :size="18" />
+        </button>
       </div>
 
       <template v-if="step === 'pick'">
@@ -252,7 +255,6 @@ async function confirm() {
   align-items: center;
   justify-content: space-between;
   padding: 18px 20px;
-  border-bottom: 1px solid var(--color-border);
 }
 .modal-header h3 {
   margin: 0;
@@ -375,7 +377,6 @@ label {
   gap: 10px;
   justify-content: flex-end;
   padding: 16px 20px;
-  border-top: 1px solid var(--color-border);
 }
 .cancel-btn {
   background: none;
@@ -398,5 +399,14 @@ label {
 .primary-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+@media (max-width: 767px) {
+  .modal {
+    border-radius: 14px !important;
+  }
+  .modal::before {
+    display: none !important;
+  }
 }
 </style>

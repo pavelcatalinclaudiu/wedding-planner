@@ -392,21 +392,13 @@ async function copyInviteLink(g: Guest) {
         <p class="page-sub">{{ t("guests.subtitle") }}</p>
       </div>
       <div class="header-actions">
-        <button
-          class="btn-outline btn-icon-only"
-          @click="showImport = true"
-          :title="t('guests.importCsv')"
-        >
-          &#8679;
+        <button class="btn btn-outline" @click="showImport = true">
+          &#8679; {{ t("guests.importCsv") }}
         </button>
-        <button
-          class="btn-outline btn-icon-only"
-          @click="exportCsv"
-          :title="t('guests.exportCsv')"
-        >
-          &#8681;
+        <button class="btn btn-outline" @click="exportCsv">
+          &#8681; {{ t("guests.exportCsv") }}
         </button>
-        <button class="btn-primary" @click="openAdd">
+        <button class="btn btn-primary" @click="openAdd">
           + {{ t("guests.addGuest") }}
         </button>
       </div>
@@ -1183,11 +1175,6 @@ async function copyInviteLink(g: Guest) {
   gap: 8px;
   align-items: center;
   flex-shrink: 0;
-}
-.btn-icon-only {
-  padding: 7px 11px;
-  font-size: 1.05rem;
-  line-height: 1;
 }
 
 /* -- Buttons -------------------------------------------------------------- */
@@ -2117,15 +2104,20 @@ textarea.fi {
     display: none !important;
   }
   .mobile-only {
-    display: block !important;
+    display: flex !important;
   }
 
   /* page header stays row, subtitle hidden */
-  .page-sub {
-    display: none;
-  }
   .header-left h2 {
     font-size: 1.1rem;
+  }
+  .header-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  .header-actions .btn {
+    width: 100%;
+    justify-content: center;
   }
 
   /* stats strip: tighter padding, smaller numbers */
@@ -2133,7 +2125,7 @@ textarea.fi {
     padding: 10px 12px;
   }
   .ss-item {
-    padding: 0 10px;
+    padding: 0 5px;
   }
   .ss-num {
     font-size: 1.15rem;

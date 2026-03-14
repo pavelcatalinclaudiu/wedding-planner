@@ -39,7 +39,6 @@ async function toggleVisibility() {
     >
       <span></span><span></span><span></span>
     </button>
-    <h1 class="page-title">{{ title }}</h1>
 
     <!-- Vendor search — only shown inside couple dashboard -->
     <DashboardSearchBar v-if="isCouple" class="topbar-search" />
@@ -93,13 +92,6 @@ async function toggleVisibility() {
   padding: 0 28px;
   gap: 16px;
   z-index: 50;
-}
-.page-title {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--color-text);
-  margin: 0;
-  white-space: nowrap;
 }
 .hamburger {
   display: none;

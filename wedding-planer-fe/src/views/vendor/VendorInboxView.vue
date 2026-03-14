@@ -869,6 +869,7 @@ async function submitOffer() {
     flex-direction: column;
     align-items: flex-start;
     padding: 12px 16px;
+    margin-bottom: 10px;
   }
   .mobile-back {
     display: flex;
@@ -878,7 +879,9 @@ async function submitOffer() {
   }
   .btn-video {
     width: 100%;
+    display: flex;
     justify-content: center;
+    gap: 5px;
   }
   .panel-header {
     flex-direction: column;

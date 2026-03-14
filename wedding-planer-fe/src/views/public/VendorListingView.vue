@@ -776,6 +776,9 @@ onMounted(fetchVendors);
 }
 
 @media (max-width: 900px) {
+  .results-pane {
+    width: 100%;
+  }
   .listing-body {
     flex-direction: column;
   }

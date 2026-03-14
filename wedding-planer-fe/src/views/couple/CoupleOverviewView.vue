@@ -386,12 +386,24 @@ function timeAgo(dateStr?: string): string {
       <div class="hero-left">
         <p class="hero-welcome">{{ t("overview.welcomeBack") }}</p>
         <h1 class="hero-title">
-          <span class="hero-names"
-            >{{ partner1
-            }}<template v-if="partner2"> &amp; {{ partner2 }}</template
-            >'s</span
-          ><br />
-          <span class="hero-subtitle">{{ t("overview.perfectDay") }}</span>
+          <template v-if="locale === 'ro'">
+            <span class="hero-subtitle">{{
+              t("overview.perfectDayPrefix")
+            }}</span
+            ><br />
+            <span class="hero-names"
+              >{{ partner1
+              }}<template v-if="partner2"> &amp; {{ partner2 }}</template></span
+            >
+          </template>
+          <template v-else>
+            <span class="hero-names"
+              >{{ partner1
+              }}<template v-if="partner2"> &amp; {{ partner2 }}</template
+              >'s</span
+            ><br />
+            <span class="hero-subtitle">{{ t("overview.perfectDay") }}</span>
+          </template>
         </h1>
         <p class="hero-meta">
           <template v-if="showWeddingDetails">
@@ -1679,7 +1691,7 @@ function timeAgo(dateStr?: string): string {
 
   .hero-countdown {
     width: 100%;
-    flex-direction: row !important;
+
     align-items: center;
     gap: 12px;
     padding: 14px 18px !important;
@@ -1727,9 +1739,6 @@ function timeAgo(dateStr?: string): string {
 
 @media (max-width: 480px) {
   /* Widgets: 1-col on very small screens */
-  .widgets-grid {
-    grid-template-columns: 1fr !important;
-  }
 
   .hero-title {
     font-size: 1.3rem !important;

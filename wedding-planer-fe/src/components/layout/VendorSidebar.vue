@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
+import { computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useAuthStore } from "@/stores/auth.store";
@@ -30,6 +30,12 @@ const vendorStore = useVendorStore();
 const leadsStore = useLeadsStore();
 const messagesStore = useMessagesStore();
 const { sidebarOpen, close } = useSidebar();
+
+onMounted(() => close());
+watch(
+  () => route.path,
+  () => close(),
+);
 
 const unreadCount = computed(() => messagesStore.totalUnread());
 const newLeadsCount = computed(() => leadsStore.newLeadsCount);
