@@ -3,7 +3,7 @@ import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import type { RecentLeadDTO } from "@/types/vendor.types";
 
-const props = defineProps<{
+defineProps<{
   leads: RecentLeadDTO[];
   loading?: boolean;
 }>();

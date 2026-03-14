@@ -2,7 +2,7 @@
 import { useI18n } from "vue-i18n";
 import type { UpcomingCallDTO } from "@/types/vendor.types";
 
-const props = defineProps<{
+defineProps<{
   calls: UpcomingCallDTO[];
   loading?: boolean;
 }>();

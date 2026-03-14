@@ -2,7 +2,7 @@
 import { useI18n } from "vue-i18n";
 import type { ProfilePerformanceDTO } from "@/types/vendor.types";
 
-const props = defineProps<{
+defineProps<{
   data: ProfilePerformanceDTO | null;
   loading?: boolean;
 }>();
