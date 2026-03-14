@@ -102,9 +102,6 @@ function closeAuthMenu() {
       </template>
     </div>
   </nav>
-
-  <!-- Click-outside overlay -->
-  <div v-if="authMenuOpen" class="auth-overlay" @click="closeAuthMenu" />
 </template>
 
 <style scoped>
@@ -339,11 +336,5 @@ function closeAuthMenu() {
 .auth-dropdown-cta:hover {
   background: #b8963a;
   color: #fff;
-}
-
-.auth-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 199;
 }
 </style>
