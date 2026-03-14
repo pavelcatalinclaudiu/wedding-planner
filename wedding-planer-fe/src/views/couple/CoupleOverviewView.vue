@@ -1693,7 +1693,7 @@ function timeAgo(dateStr?: string): string {
     width: 100%;
 
     align-items: center;
-    gap: 12px;
+    gap: 5px;
     padding: 14px 18px !important;
     border-radius: 12px !important;
   }

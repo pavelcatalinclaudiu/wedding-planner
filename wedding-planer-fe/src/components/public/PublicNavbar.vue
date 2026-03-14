@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useAuthStore } from "@/stores/auth.store";
 import { setLocale } from "@/i18n";
 import NotificationBell from "@/components/notifications/NotificationBell.vue";
+import { LayoutDashboard, User } from "lucide-vue-next";
 
 const { t, locale } = useI18n();
 const authStore = useAuthStore();
@@ -14,6 +15,14 @@ const dashboardPath = computed(() =>
 
 function switchTo(lang: "ro" | "en") {
   if (locale.value !== lang) setLocale(lang);
+}
+
+const authMenuOpen = ref(false);
+function toggleAuthMenu() {
+  authMenuOpen.value = !authMenuOpen.value;
+}
+function closeAuthMenu() {
+  authMenuOpen.value = false;
 }
 </script>
 
@@ -52,23 +61,50 @@ function switchTo(lang: "ro" | "en") {
 
       <!-- Not logged in -->
       <template v-if="!authStore.isAuthenticated">
+        <!-- Desktop: text links -->
         <RouterLink to="/login" class="pub-nav-login">
           {{ t("pubNav.logIn") }}
         </RouterLink>
-        <RouterLink to="/register" class="pub-nav-cta">
+        <RouterLink to="/register" class="pub-nav-cta pub-nav-cta-desktop">
           {{ t("pubNav.getStarted") }}
         </RouterLink>
+
+        <!-- Mobile: user icon with dropdown -->
+        <div class="auth-menu-wrap">
+          <button
+            class="auth-icon-btn"
+            @click="toggleAuthMenu"
+            :aria-expanded="authMenuOpen"
+          >
+            <User :size="20" />
+          </button>
+          <div v-if="authMenuOpen" class="auth-dropdown" @click="closeAuthMenu">
+            <RouterLink to="/login" class="auth-dropdown-item">
+              {{ t("pubNav.logIn") }}
+            </RouterLink>
+            <RouterLink
+              to="/register"
+              class="auth-dropdown-item auth-dropdown-cta"
+            >
+              {{ t("pubNav.getStarted") }}
+            </RouterLink>
+          </div>
+        </div>
       </template>
 
       <!-- Logged in -->
       <template v-else>
         <RouterLink :to="dashboardPath" class="pub-nav-cta">
-          {{ t("pubNav.myDashboard") }}
+          <LayoutDashboard :size="17" class="cta-icon" />
+          <span class="cta-label">{{ t("pubNav.myDashboard") }}</span>
         </RouterLink>
         <NotificationBell />
       </template>
     </div>
   </nav>
+
+  <!-- Click-outside overlay -->
+  <div v-if="authMenuOpen" class="auth-overlay" @click="closeAuthMenu" />
 </template>
 
 <style scoped>
@@ -195,6 +231,9 @@ function switchTo(lang: "ro" | "en") {
   font-weight: 600;
   transition: opacity 0.2s;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 7px;
 }
 
 .pub-nav-cta:hover {
@@ -223,5 +262,88 @@ function switchTo(lang: "ro" | "en") {
   .pub-nav-login {
     display: none;
   }
+  .pub-nav-cta-desktop {
+    display: none;
+  }
+  .pub-nav-cta {
+    padding: 8px 10px;
+  }
+  .cta-label {
+    display: none;
+  }
+}
+
+/* On desktop, hide the mobile auth icon */
+@media (min-width: 641px) {
+  .auth-menu-wrap {
+    display: none;
+  }
+}
+
+/* ── Auth icon + dropdown ── */
+.auth-menu-wrap {
+  position: relative;
+}
+
+.auth-icon-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.85);
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.auth-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+
+.auth-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: #1c1c1c;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  overflow: hidden;
+  min-width: 160px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 200;
+}
+
+.auth-dropdown-item {
+  display: block;
+  padding: 13px 18px;
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background 0.15s;
+  text-align: center;
+}
+.auth-dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+}
+.auth-dropdown-cta {
+  background: var(--color-gold, #c9a84c);
+  color: #fff;
+  font-weight: 700;
+  text-align: center;
+}
+.auth-dropdown-cta:hover {
+  background: #b8963a;
+  color: #fff;
+}
+
+.auth-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 199;
 }
 </style>

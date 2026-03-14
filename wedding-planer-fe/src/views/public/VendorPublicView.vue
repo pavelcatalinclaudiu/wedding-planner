@@ -252,94 +252,90 @@ onMounted(async () => {
 
       <!-- ── Content layout ── -->
       <div class="vp-body">
+        <!-- About (direct child so it can be reordered on mobile) -->
+        <section class="vp-section vp-about">
+          <h2 class="sec-title">{{ t("publicVendor.about") }}</h2>
+          <p v-if="vendor.description" class="about-text">
+            {{ vendor.description }}
+          </p>
+          <p v-else class="about-text muted">
+            {{ t("publicVendor.noDescription") }}
+          </p>
+          <div class="quick-facts">
+            <div v-if="vendor.basePrice" class="qf">
+              <span class="qf-label">{{ t("publicVendor.startingFrom") }}</span>
+              <span class="qf-val"
+                >{{ vendor.basePrice.toLocaleString() }} RON</span
+              >
+            </div>
+            <div v-if="vendor.yearsExperience" class="qf">
+              <span class="qf-label">{{ t("publicVendor.experience") }}</span>
+              <span class="qf-val">{{
+                t("publicVendor.yearsExperience", {
+                  n: vendor.yearsExperience,
+                })
+              }}</span>
+            </div>
+            <div v-if="vendor.languages?.length" class="qf">
+              <span class="qf-label">{{ t("publicVendor.languages") }}</span>
+              <span class="qf-val">{{ vendor.languages.join(", ") }}</span>
+            </div>
+            <div class="qf">
+              <span class="qf-label">{{ t("publicVendor.responseTime") }}</span>
+              <span class="qf-val">{{
+                formatResponseTime(avgResponseHours)
+              }}</span>
+            </div>
+          </div>
+
+          <!-- Social / web links -->
+          <div
+            v-if="vendor.website || vendor.instagram || vendor.facebook"
+            class="social-links"
+          >
+            <a
+              v-if="vendor.website"
+              :href="vendor.website"
+              target="_blank"
+              rel="noopener"
+              class="social-link link-web"
+            >
+              <Globe :size="14" /> Website
+            </a>
+            <a
+              v-if="vendor.instagram"
+              :href="
+                'https://instagram.com/' + vendor.instagram.replace('@', '')
+              "
+              target="_blank"
+              rel="noopener"
+              class="social-link link-ig"
+            >
+              <Camera :size="14" />
+              {{
+                vendor.instagram.startsWith("@")
+                  ? vendor.instagram
+                  : "@" + vendor.instagram
+              }}
+            </a>
+            <a
+              v-if="vendor.facebook"
+              :href="
+                vendor.facebook.startsWith('http')
+                  ? vendor.facebook
+                  : 'https://facebook.com/' + vendor.facebook
+              "
+              target="_blank"
+              rel="noopener"
+              class="social-link link-fb"
+            >
+              <Users :size="14" /> Facebook
+            </a>
+          </div>
+        </section>
+
         <!-- Main column -->
         <div class="vp-main">
-          <!-- About -->
-          <section class="vp-section">
-            <h2 class="sec-title">{{ t("publicVendor.about") }}</h2>
-            <p v-if="vendor.description" class="about-text">
-              {{ vendor.description }}
-            </p>
-            <p v-else class="about-text muted">
-              {{ t("publicVendor.noDescription") }}
-            </p>
-            <div class="quick-facts">
-              <div v-if="vendor.basePrice" class="qf">
-                <span class="qf-label">{{
-                  t("publicVendor.startingFrom")
-                }}</span>
-                <span class="qf-val"
-                  >{{ vendor.basePrice.toLocaleString() }} RON</span
-                >
-              </div>
-              <div v-if="vendor.yearsExperience" class="qf">
-                <span class="qf-label">{{ t("publicVendor.experience") }}</span>
-                <span class="qf-val">{{
-                  t("publicVendor.yearsExperience", {
-                    n: vendor.yearsExperience,
-                  })
-                }}</span>
-              </div>
-              <div v-if="vendor.languages?.length" class="qf">
-                <span class="qf-label">{{ t("publicVendor.languages") }}</span>
-                <span class="qf-val">{{ vendor.languages.join(", ") }}</span>
-              </div>
-              <div class="qf">
-                <span class="qf-label">{{
-                  t("publicVendor.responseTime")
-                }}</span>
-                <span class="qf-val">{{
-                  formatResponseTime(avgResponseHours)
-                }}</span>
-              </div>
-            </div>
-
-            <!-- Social / web links -->
-            <div
-              v-if="vendor.website || vendor.instagram || vendor.facebook"
-              class="social-links"
-            >
-              <a
-                v-if="vendor.website"
-                :href="vendor.website"
-                target="_blank"
-                rel="noopener"
-                class="social-link link-web"
-              >
-                <Globe :size="14" /> Website
-              </a>
-              <a
-                v-if="vendor.instagram"
-                :href="
-                  'https://instagram.com/' + vendor.instagram.replace('@', '')
-                "
-                target="_blank"
-                rel="noopener"
-                class="social-link link-ig"
-              >
-                <Camera :size="14" />
-                {{
-                  vendor.instagram.startsWith("@")
-                    ? vendor.instagram
-                    : "@" + vendor.instagram
-                }}
-              </a>
-              <a
-                v-if="vendor.facebook"
-                :href="
-                  vendor.facebook.startsWith('http')
-                    ? vendor.facebook
-                    : 'https://facebook.com/' + vendor.facebook
-                "
-                target="_blank"
-                rel="noopener"
-                class="social-link link-fb"
-              >
-                <Users :size="14" /> Facebook
-              </a>
-            </div>
-          </section>
-
           <!-- Portfolio gallery -->
           <section v-if="vendor.photos?.length" class="vp-section">
             <h2 class="sec-title">{{ t("publicVendor.portfolio") }}</h2>
@@ -740,12 +736,20 @@ onMounted(async () => {
   max-width: 1240px;
   margin: 0 auto;
   padding: 40px 24px;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  grid-template-areas:
+    "about aside"
+    "main  aside";
   gap: 36px;
   align-items: flex-start;
 }
+.vp-about {
+  grid-area: about;
+  min-width: 0;
+}
 .vp-main {
-  flex: 1;
+  grid-area: main;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -1032,8 +1036,7 @@ onMounted(async () => {
 
 /* Aside */
 .vp-aside {
-  width: 340px;
-  flex-shrink: 0;
+  grid-area: aside;
   position: sticky;
   top: 76px;
 }
@@ -1137,11 +1140,19 @@ onMounted(async () => {
 
 @media (max-width: 1000px) {
   .vp-body {
+    display: flex;
     flex-direction: column;
   }
   .vp-aside {
+    order: 1;
     width: 100%;
     position: static;
+  }
+  .vp-about {
+    order: 2;
+  }
+  .vp-main {
+    order: 3;
   }
 }
 @media (max-width: 600px) {

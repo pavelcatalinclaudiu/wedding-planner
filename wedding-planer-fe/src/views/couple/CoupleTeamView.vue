@@ -137,7 +137,7 @@ const emptySlots = computed(() =>
           {{ t("review.leaveReview") }}
         </button>
 
-        <RouterLink :to="`/couple/enquiries`" class="view-link">
+        <RouterLink :to="`/vendors/${lead.vendorId}`" class="view-link">
           {{ t("team.viewProfile") }} →
         </RouterLink>
       </div>

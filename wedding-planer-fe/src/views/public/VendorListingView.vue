@@ -697,7 +697,7 @@ onMounted(fetchVendors);
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 80px;
+  min-height: 50vh;
   justify-content: center;
   color: #888;
 }
