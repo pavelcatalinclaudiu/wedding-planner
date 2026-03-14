@@ -17,7 +17,7 @@
         <skipITs>true</skipITs>
         <surefire-plugin.version>3.5.4</surefire-plugin.version>
     </properties>
-
+<!-- this is a comment -->
     <dependencyManagement>
         <dependencies>
             <dependency>
