@@ -11,6 +11,8 @@ export interface UploadProgress {
 
 export function useFileUpload() {
   const uploads = ref<UploadProgress[]>([]);
+  const uploading = ref(false);
+  const progress = ref(0);
 
   async function upload(
     endpoint: string,
@@ -20,6 +22,8 @@ export function useFileUpload() {
     const fileList = Array.isArray(files) ? files : [files];
     const results: string[] = [];
 
+    uploading.value = true;
+    progress.value = 0;
     for (const file of fileList) {
       const entry: UploadProgress = {
         name: file.name,
@@ -39,6 +43,7 @@ export function useFileUpload() {
           headers: { "Content-Type": "multipart/form-data" },
           onUploadProgress: (e) => {
             entry.progress = Math.round((e.loaded / (e.total ?? 1)) * 100);
+            progress.value = entry.progress;
           },
         });
         entry.progress = 100;
@@ -49,13 +54,16 @@ export function useFileUpload() {
         entry.error = (err as Error).message ?? "Upload failed";
       }
     }
+    uploading.value = false;
 
     return results;
   }
 
   function clearUploads() {
     uploads.value = [];
+    progress.value = 0;
+    uploading.value = false;
   }
 
-  return { uploads, upload, clearUploads };
+  return { uploads, upload, clearUploads, uploading, progress };
 }

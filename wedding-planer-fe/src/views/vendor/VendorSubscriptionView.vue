@@ -55,7 +55,7 @@ async function cancel() {
 
     <div v-if="loading" class="loading">{{ t("common.loading") }}</div>
 
-    <div v-else-if="subscription?.status === 'ACTIVE'" class="current-plan">
+    <div v-else-if="subscription?.status === 'active'" class="current-plan">
       <div class="plan-badge">
         {{ subscription.plan }} {{ t("vendor.subscription.plan") }}
       </div>

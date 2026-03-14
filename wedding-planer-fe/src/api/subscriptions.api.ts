@@ -6,6 +6,7 @@ export interface Subscription {
   plan: "FREE" | "GROWTH" | "STUDIO";
   status: "active" | "cancelled" | "past_due";
   renewalDate?: string;
+  currentPeriodEnd?: string;
   videoCallsUsed: number;
   videoCallsLimit: number;
   creditsBalance: number;
