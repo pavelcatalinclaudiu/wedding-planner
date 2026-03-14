@@ -4,7 +4,6 @@ import { useI18n } from "vue-i18n";
 import { useVendorStore } from "@/stores/vendor.store";
 import { vendorApi } from "@/api/vendor.api";
 import { useFileUpload } from "@/composables/useFileUpload";
-import type { VendorPhoto } from "@/types/vendor.types";
 
 const { t } = useI18n();
 

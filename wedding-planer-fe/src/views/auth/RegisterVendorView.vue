@@ -1,6 +1,6 @@
 ﻿<script setup lang="ts">
 import { ref, computed } from "vue";
-import { useRouter } from "vue-router";
+
 import { useI18n } from "vue-i18n";
 import { useAuthStore } from "@/stores/auth.store";
 import { vendorApi } from "@/api/vendor.api";
@@ -9,7 +9,6 @@ import type { VendorCategory } from "@/types/vendor.types";
 import { Mail } from "lucide-vue-next";
 
 const { t } = useI18n();
-const router = useRouter();
 const authStore = useAuthStore();
 
 const step = ref(1);

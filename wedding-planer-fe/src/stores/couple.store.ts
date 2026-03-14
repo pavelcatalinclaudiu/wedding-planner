@@ -43,8 +43,8 @@ export const useCoupleStore = defineStore("couple", () => {
     checklist.value = res.data;
   }
 
-  async function toggleChecklistItem(id: string, done: boolean) {
-    const res = await coupleApi.updateChecklistItem(id, done);
+  async function toggleChecklistItem(id: string) {
+    const res = await coupleApi.toggleChecklistItem(id);
     const idx = checklist.value.findIndex((i) => i.id === id);
     if (idx !== -1) checklist.value[idx] = res.data;
   }

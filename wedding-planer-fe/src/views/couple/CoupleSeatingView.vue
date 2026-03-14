@@ -2,7 +2,7 @@
 import { onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { coupleApi } from "@/api/couple.api";
-import type { SeatingLayout, Guest } from "@/types/couple.types";
+import type { SeatingLayout } from "@/types/couple.types";
 import { useGuestsStore } from "@/stores/guests.store";
 
 const { t } = useI18n();
@@ -13,15 +13,10 @@ const loading = ref(false);
 async function fetchLayout() {
   loading.value = true;
   try {
-    layout.value = await coupleApi.getSeatingLayout();
+    layout.value = (await coupleApi.getSeating()).data;
   } finally {
     loading.value = false;
   }
-}
-
-async function assignGuest(tableId: string, guestId: string) {
-  await coupleApi.assignGuestToTable(tableId, guestId);
-  await fetchLayout();
 }
 
 onMounted(async () => {
@@ -47,7 +42,7 @@ onMounted(async () => {
           {{ t("seating.capacity") }}: {{ table.capacity }}
         </p>
         <div class="seat-list">
-          <div v-for="seat in table.seats" :key="seat" class="seat">
+          <div v-for="seat in table.guests" :key="seat" class="seat">
             <span v-if="seat">{{ seat }}</span>
             <span v-else class="empty-seat">{{ t("seating.emptySeat") }}</span>
           </div>

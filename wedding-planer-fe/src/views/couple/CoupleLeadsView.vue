@@ -45,7 +45,6 @@ const activeCall = computed(() =>
 );
 
 const latestOffer = computed(() => offers.value[0] ?? null);
-const latestOfferViewed = computed(() => !!latestOffer.value?.viewedAt);
 const hasPendingOffer = computed(() =>
   offers.value.some((o) => o.status === "PENDING"),
 );

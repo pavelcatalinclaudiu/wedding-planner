@@ -1,6 +1,6 @@
 ﻿<script setup lang="ts">
 import { ref, computed } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useAuthStore } from "@/stores/auth.store";
 import { coupleApi } from "@/api/couple.api";
@@ -10,9 +10,8 @@ import { Mail } from "lucide-vue-next";
 
 const { t } = useI18n();
 const route = useRoute();
-const router = useRouter();
 const authStore = useAuthStore();
-const { getEnquiryIntent, redirectAfterAuth } = useAuthRedirect();
+const { getEnquiryIntent } = useAuthRedirect();
 
 const step = ref(1);
 const loading = ref(false);

@@ -16,8 +16,10 @@ export const messagesApi = {
     apiClient.post<Message>(`/messages/threads/${threadId}/send`, data),
   markRead: (threadId: string) =>
     apiClient.post(`/messages/threads/${threadId}/read`, {}),
-  startThread: (dealId: string) =>
-    apiClient.get<Thread>(`/messages/threads/lead/${dealId}`),
+  startThread: (dealId: string, firstMessage?: string) =>
+    apiClient.post<Thread>(`/messages/threads/lead/${dealId}`, {
+      content: firstMessage,
+    }),
 
   // ─── Group chat ──────────────────────────────────────────────────────────
   /** COUPLE → returns a single Thread; VENDOR → returns Thread[] */

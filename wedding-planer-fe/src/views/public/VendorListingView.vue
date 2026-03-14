@@ -7,7 +7,7 @@ import { useDebounce } from "@/composables/useDebounce";
 import VendorCard from "@/components/vendor/VendorCard.vue";
 import PublicNavbar from "@/components/public/PublicNavbar.vue";
 import type { VendorProfile } from "@/types/vendor.types";
-import { Search, Calendar, X } from "lucide-vue-next";
+import { Search, X } from "lucide-vue-next";
 
 const route = useRoute();
 const router = useRouter();

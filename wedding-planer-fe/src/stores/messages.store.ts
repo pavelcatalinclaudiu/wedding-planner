@@ -61,8 +61,8 @@ export const useMessagesStore = defineStore("messages", () => {
     await markRead(threadId);
   }
 
-  async function fetchGroupThread(dealId: string) {
-    const res = await messagesApi.getGroupThread(dealId);
+  async function fetchGroupThread(_dealId: string) {
+    const res = await messagesApi.getGroupChat();
     return res.data;
   }
 
