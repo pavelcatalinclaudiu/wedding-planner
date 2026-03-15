@@ -36,14 +36,12 @@ public class VideoCallService {
                 && !jaasAppId.equals("placeholder");
     }
 
-    /** Fixes a stale roomUrl that has "placeholder" as the appId — heals the DB record in place. */
-    @Transactional
-    public VideoCall repairRoomUrl(VideoCall call) {
+    /** Fixes a stale roomUrl that has "placeholder" as the appId.
+     *  Must be called within an active transaction — Hibernate dirty-tracks the managed entity. */
+    private void repairRoomUrl(VideoCall call) {
         if (jaasEnabled() && call.roomUrl != null && call.roomUrl.contains("/placeholder/")) {
             call.roomUrl = call.roomUrl.replace("/placeholder/", "/" + jaasAppId + "/");
-            videoCallRepository.getEntityManager().merge(call);
         }
-        return call;
     }
 
     public List<VideoCall> getByLead(UUID leadId) {
@@ -52,13 +50,14 @@ public class VideoCallService {
 
     /** Returns the most recent PENDING, SCHEDULED, or IN_PROGRESS call for the lead, or empty.
      *  Heals stale "placeholder" roomUrls on the fly. */
+    @Transactional
     public Optional<VideoCall> getActiveForLead(UUID leadId) {
         return videoCallRepository.findByLead(leadId).stream()
                 .filter(c -> c.status == VideoCallStatus.PENDING
                           || c.status == VideoCallStatus.SCHEDULED
                           || c.status == VideoCallStatus.IN_PROGRESS)
                 .max(java.util.Comparator.comparing(c -> c.scheduledAt))
-                .map(this::repairRoomUrl);
+                .map(c -> { repairRoomUrl(c); return c; });
     }
 
     public List<VideoCall> getForUser(UUID userId, boolean isVendor) {
@@ -128,6 +127,7 @@ public class VideoCallService {
             throw new BusinessException("Only pending calls can be accepted");
         }
         call.status = VideoCallStatus.SCHEDULED;
+        repairRoomUrl(call);
 
         Lead lead = call.lead;
         String vendorBiz  = lead.vendor != null ? lead.vendor.businessName : "your vendor";
@@ -213,6 +213,7 @@ public class VideoCallService {
         VideoCall call  = findById(callId);
         call.status     = VideoCallStatus.IN_PROGRESS;
         call.startedAt  = Instant.now();
+        repairRoomUrl(call);
         return call;
     }
 
