@@ -18,7 +18,6 @@ import {
   Network,
   MessageCircle,
   BarChart2,
-  CreditCard,
   User,
 } from "lucide-vue-next";
 

@@ -48,8 +48,6 @@ const VendorNetworkView = () => import("@/views/vendor/VendorNetworkView.vue");
 const VendorAnalyticsView = () =>
   import("@/views/vendor/VendorAnalyticsView.vue");
 const VendorProfileView = () => import("@/views/vendor/VendorProfileView.vue");
-const VendorSubscriptionView = () =>
-  import("@/views/vendor/VendorSubscriptionView.vue");
 const VendorGroupChatView = () =>
   import("@/views/vendor/VendorGroupChatView.vue");
 
