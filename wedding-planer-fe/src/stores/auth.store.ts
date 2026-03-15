@@ -53,12 +53,10 @@ export const useAuthStore = defineStore("auth", () => {
 
     // Clear state synchronously first — no await, no network call that could
     // re-trigger the 401 interceptor and cause infinite recursion.
-    const userId = user.value?.id;
     user.value = null;
     accessToken.value = null;
     localStorage.removeItem("access_token");
     localStorage.removeItem("auth_user");
-    if (userId) localStorage.removeItem(`onboarding_completed_${userId}`);
     // Fire-and-forget: notify the backend but don't block or retry on failure.
     authApi.logout().catch(() => {});
   }

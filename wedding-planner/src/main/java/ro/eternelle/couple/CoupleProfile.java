@@ -57,6 +57,9 @@ public class CoupleProfile extends PanacheEntityBase {
     @Column(name = "profile_picture")
     public String profilePicture;
 
+    @Column(name = "onboarding_completed", nullable = false)
+    public boolean onboardingCompleted = false;
+
     @Column(name = "created_at")
     public Instant createdAt = Instant.now();
 }

@@ -2,7 +2,6 @@
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useCoupleStore } from "@/stores/couple.store";
-import { useAuthStore } from "@/stores/auth.store";
 import {
   Heart,
   CalendarDays,
@@ -14,10 +13,7 @@ import {
 
 const router = useRouter();
 const coupleStore = useCoupleStore();
-const authStore = useAuthStore();
 const emit = defineEmits<{ close: [] }>();
-
-const STORAGE_KEY = `onboarding_completed_${authStore.user?.id ?? "guest"}`;
 
 const step = ref(1);
 const TOTAL_STEPS = 4;
@@ -75,8 +71,8 @@ function skip() {
   }
 }
 
-function finish() {
-  localStorage.setItem(STORAGE_KEY, "1");
+async function finish() {
+  await coupleStore.updateProfile({ onboardingCompleted: true });
   emit("close");
 }
 

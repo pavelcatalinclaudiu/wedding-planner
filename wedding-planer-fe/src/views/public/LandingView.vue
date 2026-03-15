@@ -191,6 +191,14 @@ onMounted(async () => {
     <!-- ── Hero ── -->
     <section class="hero">
       <div class="hero-bg">
+        <img
+          src="/image.png"
+          alt=""
+          class="hero-bg-img"
+          fetchpriority="high"
+          loading="eager"
+          decoding="async"
+        />
         <div class="hero-overlay" />
       </div>
       <div class="hero-content">
@@ -512,9 +520,14 @@ onMounted(async () => {
 .hero-bg {
   position: absolute;
   inset: 0;
-  background-image: url("../../../public/image.png");
-  background-size: cover;
-  background-position: center;
+}
+.hero-bg-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
 }
 .hero-overlay {
   position: absolute;

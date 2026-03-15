@@ -137,7 +137,7 @@ onMounted(() => {
 
 function logout() {
   authStore.logout();
-  router.push("/login");
+  router.push("/");
 }
 
 function switchLang() {

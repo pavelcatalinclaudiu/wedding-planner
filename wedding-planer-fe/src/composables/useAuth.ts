@@ -22,7 +22,7 @@ export function useAuth() {
 
   async function logout() {
     await store.logout();
-    router.push("/login");
+    router.push("/");
   }
 
   function redirectByRole() {

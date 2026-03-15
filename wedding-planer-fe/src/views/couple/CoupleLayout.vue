@@ -33,9 +33,24 @@ const notifSocket = useNotificationSocket();
 const { isDark } = useTheme();
 
 const showOnboarding = ref(false);
-const ONBOARDING_KEY = computed(
-  () => `onboarding_completed_${authStore.user?.id ?? "guest"}`,
-);
+
+onMounted(async () => {
+  await Promise.all([
+    coupleStore.fetchProfile(),
+    leadsStore.fetchCoupleLeads(),
+    notificationsStore.fetchNotifications(),
+  ]);
+  const userId = authStore.user?.id;
+  if (userId) {
+    notifSocket.connect(userId, () => notificationsStore.bumpUnread());
+  }
+  // Show onboarding for first-time users (server-persisted flag)
+  if (!coupleStore.profile?.onboardingCompleted) {
+    setTimeout(() => {
+      showOnboarding.value = true;
+    }, 800);
+  }
+});
 
 const pageTitle = computed(() => {
   const key = route.meta.title as string | undefined;
@@ -72,24 +87,6 @@ const bottomTabs = computed(() => [
     icon: MessageCircle,
   },
 ]);
-
-onMounted(async () => {
-  await Promise.all([
-    coupleStore.fetchProfile(),
-    leadsStore.fetchCoupleLeads(),
-    notificationsStore.fetchNotifications(),
-  ]);
-  const userId = authStore.user?.id;
-  if (userId) {
-    notifSocket.connect(userId, () => notificationsStore.bumpUnread());
-  }
-  // Show onboarding for first-time users
-  if (!localStorage.getItem(ONBOARDING_KEY.value)) {
-    setTimeout(() => {
-      showOnboarding.value = true;
-    }, 800);
-  }
-});
 
 onUnmounted(() => notifSocket.disconnect());
 </script>

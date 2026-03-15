@@ -45,6 +45,7 @@ public class CoupleService {
         if (updates.weddingLocation != null) profile.weddingLocation = updates.weddingLocation;
         if (updates.totalBudget != null)     profile.totalBudget     = updates.totalBudget;
         profile.guestCount = updates.guestCount;
+        if (updates.onboardingCompleted)     profile.onboardingCompleted = true;
         return profile;
     }
 }

@@ -22,7 +22,7 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401 && !url.includes("/auth/")) {
       const { useAuthStore } = await import("@/stores/auth.store");
       useAuthStore().logout();
-      router.push("/login");
+      router.push("/");
     }
     return Promise.reject(error);
   },

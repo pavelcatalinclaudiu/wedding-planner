@@ -60,7 +60,7 @@ function isActive(path: string) {
 
 function logout() {
   authStore.logout();
-  router.push("/login");
+  router.push("/");
 }
 
 function switchLang() {

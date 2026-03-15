@@ -9,6 +9,7 @@ export interface CoupleProfile {
   totalBudget: number;
   subdomain?: string;
   profilePicture?: string;
+  onboardingCompleted: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -20,6 +21,7 @@ export interface CoupleProfileRequest {
   weddingLocation: string;
   estimatedGuestCount: number;
   totalBudget: number;
+  onboardingCompleted?: boolean;
 }
 
 export interface ChecklistItem {
