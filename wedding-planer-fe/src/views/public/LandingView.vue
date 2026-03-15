@@ -527,7 +527,7 @@ onMounted(async () => {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
+  object-position: 73% center;
 }
 .hero-overlay {
   position: absolute;
@@ -1038,8 +1038,8 @@ onMounted(async () => {
   .hero {
     min-height: 100svh;
   }
-  .hero-bg {
-    background-position: 10% center;
+  .hero-bg-img {
+    object-position: 10% center;
   }
   .hero-content {
     padding: 80px 18px 48px;
