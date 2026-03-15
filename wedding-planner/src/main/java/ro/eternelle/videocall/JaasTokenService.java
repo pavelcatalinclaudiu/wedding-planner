@@ -14,6 +14,7 @@ import java.time.Instant;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @ApplicationScoped
@@ -26,6 +27,9 @@ public class JaasTokenService {
 
     @ConfigProperty(name = "jaas.kid")
     String kid;
+
+    @ConfigProperty(name = "jaas.private.key")
+    Optional<String> jaasPrivateKey;
 
     public String moderatorToken(String roomName, String displayName) {
         return buildToken(roomName, displayName, true);
@@ -86,10 +90,28 @@ public class JaasTokenService {
     }
 
     private PrivateKey loadPrivateKey() {
+        // 1. Try env var (Railway / prod): JAAS_PRIVATE_KEY = base64-encoded PEM
+        String envKey = jaasPrivateKey.orElse("").trim();
+        if (!envKey.isBlank()) {
+            try {
+                String stripped = envKey
+                        .replace("-----BEGIN PRIVATE KEY-----", "")
+                        .replace("-----END PRIVATE KEY-----", "")
+                        .replaceAll("\\s+", "");
+                byte[] decoded = Base64.getDecoder().decode(stripped);
+                return KeyFactory.getInstance("RSA")
+                        .generatePrivate(new PKCS8EncodedKeySpec(decoded));
+            } catch (Exception e) {
+                LOG.warn("Failed to parse JAAS_PRIVATE_KEY env var: " + e.getMessage());
+                return null;
+            }
+        }
+
+        // 2. Fall back to classpath file (local dev)
         try (InputStream is = getClass().getClassLoader()
                 .getResourceAsStream("META-INF/resources/jaas-private.pem")) {
             if (is == null) {
-                LOG.warn("jaas-private.pem not found — JaaS tokens disabled");
+                LOG.warn("jaas-private.pem not found and JAAS_PRIVATE_KEY not set — JaaS tokens disabled");
                 return null;
             }
             String pem = new String(is.readAllBytes(), StandardCharsets.UTF_8)
