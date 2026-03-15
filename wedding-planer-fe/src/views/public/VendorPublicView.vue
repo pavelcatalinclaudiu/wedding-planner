@@ -630,6 +630,7 @@ onMounted(async () => {
   padding: 80px;
   color: #888;
   font-size: 0.95rem;
+  height: 100vh;
 }
 .state-msg a {
   color: #c8974a;

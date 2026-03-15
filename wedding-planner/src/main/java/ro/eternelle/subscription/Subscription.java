@@ -6,6 +6,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import ro.eternelle.user.User;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -31,6 +32,7 @@ public class Subscription extends PanacheEntityBase {
     @Column(name = "stripe_price_id")
     public String stripePriceId;
 
+    @JsonProperty("plan")
     @Column(name = "plan_name", nullable = false)
     public String planName;
 

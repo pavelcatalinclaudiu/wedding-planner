@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
+import UpgradeGate from "@/components/ui/UpgradeGate.vue";
 import { coupleApi } from "@/api/couple.api";
 import { FileText } from "lucide-vue-next";
 
@@ -55,48 +56,50 @@ onMounted(fetchDocs);
 </script>
 
 <template>
-  <div class="docs-view">
-    <div class="docs-header">
-      <div>
-        <h2>{{ t("documents.title") }}</h2>
-        <p class="page-sub">{{ t("documents.subtitle") }}</p>
+  <UpgradeGate feature="documents">
+    <div class="docs-view">
+      <div class="docs-header">
+        <div>
+          <h2>{{ t("documents.title") }}</h2>
+          <p class="page-sub">{{ t("documents.subtitle") }}</p>
+        </div>
+        <button class="upload-btn" @click="fileInputRef?.click()">
+          + {{ t("documents.upload") }}
+        </button>
+        <input
+          ref="fileInputRef"
+          type="file"
+          multiple
+          hidden
+          @change="handleUpload"
+        />
       </div>
-      <button class="upload-btn" @click="fileInputRef?.click()">
-        + {{ t("documents.upload") }}
-      </button>
-      <input
-        ref="fileInputRef"
-        type="file"
-        multiple
-        hidden
-        @change="handleUpload"
-      />
-    </div>
 
-    <div v-if="uploading" class="upload-progress">
-      {{ t("documents.uploading") }}
-    </div>
+      <div v-if="uploading" class="upload-progress">
+        {{ t("documents.uploading") }}
+      </div>
 
-    <div v-if="loading" class="loading">{{ t("documents.loading") }}</div>
-    <div v-else-if="documents.length === 0" class="empty">
-      {{ t("documents.noDocuments") }}
-    </div>
-    <div v-else class="doc-list">
-      <div v-for="doc in documents" :key="doc.id" class="doc-row">
-        <span class="doc-icon"><FileText :size="20" /></span>
-        <a
-          :href="apiBase.replace('/api', '') + doc.url"
-          target="_blank"
-          class="doc-name"
-          >{{ doc.name }}</a
-        >
-        <span class="doc-date">{{
-          new Date(doc.uploadedAt).toLocaleDateString()
-        }}</span>
-        <button class="remove-btn" @click="deleteDoc(doc.id)">×</button>
+      <div v-if="loading" class="loading">{{ t("documents.loading") }}</div>
+      <div v-else-if="documents.length === 0" class="empty">
+        {{ t("documents.noDocuments") }}
+      </div>
+      <div v-else class="doc-list">
+        <div v-for="doc in documents" :key="doc.id" class="doc-row">
+          <span class="doc-icon"><FileText :size="20" /></span>
+          <a
+            :href="apiBase.replace('/api', '') + doc.url"
+            target="_blank"
+            class="doc-name"
+            >{{ doc.name }}</a
+          >
+          <span class="doc-date">{{
+            new Date(doc.uploadedAt).toLocaleDateString()
+          }}</span>
+          <button class="remove-btn" @click="deleteDoc(doc.id)">×</button>
+        </div>
       </div>
     </div>
-  </div>
+  </UpgradeGate>
 </template>
 
 <style scoped>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
+import UpgradeGate from "@/components/ui/UpgradeGate.vue";
 import { vendorApi } from "@/api/vendor.api";
 import type { VendorDeepAnalytics } from "@/types/vendor.types";
 
@@ -87,131 +88,136 @@ function ratingColor(r: number) {
 </script>
 
 <template>
-  <div class="analytics-view">
-    <div class="page-header">
-      <h2>{{ t("vendor.analytics.title") }}</h2>
-      <p class="subtitle">{{ t("vendor.analytics.subtitle") }}</p>
-    </div>
+  <UpgradeGate feature="analytics">
+    <div class="analytics-view">
+      <div class="page-header">
+        <h2>{{ t("vendor.analytics.title") }}</h2>
+        <p class="subtitle">{{ t("vendor.analytics.subtitle") }}</p>
+      </div>
 
-    <div v-if="loading" class="state-msg">{{ t("common.loading") }}</div>
-    <div v-else-if="error" class="state-msg err">{{ error }}</div>
+      <div v-if="loading" class="state-msg">{{ t("common.loading") }}</div>
+      <div v-else-if="error" class="state-msg err">{{ error }}</div>
 
-    <template v-else-if="data">
-      <!-- ── 1. Revenue trend ─────────────────────────────────────────────── -->
-      <section class="card">
-        <h3 class="card-title">{{ t("vendor.analytics.revenueTitle") }}</h3>
-        <p class="card-sub">{{ t("vendor.analytics.revenueSub") }}</p>
-        <div class="bar-chart">
-          <div
-            v-for="m in data.revenueByMonth"
-            :key="m.month + m.year"
-            class="bar-col"
-          >
-            <span class="bar-label-top">{{
-              m.revenue > 0 ? formatRevenue(m.revenue) : ""
-            }}</span>
+      <template v-else-if="data">
+        <!-- ── 1. Revenue trend ─────────────────────────────────────────────── -->
+        <section class="card">
+          <h3 class="card-title">{{ t("vendor.analytics.revenueTitle") }}</h3>
+          <p class="card-sub">{{ t("vendor.analytics.revenueSub") }}</p>
+          <div class="bar-chart">
             <div
-              class="bar"
-              :style="{ height: revenueBarPct(m.revenue) + '%' }"
-              :class="{ 'bar--active': m.bookings > 0 }"
-            ></div>
-            <span class="bar-label">{{ m.month }}</span>
-          </div>
-        </div>
-        <p class="chart-note">
-          {{ t("vendor.analytics.revenueTotal") }}
-          <strong
-            >{{
-              formatRevenue(
-                data.revenueByMonth.reduce((s, m) => s + m.revenue, 0),
-              )
-            }}
-            RON</strong
-          >
-          {{ t("common.of") }}
-          <strong
-            >{{ data.revenueByMonth.reduce((s, m) => s + m.bookings, 0) }}
-            {{ t("vendor.analytics.revenueBookings") }}</strong
-          >
-        </p>
-      </section>
-
-      <!-- ── 2. Lead funnel ──────────────────────────────────────────────── -->
-      <section class="card">
-        <h3 class="card-title">{{ t("vendor.analytics.funnelTitle") }}</h3>
-        <p class="card-sub">{{ t("vendor.analytics.funnelSub") }}</p>
-        <div class="funnel">
-          <div
-            v-for="stage in funnelStages"
-            :key="stage.label"
-            class="funnel-stage"
-          >
-            <div class="funnel-meta">
-              <span class="funnel-label">{{ stage.label }}</span>
-              <span class="funnel-count">{{ stage.value }}</span>
-              <span class="funnel-pct">{{ funnelPct(stage.value) }}%</span>
-            </div>
-            <div class="funnel-bar-wrap">
+              v-for="m in data.revenueByMonth"
+              :key="m.month + m.year"
+              class="bar-col"
+            >
+              <span class="bar-label-top">{{
+                m.revenue > 0 ? formatRevenue(m.revenue) : ""
+              }}</span>
               <div
-                class="funnel-bar"
-                :style="{
-                  width: funnelPct(stage.value) + '%',
-                  background: stage.color,
-                }"
+                class="bar"
+                :style="{ height: revenueBarPct(m.revenue) + '%' }"
+                :class="{ 'bar--active': m.bookings > 0 }"
               ></div>
+              <span class="bar-label">{{ m.month }}</span>
             </div>
           </div>
-        </div>
-        <p class="chart-note">
-          {{ t("vendor.analytics.funnelTotal") }}
-          <strong>{{ funnelTotal }}</strong>
-        </p>
-      </section>
+          <p class="chart-note">
+            {{ t("vendor.analytics.revenueTotal") }}
+            <strong
+              >{{
+                formatRevenue(
+                  data.revenueByMonth.reduce((s, m) => s + m.revenue, 0),
+                )
+              }}
+              RON</strong
+            >
+            {{ t("common.of") }}
+            <strong
+              >{{ data.revenueByMonth.reduce((s, m) => s + m.bookings, 0) }}
+              {{ t("vendor.analytics.revenueBookings") }}</strong
+            >
+          </p>
+        </section>
 
-      <!-- ── 3. Booking peaks ────────────────────────────────────────────── -->
-      <section class="card">
-        <h3 class="card-title">{{ t("vendor.analytics.peaksTitle") }}</h3>
-        <p class="card-sub">{{ t("vendor.analytics.peaksSub") }}</p>
-        <div class="bar-chart peak-chart">
-          <div
-            v-for="p in data.bookingPeaks"
-            :key="p.monthNumber"
-            class="bar-col"
-          >
-            <span class="bar-label-top">{{ p.count || "" }}</span>
+        <!-- ── 2. Lead funnel ──────────────────────────────────────────────── -->
+        <section class="card">
+          <h3 class="card-title">{{ t("vendor.analytics.funnelTitle") }}</h3>
+          <p class="card-sub">{{ t("vendor.analytics.funnelSub") }}</p>
+          <div class="funnel">
             <div
-              class="bar bar--peak"
-              :style="{ height: peakBarPct(p.count) + '%' }"
-            ></div>
-            <span class="bar-label">{{ p.month }}</span>
+              v-for="stage in funnelStages"
+              :key="stage.label"
+              class="funnel-stage"
+            >
+              <div class="funnel-meta">
+                <span class="funnel-label">{{ stage.label }}</span>
+                <span class="funnel-count">{{ stage.value }}</span>
+                <span class="funnel-pct">{{ funnelPct(stage.value) }}%</span>
+              </div>
+              <div class="funnel-bar-wrap">
+                <div
+                  class="funnel-bar"
+                  :style="{
+                    width: funnelPct(stage.value) + '%',
+                    background: stage.color,
+                  }"
+                ></div>
+              </div>
+            </div>
           </div>
-        </div>
-      </section>
+          <p class="chart-note">
+            {{ t("vendor.analytics.funnelTotal") }}
+            <strong>{{ funnelTotal }}</strong>
+          </p>
+        </section>
 
-      <!-- ── 4. Rating trend ─────────────────────────────────────────────── -->
-      <section class="card">
-        <h3 class="card-title">{{ t("vendor.analytics.ratingTitle") }}</h3>
-        <p class="card-sub">{{ t("vendor.analytics.ratingSub") }}</p>
-        <div class="rating-table">
-          <div
-            v-for="q in data.ratingByQuarter"
-            :key="q.label"
-            class="rating-row"
-          >
-            <span class="q-label">{{ q.label }}</span>
-            <span class="q-stars" :style="{ color: ratingColor(q.avgRating) }">
-              {{ stars(q.avgRating) }}
-            </span>
-            <span class="q-count">{{
-              q.reviewCount
-                ? `${q.reviewCount} ${q.reviewCount !== 1 ? t("vendor.analytics.reviewPlural") : t("vendor.analytics.reviewSingular")}`
-                : t("vendor.analytics.noReviewsLabel")
-            }}</span>
+        <!-- ── 3. Booking peaks ────────────────────────────────────────────── -->
+        <section class="card">
+          <h3 class="card-title">{{ t("vendor.analytics.peaksTitle") }}</h3>
+          <p class="card-sub">{{ t("vendor.analytics.peaksSub") }}</p>
+          <div class="bar-chart peak-chart">
+            <div
+              v-for="p in data.bookingPeaks"
+              :key="p.monthNumber"
+              class="bar-col"
+            >
+              <span class="bar-label-top">{{ p.count || "" }}</span>
+              <div
+                class="bar bar--peak"
+                :style="{ height: peakBarPct(p.count) + '%' }"
+              ></div>
+              <span class="bar-label">{{ p.month }}</span>
+            </div>
           </div>
-        </div>
-      </section>
-    </template>
-  </div>
+        </section>
+
+        <!-- ── 4. Rating trend ─────────────────────────────────────────────── -->
+        <section class="card">
+          <h3 class="card-title">{{ t("vendor.analytics.ratingTitle") }}</h3>
+          <p class="card-sub">{{ t("vendor.analytics.ratingSub") }}</p>
+          <div class="rating-table">
+            <div
+              v-for="q in data.ratingByQuarter"
+              :key="q.label"
+              class="rating-row"
+            >
+              <span class="q-label">{{ q.label }}</span>
+              <span
+                class="q-stars"
+                :style="{ color: ratingColor(q.avgRating) }"
+              >
+                {{ stars(q.avgRating) }}
+              </span>
+              <span class="q-count">{{
+                q.reviewCount
+                  ? `${q.reviewCount} ${q.reviewCount !== 1 ? t("vendor.analytics.reviewPlural") : t("vendor.analytics.reviewSingular")}`
+                  : t("vendor.analytics.noReviewsLabel")
+              }}</span>
+            </div>
+          </div>
+        </section>
+      </template>
+    </div>
+  </UpgradeGate>
 </template>
 
 <style scoped>

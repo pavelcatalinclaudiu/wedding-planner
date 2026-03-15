@@ -3,7 +3,6 @@ package ro.eternelle.couple;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import org.eclipse.microprofile.jwt.JsonWebToken;
 import ro.eternelle.exception.BusinessException;
 import ro.eternelle.user.User;
 import ro.eternelle.user.UserRepository;

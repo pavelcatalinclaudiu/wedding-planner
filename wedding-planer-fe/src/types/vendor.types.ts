@@ -17,7 +17,7 @@ export type VendorCategory =
   | "JEWELRY"
   | "OTHER";
 
-export type VendorTier = "FREE" | "STARTER" | "PROFESSIONAL" | "PREMIUM";
+export type VendorTier = "FREE" | "STANDARD" | "PREMIUM";
 
 export interface VendorProfile {
   id: string;
@@ -31,6 +31,7 @@ export interface VendorProfile {
   reviewCount: number;
   tier: VendorTier;
   active: boolean;
+  monetizationEnabled?: boolean;
   yearsExperience?: number;
   languages?: string[];
   photos: VendorPhoto[];

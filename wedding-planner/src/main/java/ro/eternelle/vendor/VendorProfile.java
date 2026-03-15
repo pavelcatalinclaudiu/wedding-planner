@@ -63,6 +63,9 @@ public class VendorProfile extends PanacheEntityBase {
     @JsonProperty("active")
     public boolean isActive = true;
 
+    @Column(name = "monetization_enabled", nullable = false)
+    public boolean monetizationEnabled = false;
+
     @Column(name = "profile_picture")
     public String profilePicture;
 

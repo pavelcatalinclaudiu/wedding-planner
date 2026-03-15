@@ -38,6 +38,26 @@ export const adminApi = {
     apiClient.put(`/admin/vendors/${id}/activate`),
   toggleVerifyVendor: (id: string) =>
     apiClient.put(`/admin/vendors/${id}/verify`),
+  setVendorPlan: (id: string, plan: string) =>
+    apiClient.put(`/admin/vendors/${id}/plan`, null, { params: { plan } }),
+  setCouplePlan: (id: string, plan: string) =>
+    apiClient.put(`/admin/couples/${id}/plan`, null, { params: { plan } }),
+  toggleVendorMonetization: (id: string, enabled: boolean) =>
+    apiClient.put(`/admin/vendors/${id}/monetization`, null, {
+      params: { enabled },
+    }),
+  toggleCoupleMonetization: (id: string, enabled: boolean) =>
+    apiClient.put(`/admin/couples/${id}/monetization`, null, {
+      params: { enabled },
+    }),
+  bulkToggleVendorMonetization: (enabled: boolean) =>
+    apiClient.put(`/admin/vendors/monetization/bulk`, null, {
+      params: { enabled },
+    }),
+  bulkToggleCoupleMonetization: (enabled: boolean) =>
+    apiClient.put(`/admin/couples/monetization/bulk`, null, {
+      params: { enabled },
+    }),
 
   // Reviews
   listReviews: (params?: {

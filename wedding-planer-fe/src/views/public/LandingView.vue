@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { vendorApi } from "@/api/vendor.api";
+import apiClient from "@/api/client";
 import VendorCard from "@/components/vendor/VendorCard.vue";
 import PublicNavbar from "@/components/public/PublicNavbar.vue";
 import type { VendorProfile } from "@/types/vendor.types";
@@ -171,6 +172,9 @@ function scrollFeatured(direction: "left" | "right") {
 }
 
 onMounted(async () => {
+  // Track this landing page visit (fire-and-forget, silently ignored on failure)
+  apiClient.post("/public/page-visit").catch(() => {});
+
   loadingFeatured.value = true;
   try {
     const res = await vendorApi.list({ tier: "PREMIUM" });

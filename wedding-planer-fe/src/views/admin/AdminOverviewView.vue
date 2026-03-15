@@ -2,7 +2,15 @@
 import { onMounted, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useAdminStore } from "@/stores/admin.store";
-import { Users, Store, Heart, TrendingUp, Star, Eye } from "lucide-vue-next";
+import {
+  Users,
+  Store,
+  Heart,
+  TrendingUp,
+  Star,
+  Eye,
+  CreditCard,
+} from "lucide-vue-next";
 
 const { t } = useI18n();
 const adminStore = useAdminStore();
@@ -22,6 +30,7 @@ const kpis = computed(() => {
       sub: `+${stats.value.newUsersThisWeek} ${t("admin.overview.thisWeek")}`,
       icon: Users,
       color: "#6c63ff",
+      link: "/admin/users",
     },
     {
       label: t("admin.overview.totalVendors"),
@@ -29,6 +38,7 @@ const kpis = computed(() => {
       sub: `${stats.value.activeVendors} ${t("admin.overview.active")}`,
       icon: Store,
       color: "#d4af37",
+      link: "/admin/vendors",
     },
     {
       label: t("admin.overview.totalCouples"),
@@ -36,6 +46,7 @@ const kpis = computed(() => {
       sub: null,
       icon: Heart,
       color: "#e53e7c",
+      link: "/admin/users?role=COUPLE",
     },
     {
       label: t("admin.overview.totalLeads"),
@@ -43,6 +54,7 @@ const kpis = computed(() => {
       sub: null,
       icon: TrendingUp,
       color: "#38a169",
+      link: null,
     },
     {
       label: t("admin.overview.totalReviews"),
@@ -50,13 +62,35 @@ const kpis = computed(() => {
       sub: `⭐ ${stats.value.avgRating.toFixed(2)} ${t("admin.overview.avgRating")}`,
       icon: Star,
       color: "#dd6b20",
+      link: "/admin/reviews",
+      badge:
+        stats.value.pendingReviewsCount > 0
+          ? stats.value.pendingReviewsCount
+          : null,
     },
     {
       label: t("admin.overview.platformVisits"),
-      value: stats.value.totalProfileViews,
-      sub: `+${stats.value.profileViewsThisWeek} ${t("admin.overview.thisWeek")} · ${stats.value.uniqueVisitors} ${t("admin.overview.uniqueVisitors")}`,
+      value: stats.value.landingPageVisits,
+      sub: `+${stats.value.landingPageVisitsThisWeek} ${t("admin.overview.thisWeek")} · ${stats.value.uniqueLandingVisitors} ${t("admin.overview.uniqueVisitors")}`,
       icon: Eye,
       color: "#0bc5ea",
+      link: null,
+    },
+    {
+      label: t("admin.overview.paidVendors"),
+      value: stats.value.paidVendors,
+      sub: `${t("admin.overview.ofTotal", { total: stats.value.totalVendors })}`,
+      icon: CreditCard,
+      color: "#805ad5",
+      link: "/admin/vendors",
+    },
+    {
+      label: t("admin.overview.paidCouples"),
+      value: stats.value.paidCouples,
+      sub: `${t("admin.overview.ofTotal", { total: stats.value.totalCouples })}`,
+      icon: CreditCard,
+      color: "#e53e7c",
+      link: "/admin/users?role=COUPLE",
     },
   ];
 });
@@ -82,14 +116,37 @@ const categoryEntries = computed(() =>
 <template>
   <div class="overview-page">
     <!-- Loading skeleton -->
-    <div v-if="adminStore.statsLoading" class="loading-state">
-      {{ t("common.loading") }}
-    </div>
+    <template v-if="adminStore.statsLoading">
+      <div class="kpi-grid">
+        <div v-for="i in 8" :key="i" class="kpi-card skeleton-card">
+          <div class="skeleton skeleton-icon"></div>
+          <div class="kpi-body">
+            <div class="skeleton skeleton-value"></div>
+            <div class="skeleton skeleton-label"></div>
+          </div>
+        </div>
+      </div>
+      <div class="lower-grid">
+        <div class="card skeleton-chart-wrap">
+          <div class="skeleton" style="height: 140px; border-radius: 8px"></div>
+        </div>
+        <div class="card">
+          <div class="skeleton" style="height: 140px; border-radius: 8px"></div>
+        </div>
+      </div>
+    </template>
 
     <template v-else-if="stats">
       <!-- KPI Cards -->
       <div class="kpi-grid">
-        <div v-for="kpi in kpis" :key="kpi.label" class="kpi-card">
+        <component
+          v-for="kpi in kpis"
+          :key="kpi.label"
+          :is="kpi.link ? 'RouterLink' : 'div'"
+          :to="kpi.link ?? undefined"
+          class="kpi-card"
+          :class="{ 'kpi-card--link': !!kpi.link }"
+        >
           <div
             class="kpi-icon"
             :style="{ background: kpi.color + '1a', color: kpi.color }"
@@ -97,11 +154,17 @@ const categoryEntries = computed(() =>
             <component :is="kpi.icon" :size="22" />
           </div>
           <div class="kpi-body">
-            <div class="kpi-value">{{ kpi.value.toLocaleString() }}</div>
+            <div class="kpi-value-row">
+              <div class="kpi-value">{{ kpi.value.toLocaleString() }}</div>
+              <span v-if="(kpi as any).badge" class="kpi-badge"
+                >{{ (kpi as any).badge }}
+                {{ t("admin.overview.pending") }}</span
+              >
+            </div>
             <div class="kpi-label">{{ kpi.label }}</div>
             <div v-if="kpi.sub" class="kpi-sub">{{ kpi.sub }}</div>
           </div>
-        </div>
+        </component>
       </div>
 
       <!-- Two-column lower section -->
@@ -173,7 +236,15 @@ const categoryEntries = computed(() =>
             </thead>
             <tbody>
               <tr v-for="v in stats.topVendors" :key="v.id">
-                <td class="bold-cell">{{ v.businessName }}</td>
+                <td class="bold-cell">
+                  <RouterLink
+                    :to="`/vendors/${v.id}`"
+                    target="_blank"
+                    class="vendor-link"
+                  >
+                    {{ v.businessName }}
+                  </RouterLink>
+                </td>
                 <td>{{ v.category.replace(/_/g, " ") }}</td>
                 <td>{{ v.city }}</td>
                 <td>⭐ {{ v.avgRating.toFixed(1) }}</td>
@@ -210,6 +281,20 @@ const categoryEntries = computed(() =>
   display: flex;
   align-items: flex-start;
   gap: 14px;
+  text-decoration: none;
+  color: inherit;
+  transition:
+    box-shadow 0.15s,
+    border-color 0.15s;
+}
+
+.kpi-card--link {
+  cursor: pointer;
+}
+
+.kpi-card--link:hover {
+  border-color: var(--color-gold);
+  box-shadow: 0 2px 12px rgba(212, 175, 55, 0.12);
 }
 
 .kpi-icon {
@@ -222,11 +307,28 @@ const categoryEntries = computed(() =>
   flex-shrink: 0;
 }
 
+.kpi-value-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .kpi-value {
   font-size: 22px;
   font-weight: 700;
   line-height: 1;
   margin-bottom: 3px;
+}
+
+.kpi-badge {
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(229, 62, 62, 0.12);
+  color: #e53e3e;
+  border-radius: 20px;
+  padding: 2px 8px;
+  white-space: nowrap;
 }
 
 .kpi-label {
@@ -395,6 +497,65 @@ const categoryEntries = computed(() =>
 
 .bold-cell {
   font-weight: 600;
+}
+
+.vendor-link {
+  color: inherit;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.vendor-link:hover {
+  color: var(--color-gold);
+  text-decoration: underline;
+}
+
+/* Skeleton */
+.skeleton-card {
+  pointer-events: none;
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-border) 25%,
+    var(--color-surface) 50%,
+    var(--color-border) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 6px;
+}
+
+.skeleton-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.skeleton-value {
+  height: 22px;
+  width: 60px;
+  margin-bottom: 8px;
+}
+
+.skeleton-label {
+  height: 13px;
+  width: 90px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton-chart-wrap {
+  overflow: hidden;
 }
 
 .empty-state,

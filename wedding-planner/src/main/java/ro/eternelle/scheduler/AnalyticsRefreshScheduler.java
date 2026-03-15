@@ -3,10 +3,8 @@ package ro.eternelle.scheduler;
 import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import ro.eternelle.vendor.VendorProfile;
 import ro.eternelle.vendor.VendorRepository;
 
-import java.util.List;
 
 @ApplicationScoped
 public class AnalyticsRefreshScheduler {

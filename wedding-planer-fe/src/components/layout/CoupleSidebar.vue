@@ -22,6 +22,7 @@ import {
   Globe,
   FolderOpen,
   User,
+  CreditCard,
 } from "lucide-vue-next";
 
 const { t, locale } = useI18n();
@@ -129,6 +130,15 @@ const navItems = computed(() => [
         path: "/couple/profile",
         icon: User,
       },
+      ...(coupleStore.profile?.monetizationEnabled
+        ? [
+            {
+              label: t("nav.couple.items.subscription"),
+              path: "/couple/subscription",
+              icon: CreditCard,
+            },
+          ]
+        : []),
     ],
   },
 ]);

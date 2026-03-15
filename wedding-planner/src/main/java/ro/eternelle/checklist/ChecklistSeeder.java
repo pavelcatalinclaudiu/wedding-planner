@@ -1,12 +1,10 @@
 package ro.eternelle.checklist;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import ro.eternelle.couple.CoupleProfile;
 
-import java.time.LocalDate;
 import java.util.List;
 
 /**

@@ -90,6 +90,42 @@ export const useAdminStore = defineStore("admin", () => {
     if (v) v.isVerified = !v.isVerified;
   }
 
+  async function setVendorPlan(id: string, plan: string) {
+    await adminApi.setVendorPlan(id, plan);
+    const v = vendors.value.find((x) => x.id === id);
+    if (v) v.tier = plan as "FREE" | "STANDARD" | "PREMIUM";
+  }
+
+  async function setCouplePlan(id: string, plan: string) {
+    await adminApi.setCouplePlan(id, plan);
+    const u = users.value.find((x) => x.profileId === id);
+    if (u) u.couplePlan = plan as "FREE" | "DREAM_WEDDING";
+  }
+
+  async function toggleVendorMonetization(id: string, enabled: boolean) {
+    await adminApi.toggleVendorMonetization(id, enabled);
+    const v = vendors.value.find((x) => x.id === id);
+    if (v) v.monetizationEnabled = enabled;
+  }
+
+  async function toggleCoupleMonetization(id: string, enabled: boolean) {
+    await adminApi.toggleCoupleMonetization(id, enabled);
+    const u = users.value.find((x) => x.profileId === id);
+    if (u) u.coupleMonetizationEnabled = enabled;
+  }
+
+  async function bulkToggleVendorMonetization(enabled: boolean) {
+    await adminApi.bulkToggleVendorMonetization(enabled);
+    vendors.value.forEach((v) => (v.monetizationEnabled = enabled));
+  }
+
+  async function bulkToggleCoupleMonetization(enabled: boolean) {
+    await adminApi.bulkToggleCoupleMonetization(enabled);
+    users.value
+      .filter((u) => u.role === "COUPLE")
+      .forEach((u) => (u.coupleMonetizationEnabled = enabled));
+  }
+
   async function fetchReviews(params?: {
     search?: string;
     status?: string;
@@ -140,6 +176,12 @@ export const useAdminStore = defineStore("admin", () => {
     suspendVendor,
     activateVendor,
     toggleVerifyVendor,
+    setVendorPlan,
+    setCouplePlan,
+    toggleVendorMonetization,
+    toggleCoupleMonetization,
+    bulkToggleVendorMonetization,
+    bulkToggleCoupleMonetization,
     reviews,
     reviewsTotal,
     reviewsLoading,

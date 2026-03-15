@@ -11,7 +11,6 @@ const { upload } = useFileUpload();
 const { t } = useI18n();
 const saving = ref(false);
 const saved = ref(false);
-const coverInputRef = ref<HTMLInputElement | null>(null);
 
 const form = ref({
   businessName: "",
@@ -105,7 +104,6 @@ async function uploadCover(e: Event) {
             <Camera :size="14" />
             {{ t("vendor.profile.changeCover") }}
             <input
-              ref="coverInputRef"
               type="file"
               accept="image/*"
               style="display: none"

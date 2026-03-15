@@ -31,6 +31,8 @@ const CoupleVideoCallsView = () =>
 const CoupleCalendarView = () =>
   import("@/views/couple/CoupleCalendarView.vue");
 const CoupleProfileView = () => import("@/views/couple/CoupleProfileView.vue");
+const CoupleSubscriptionView = () =>
+  import("@/views/couple/CoupleSubscriptionView.vue");
 
 // Vendor
 const VendorLayout = () => import("@/views/vendor/VendorLayout.vue");
@@ -50,6 +52,8 @@ const VendorAnalyticsView = () =>
 const VendorProfileView = () => import("@/views/vendor/VendorProfileView.vue");
 const VendorGroupChatView = () =>
   import("@/views/vendor/VendorGroupChatView.vue");
+const VendorSubscriptionView = () =>
+  import("@/views/vendor/VendorSubscriptionView.vue");
 
 // Admin
 const AdminLayout = () => import("@/views/admin/AdminLayout.vue");
@@ -161,6 +165,11 @@ const routes: RouteRecordRaw[] = [
         component: CoupleProfileView,
         meta: { title: "nav.couple.items.myProfile" },
       },
+      {
+        path: "subscription",
+        component: CoupleSubscriptionView,
+        meta: { title: "nav.couple.items.subscription" },
+      },
     ],
   },
 
@@ -224,6 +233,11 @@ const routes: RouteRecordRaw[] = [
       //   component: VendorSubscriptionView,
       //   meta: { title: "nav.vendor.items.subscription" },
       // },
+      {
+        path: "subscription",
+        component: VendorSubscriptionView,
+        meta: { title: "nav.vendor.items.subscription" },
+      },
       {
         path: "group-chat",
         component: VendorGroupChatView,

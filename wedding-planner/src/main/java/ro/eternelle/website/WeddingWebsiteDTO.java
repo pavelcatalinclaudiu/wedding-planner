@@ -2,7 +2,6 @@ package ro.eternelle.website;
 
 import ro.eternelle.couple.CoupleProfile;
 
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public class WeddingWebsiteDTO {

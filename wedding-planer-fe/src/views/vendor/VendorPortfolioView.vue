@@ -4,16 +4,28 @@ import { useI18n } from "vue-i18n";
 import { useVendorStore } from "@/stores/vendor.store";
 import { vendorApi } from "@/api/vendor.api";
 import { useFileUpload } from "@/composables/useFileUpload";
+import { useFeatureAccess } from "@/composables/useFeatureAccess";
 
 const { t } = useI18n();
 
 const vendorStore = useVendorStore();
 const { upload, uploading, progress } = useFileUpload();
+const { monetizationEnabled } = useFeatureAccess();
 const fileInputRef = ref<HTMLInputElement | null>(null);
 
 const photos = computed(() => vendorStore.profile?.photos ?? []);
 
+const isAtPhotoLimit = computed(() => {
+  const profile = vendorStore.profile;
+  return (
+    monetizationEnabled.value &&
+    profile?.tier === "FREE" &&
+    photos.value.length >= 5
+  );
+});
+
 async function handleUpload(e: Event) {
+  if (isAtPhotoLimit.value) return;
   const files = (e.target as HTMLInputElement).files;
   if (!files?.length) return;
   await upload("/vendors/me/photos", Array.from(files));
@@ -35,8 +47,17 @@ onMounted(() => vendorStore.fetchMyProfile());
         <h2>{{ t("vendor.portfolio.title") }}</h2>
         <p class="page-sub">{{ t("vendor.portfolio.subtitle") }}</p>
       </div>
-      <button class="upload-btn" @click="fileInputRef?.click()">
-        + {{ t("vendor.portfolio.addPhoto") }}
+      <button
+        class="upload-btn"
+        :disabled="isAtPhotoLimit"
+        @click="!isAtPhotoLimit && fileInputRef?.click()"
+      >
+        +
+        {{
+          isAtPhotoLimit
+            ? t("vendor.portfolio.photoLimitReached")
+            : t("vendor.portfolio.addPhoto")
+        }}
       </button>
       <input
         ref="fileInputRef"
@@ -91,6 +112,11 @@ h2 {
   padding: 8px 18px;
   font-weight: 700;
   cursor: pointer;
+}
+.upload-btn:disabled {
+  background: var(--color-muted, #aaa);
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 .upload-progress {
   background: var(--color-gold-light);

@@ -1,6 +1,5 @@
 package ro.eternelle.messaging;
 
-import ro.eternelle.user.User;
 
 import java.time.Instant;
 import java.util.List;

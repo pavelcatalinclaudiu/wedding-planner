@@ -19,6 +19,7 @@ import {
   MessageCircle,
   BarChart2,
   User,
+  CreditCard,
 } from "lucide-vue-next";
 
 const { t, locale } = useI18n();
@@ -109,6 +110,15 @@ const navItems = computed(() => [
       //   path: "/vendor/subscription",
       //   icon: CreditCard,
       // },
+      ...(vendorStore.profile?.monetizationEnabled
+        ? [
+            {
+              label: t("nav.vendor.items.subscription"),
+              path: "/vendor/subscription",
+              icon: CreditCard,
+            },
+          ]
+        : []),
       {
         label: t("nav.vendor.items.myProfile"),
         path: "/vendor/profile",

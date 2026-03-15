@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
+import UpgradeGate from "@/components/ui/UpgradeGate.vue";
 import { useVideoCallsStore } from "@/stores/videoCalls.store";
 import VideoCallCard from "@/components/video/VideoCallCard.vue";
 import ScheduleCallModal from "@/components/video/ScheduleCallModal.vue";
@@ -41,69 +42,71 @@ async function onCallScheduled() {
 </script>
 
 <template>
-  <div class="calls-view">
-    <div class="page-header">
-      <h2>{{ t("videoCalls.title") }}</h2>
-      <p class="page-sub">{{ t("videoCalls.subtitle") }}</p>
-    </div>
-
-    <!-- Upcoming / active calls -->
-    <section v-if="upcomingCalls.length" class="calls-section">
-      <h3 class="section-title">{{ t("videoCalls.upcoming") }}</h3>
-      <div class="cards-grid">
-        <VideoCallCard
-          v-for="call in upcomingCalls"
-          :key="call.id"
-          :call="call"
-          :lead-id="call.leadId"
-          :vendor-id="call.vendorId"
-          my-role="COUPLE"
-        />
+  <UpgradeGate feature="videoCalls">
+    <div class="calls-view">
+      <div class="page-header">
+        <h2>{{ t("videoCalls.title") }}</h2>
+        <p class="page-sub">{{ t("videoCalls.subtitle") }}</p>
       </div>
-    </section>
 
-    <!-- Past calls -->
-    <section v-if="pastCalls.length" class="calls-section">
-      <h3 class="section-title">{{ t("videoCalls.pastCalls") }}</h3>
-      <div class="past-list">
-        <div v-for="call in pastCalls" :key="call.id" class="past-row">
-          <div class="pf-av" :title="call.vendorName ?? 'Vendor'">
-            <img
-              v-if="call.vendorProfilePicture"
-              :src="call.vendorProfilePicture"
-              class="pf-av-img"
-              alt=""
-            />
-            <template v-else>{{
-              (call.vendorName?.[0] ?? "?").toUpperCase()
-            }}</template>
-          </div>
-          <div class="past-info">
-            <span class="past-vendor">{{ call.vendorName ?? "Vendor" }}</span>
-            <span class="past-date">{{ formatDate(call.scheduledAt) }}</span>
-          </div>
-          <span class="call-status" :class="call.status.toLowerCase()">
-            {{ call.status }}
-          </span>
+      <!-- Upcoming / active calls -->
+      <section v-if="upcomingCalls.length" class="calls-section">
+        <h3 class="section-title">{{ t("videoCalls.upcoming") }}</h3>
+        <div class="cards-grid">
+          <VideoCallCard
+            v-for="call in upcomingCalls"
+            :key="call.id"
+            :call="call"
+            :lead-id="call.leadId"
+            :vendor-id="call.vendorId"
+            my-role="COUPLE"
+          />
         </div>
+      </section>
+
+      <!-- Past calls -->
+      <section v-if="pastCalls.length" class="calls-section">
+        <h3 class="section-title">{{ t("videoCalls.pastCalls") }}</h3>
+        <div class="past-list">
+          <div v-for="call in pastCalls" :key="call.id" class="past-row">
+            <div class="pf-av" :title="call.vendorName ?? 'Vendor'">
+              <img
+                v-if="call.vendorProfilePicture"
+                :src="call.vendorProfilePicture"
+                class="pf-av-img"
+                alt=""
+              />
+              <template v-else>{{
+                (call.vendorName?.[0] ?? "?").toUpperCase()
+              }}</template>
+            </div>
+            <div class="past-info">
+              <span class="past-vendor">{{ call.vendorName ?? "Vendor" }}</span>
+              <span class="past-date">{{ formatDate(call.scheduledAt) }}</span>
+            </div>
+            <span class="call-status" :class="call.status.toLowerCase()">
+              {{ call.status }}
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Empty state -->
+      <div v-if="!videoStore.calls.length" class="empty">
+        <p>{{ t("videoCalls.noCalls") }}</p>
+        <p class="empty-hint">
+          {{ t("videoCalls.goToEnquiries") }}
+        </p>
       </div>
-    </section>
 
-    <!-- Empty state -->
-    <div v-if="!videoStore.calls.length" class="empty">
-      <p>{{ t("videoCalls.noCalls") }}</p>
-      <p class="empty-hint">
-        {{ t("videoCalls.goToEnquiries") }}
-      </p>
+      <!-- Modals -->
+      <ScheduleCallModal
+        v-if="videoStore.showScheduleModal"
+        @close="videoStore.closeScheduleModal()"
+        @scheduled="onCallScheduled"
+      />
     </div>
-
-    <!-- Modals -->
-    <ScheduleCallModal
-      v-if="videoStore.showScheduleModal"
-      @close="videoStore.closeScheduleModal()"
-      @scheduled="onCallScheduled"
-    />
-  </div>
+  </UpgradeGate>
 </template>
 
 <style scoped>

@@ -48,6 +48,7 @@
     "show_less": "Arată mai puțin",
     "noResults": "Niciun rezultat",
     "error_generic": "A apărut o eroare. Încearcă din nou.",
+    "errorGeneric": "Ceva a mers greșit. Încearcă din nou.",
     "pending": "În așteptare",
     "confirmed": "Confirmat",
     "cancelled": "Anulat",
@@ -865,7 +866,9 @@
     "minutes": "minute",
     "pastCalls": "Apeluri trecute",
     "goToEnquiries": "Mergi la Solicitările mele şi selectează un furnizor pentru a programa un apel.",
-    "goToLeads": "Accesază Mesaje primite şi selectează un lead pentru a programa un apel."
+    "goToLeads": "Accesază Mesaje primite şi selectează un lead pentru a programa un apel.",
+    "monthlyUsage": "{used}/1 apel video lunar folosit",
+    "monthlyLimitReached": "Limita lunară de apeluri video a fost atinsă. Fă upgrade pentru mai multe."
   },
 
   "team": {
@@ -1014,7 +1017,8 @@
       "noPhotos": "Nu ai fotografii în portofoliu.",
       "uploading": "Încărcare...",
       "setCover": "Setează ca poză de copertă",
-      "delete": "Șterge fotografia"
+      "delete": "Șterge fotografia",
+      "photoLimitReached": "5/5 fotografii — fă upgrade pentru mai multe"
     },
     "reviews": {
       "title": "Recenzii",
@@ -1085,28 +1089,39 @@
       "cancelConfirm": "Ești sigur? Vei pierde accesul la sfârșitul perioadei de facturare.",
       "yesCancel": "Da, anulează",
       "keep": "Păstrează abonamentul",
+      "cancelNotice": "Abonamentul tău va fi anulat la sfârșitul perioadei de facturare.",
       "mostPopular": "Cel Mai Popular",
       "getStartedFree": "Începe Gratuit",
       "upgradeTo": "Upgradează la {plan}",
+      "switchTo": "Comută la {plan}",
+      "switching": "Se comută...",
+      "cancelToDowngrade": "Anulează planul curent pentru a reveni la gratuit",
+      "adminAssigned": "Plan atribuit de administrator",
       "expiresOn": "Expiră pe",
       "features": "Funcționalități",
-      "basicFeatures": [
+      "freeLabel": "Gratuit",
+      "standardLabel": "Standard",
+      "premiumLabel": "Premium",
+      "perMonth": "lun\u0103",
+      "standardPrice": "49 RON",
+      "premiumPrice": "99 RON",
+      "freeFeatures": [
+        "Profil listat",
+        "P\u00e2n\u0103 la 5 fotografii \u00een portofoliu",
+        "Mesagerie de baz\u0103",
+        "1 apel video / lun\u0103"
+      ],
+      "standardFeatures": [
         "Până la 3 oferte active",
         "Portofoliu — 10 fotografii",
         "Listing standard"
       ],
-      "proFeatures": [
+      "premiumFeatures": [
         "Oferte active nelimitate",
         "Portofoliu nelimitat",
         "Listing promovat",
         "Dashboard analize",
         "Suport prioritar"
-      ],
-      "eliteFeatures": [
-        "Tot ce include Pro",
-        "Insignă verificat",
-        "Acces rețea parteneri",
-        "Manager cont dedicat"
       ]
     },
     "profile": {
@@ -1296,6 +1311,10 @@
       "totalCouples": "Total cupluri",
       "totalLeads": "Total lead-uri",
       "totalReviews": "Total recenzii",
+      "paidVendors": "Furnizori plătiți",
+      "paidCouples": "Cupluri plătite",
+      "ofTotal": "din {total} total",
+      "pending": "în așteptare",
       "avgRating": "rating mediu",
       "platformVisits": "Vizite platformă",
       "uniqueVisitors": "vizitatori unici",
@@ -1312,7 +1331,12 @@
       "verified": "Verificat",
       "joined": "Înregistrat",
       "lastLogin": "Ultima autentificare",
-      "confirmDelete": "Șterge definitiv utilizatorul {email}? Acțiunea este ireversibilă."
+      "confirmDelete": "Șterge definitiv utilizatorul {email}? Acțiunea este ireversibilă.",
+      "deleteSuccess": "Utilizatorul {email} a fost șters.",
+      "confirmPlanChange": "Schimbă planul la {plan}?",
+      "planChangeSuccess": "Planul a fost schimbat la {plan}.",
+      "coupleMonetizationEnableAll": "Activează monetizarea pentru toate cuplurile",
+      "coupleMonetizationDisableAll": "Dezactivează monetizarea pentru toate cuplurile"
     },
     "vendors": {
       "searchPlaceholder": "Caută după nume sau oraș…",
@@ -1330,7 +1354,23 @@
       "activate": "Activează furnizorul",
       "verify": "Verifică furnizorul",
       "unverify": "Elimină verificarea",
-      "confirmSuspend": "Suspendă {name}? Nu va mai apărea în listări."
+      "confirmSuspend": "Suspendă {name}? Nu va mai apărea în listări.",
+      "suspendSuccess": "Furnizor suspendat.",
+      "activateSuccess": "Furnizor activat.",
+      "verifySuccess": "Furnizor verificat.",
+      "unverifySuccess": "Verificare eliminată.",
+      "confirmPlanChange": "Schimbă planul la {plan}?",
+      "planChangeSuccess": "Planul a fost schimbat la {plan}.",
+      "monetizationOnToast": "Monetizare activată.",
+      "monetizationOffToast": "Monetizare dezactivată.",
+      "bulkFilterWarning": "(Afectează doar furnizorii vizibili cu filtrul curent)",
+      "viewProfile": "Vezi profilul public",
+      "plan": "Plan",
+      "monetization": "Monetizare",
+      "monetizationOn": "Monetizare activă — apasă pentru a dezactiva",
+      "monetizationOff": "Monetizare dezactivată — apasă pentru a activa",
+      "monetizationEnableAll": "Activează monetizarea pentru toți",
+      "monetizationDisableAll": "Dezactivează monetizarea pentru toți"
     },
     "reviews": {
       "searchPlaceholder": "Caută după furnizor sau comentariu…",
@@ -1344,10 +1384,49 @@
       "hidden": "Ascuns",
       "noComment": "Fără comentariu",
       "vendorReply": "Răspuns furnizor",
-      "confirmDelete": "Șterge recenzia pentru {vendor}? Acțiunea este ireversibilă."
+      "confirmDelete": "Șterge recenzia pentru {vendor}? Acțiunea este ireversibilă.",
+      "deleteSuccess": "Recenzie ștearsă.",
+      "approveSuccess": "Recenzie aprobată.",
+      "rejectSuccess": "Recenzie respinsă."
     },
     "pagination": {
-      "showing": "Afișând {from}–{to} din {total}"
+      "showing": "Afișând {from}–{to} din {total}",
+      "page": "Pagina {page} din {total}"
+    }
+  },
+
+  "couple": {
+    "subscription": {
+      "title": "Planul meu",
+      "subtitle": "Gestionează abonamentul și deblochează funcționalități premium.",
+      "freePlanName": "Gratuit",
+      "freePrice": "0 RON / lună",
+      "dreamWeddingLabel": "Nunta Visurilor",
+      "currentPlan": "Planul curent",
+      "monthly": "Lunar",
+      "oneTime": "O singură dată",
+      "upgradeBtn": "Alege Nunta Visurilor",
+      "mostPopular": "Cel mai popular",
+      "renews": "Se reînnoiește:",
+      "manageBilling": "Gestionează facturarea",
+      "cancel": "Anulează abonamentul",
+      "cancelConfirm": "Ești sigur? Vei pierde accesul la sfârșitul perioadei.",
+      "yesCancel": "Da, anulează",
+      "keep": "Păstrează abonamentul",
+      "freeFeatures": [
+        "Până la 30 de invitați",
+        "Listă de sarcini & buget de bază",
+        "Site nuntă",
+        "3 apeluri video / lună"
+      ],
+      "dreamFeatures": [
+        "Invitați nelimitați",
+        "Plan de locuri drag-and-drop",
+        "Tracker avansat de buget",
+        "Chat de grup",
+        "Apeluri video nelimitate",
+        "Seif documente"
+      ]
     }
   },
 
@@ -1358,5 +1437,17 @@
     "unauthorized": "Acces neautorizat",
     "serverError": "Eroare server",
     "networkError": "Eroare de rețea. Verifică conexiunea."
+  },
+
+  "upgrade": {
+    "title": "Funcție Premium",
+    "description": "Această funcție necesită un abonament superior. Deblochează {feature} prin actualizarea planului tău.",
+    "cta": "Actualizează Planul",
+    "features": {
+      "videoCalls": "Apeluri Video",
+      "network": "Rețea de Parteneri",
+      "analytics": "Analiză Avansată",
+      "documents": "Seif Documente"
+    }
   }
 }

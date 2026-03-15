@@ -12,7 +12,6 @@ import ro.eternelle.couple.CoupleRepository;
 import ro.eternelle.exception.BusinessException;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.UUID;
 
 @Path("/api/budget")

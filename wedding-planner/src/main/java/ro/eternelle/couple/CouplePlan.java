@@ -1,5 +1,5 @@
 package ro.eternelle.couple;
 
 public enum CouplePlan {
-    FREE, PREMIUM
+    FREE, DREAM_WEDDING
 }

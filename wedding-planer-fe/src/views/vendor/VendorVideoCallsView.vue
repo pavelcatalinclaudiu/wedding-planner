@@ -1,14 +1,42 @@
 <script setup lang="ts">
 import { computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
+import UpgradeGate from "@/components/ui/UpgradeGate.vue";
 import { useVideoCallsStore } from "@/stores/videoCalls.store";
+import { useVendorStore } from "@/stores/vendor.store";
+import { useFeatureAccess } from "@/composables/useFeatureAccess";
 import VideoCallCard from "@/components/video/VideoCallCard.vue";
 import ScheduleCallModal from "@/components/video/ScheduleCallModal.vue";
 
 const { t } = useI18n();
 const videoStore = useVideoCallsStore();
+const vendorStore = useVendorStore();
+const { monetizationEnabled } = useFeatureAccess();
 
-onMounted(() => videoStore.fetchCalls());
+onMounted(() => {
+  videoStore.fetchCalls();
+  vendorStore.fetchMyProfile();
+});
+
+const isFreePlan = computed(
+  () => monetizationEnabled.value && vendorStore.profile?.tier === "FREE",
+);
+
+const callsUsedThisMonth = computed(() => {
+  if (!isFreePlan.value) return 0;
+  const now = new Date();
+  return videoStore.calls.filter((c) => {
+    if (c.status === "CANCELLED") return false;
+    const d = new Date(c.scheduledAt);
+    return (
+      d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
+    );
+  }).length;
+});
+
+const monthlyLimitReached = computed(
+  () => isFreePlan.value && callsUsedThisMonth.value >= 1,
+);
 
 const upcomingCalls = computed(() =>
   videoStore.calls.filter(
@@ -41,72 +69,92 @@ async function onCallScheduled() {
 </script>
 
 <template>
-  <div class="calls-view">
-    <div class="page-header">
-      <h2>{{ t("videoCalls.title") }}</h2>
-      <p class="page-sub">{{ t("videoCalls.subtitle") }}</p>
-    </div>
-
-    <!-- Upcoming / active calls -->
-    <section v-if="upcomingCalls.length" class="calls-section">
-      <h3 class="section-title">{{ t("videoCalls.upcoming") }}</h3>
-      <div class="cards-grid">
-        <VideoCallCard
-          v-for="call in upcomingCalls"
-          :key="call.id"
-          :call="call"
-          :lead-id="call.leadId"
-          :vendor-id="call.vendorId"
-          my-role="VENDOR"
-        />
+  <UpgradeGate feature="videoCalls">
+    <div class="calls-view">
+      <div class="page-header">
+        <h2>{{ t("videoCalls.title") }}</h2>
+        <p class="page-sub">{{ t("videoCalls.subtitle") }}</p>
       </div>
-    </section>
 
-    <!-- Past calls -->
-    <section v-if="pastCalls.length" class="calls-section">
-      <h3 class="section-title">{{ t("videoCalls.pastCalls") }}</h3>
-      <div class="past-list">
-        <div v-for="call in pastCalls" :key="call.id" class="past-row">
-          <div class="pf-av" :title="call.coupleName ?? 'Couple'">
-            <img
-              v-if="call.coupleProfilePicture"
-              :src="call.coupleProfilePicture"
-              class="pf-av-img"
-              alt=""
-            />
-            <template v-else>{{
-              (call.coupleName?.[0] ?? "?").toUpperCase()
-            }}</template>
-          </div>
-          <div class="past-info">
-            <span class="past-couple">{{ call.coupleName ?? "Couple" }}</span>
-            <span class="past-date">{{ formatDate(call.scheduledAt) }}</span>
-          </div>
-          <span class="call-status" :class="call.status.toLowerCase()">
-            {{ call.status }}
-          </span>
+      <!-- FREE plan monthly limit banner -->
+      <div
+        v-if="isFreePlan"
+        class="monthly-limit-banner"
+        :class="{ reached: monthlyLimitReached }"
+      >
+        <span>{{
+          t("videoCalls.monthlyUsage", { used: callsUsedThisMonth })
+        }}</span>
+        <RouterLink
+          v-if="monthlyLimitReached"
+          to="/vendor/subscription"
+          class="upgrade-link"
+        >
+          {{ t("vendor.subscription.upgrade") }}
+        </RouterLink>
+      </div>
+
+      <!-- Upcoming / active calls -->
+      <section v-if="upcomingCalls.length" class="calls-section">
+        <h3 class="section-title">{{ t("videoCalls.upcoming") }}</h3>
+        <div class="cards-grid">
+          <VideoCallCard
+            v-for="call in upcomingCalls"
+            :key="call.id"
+            :call="call"
+            :lead-id="call.leadId"
+            :vendor-id="call.vendorId"
+            my-role="VENDOR"
+          />
         </div>
+      </section>
+
+      <!-- Past calls -->
+      <section v-if="pastCalls.length" class="calls-section">
+        <h3 class="section-title">{{ t("videoCalls.pastCalls") }}</h3>
+        <div class="past-list">
+          <div v-for="call in pastCalls" :key="call.id" class="past-row">
+            <div class="pf-av" :title="call.coupleName ?? 'Couple'">
+              <img
+                v-if="call.coupleProfilePicture"
+                :src="call.coupleProfilePicture"
+                class="pf-av-img"
+                alt=""
+              />
+              <template v-else>{{
+                (call.coupleName?.[0] ?? "?").toUpperCase()
+              }}</template>
+            </div>
+            <div class="past-info">
+              <span class="past-couple">{{ call.coupleName ?? "Couple" }}</span>
+              <span class="past-date">{{ formatDate(call.scheduledAt) }}</span>
+            </div>
+            <span class="call-status" :class="call.status.toLowerCase()">
+              {{ call.status }}
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Empty state -->
+      <div v-if="!videoStore.calls.length" class="empty">
+        <p>{{ t("videoCalls.noCalls") }}</p>
+        <p class="empty-hint">
+          <RouterLink to="/vendor/leads" class="link">{{
+            t("nav.vendor.items.inbox")
+          }}</RouterLink>
+          — {{ t("videoCalls.goToLeads") }}
+        </p>
       </div>
-    </section>
 
-    <!-- Empty state -->
-    <div v-if="!videoStore.calls.length" class="empty">
-      <p>{{ t("videoCalls.noCalls") }}</p>
-      <p class="empty-hint">
-        <RouterLink to="/vendor/leads" class="link">{{
-          t("nav.vendor.items.inbox")
-        }}</RouterLink>
-        — {{ t("videoCalls.goToLeads") }}
-      </p>
+      <!-- Modals -->
+      <ScheduleCallModal
+        v-if="videoStore.showScheduleModal"
+        @close="videoStore.closeScheduleModal()"
+        @scheduled="onCallScheduled"
+      />
     </div>
-
-    <!-- Modals -->
-    <ScheduleCallModal
-      v-if="videoStore.showScheduleModal"
-      @close="videoStore.closeScheduleModal()"
-      @scheduled="onCallScheduled"
-    />
-  </div>
+  </UpgradeGate>
 </template>
 
 <style scoped>
@@ -121,6 +169,32 @@ h2 {
   margin: 0;
   font-size: 0.88rem;
   color: var(--color-muted);
+}
+
+.monthly-limit-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--color-gold-light, #fdf8ee);
+  border: 1px solid var(--color-gold);
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-gold);
+  margin-bottom: 20px;
+}
+.monthly-limit-banner.reached {
+  background: var(--chip-red-bg, #fef2f2);
+  border-color: var(--color-error, #e53935);
+  color: var(--color-error, #e53935);
+}
+.upgrade-link {
+  color: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  white-space: nowrap;
 }
 
 .calls-section {

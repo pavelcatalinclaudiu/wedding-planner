@@ -60,6 +60,9 @@ public class CoupleProfile extends PanacheEntityBase {
     @Column(name = "onboarding_completed", nullable = false)
     public boolean onboardingCompleted = false;
 
+    @Column(name = "monetization_enabled", nullable = false)
+    public boolean monetizationEnabled = false;
+
     @Column(name = "created_at")
     public Instant createdAt = Instant.now();
 }

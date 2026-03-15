@@ -10,9 +10,15 @@ export interface AdminStats {
   totalProfileViews: number;
   uniqueVisitors: number;
   profileViewsThisWeek: number;
+  landingPageVisits: number;
+  uniqueLandingVisitors: number;
+  landingPageVisitsThisWeek: number;
   signupsByDay: { date: string; count: number }[];
   vendorsByCategory: Record<string, number>;
   topVendors: AdminTopVendor[];
+  pendingReviewsCount: number;
+  paidVendors: number;
+  paidCouples: number;
 }
 
 export interface AdminTopVendor {
@@ -33,6 +39,9 @@ export interface AdminUser {
   createdAt: string;
   lastLogin: string | null;
   displayName: string | null;
+  couplePlan: "FREE" | "DREAM_WEDDING" | null;
+  coupleMonetizationEnabled: boolean;
+  profileId: string | null;
 }
 
 export interface AdminVendor {
@@ -48,8 +57,10 @@ export interface AdminVendor {
   profileViews: number;
   isVerified: boolean;
   isActive: boolean;
+  monetizationEnabled: boolean;
   leadCount: number;
   createdAt: string;
+  tier: "FREE" | "STANDARD" | "PREMIUM";
 }
 
 export interface AdminReview {

@@ -10,7 +10,6 @@ import ro.eternelle.lead.LeadStatus;
 import ro.eternelle.user.User;
 import ro.eternelle.user.UserRepository;
 
-import org.jboss.logging.Logger;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -20,8 +19,6 @@ import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class VendorService {
-
-    private static final Logger LOG = Logger.getLogger(VendorService.class);
 
     @Inject
     VendorRepository vendorRepository;

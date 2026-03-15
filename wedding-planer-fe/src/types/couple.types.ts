@@ -10,6 +10,8 @@ export interface CoupleProfile {
   subdomain?: string;
   profilePicture?: string;
   onboardingCompleted: boolean;
+  plan?: "FREE" | "DREAM_WEDDING";
+  monetizationEnabled?: boolean;
   createdAt: string;
   updatedAt: string;
 }

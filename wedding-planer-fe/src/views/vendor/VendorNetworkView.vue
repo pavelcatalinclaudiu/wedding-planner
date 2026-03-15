@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from "vue";
 import { useI18n } from "vue-i18n";
+import UpgradeGate from "@/components/ui/UpgradeGate.vue";
 import { networkApi } from "@/api/network.api";
 import type { VendorPartner } from "@/types/vendor.types";
 import { X } from "lucide-vue-next";
@@ -106,125 +107,137 @@ function initials(name: string) {
 </script>
 
 <template>
-  <div class="network-view">
-    <div class="page-header">
-      <h2>{{ t("vendor.network.title") }}</h2>
-      <p class="subtitle">{{ t("vendor.network.subtitle") }}</p>
-    </div>
-
-    <!-- ── Add partner ── -->
-    <div class="add-section">
-      <div class="search-wrap">
-        <input
-          v-model="searchQuery"
-          class="search-input"
-          :placeholder="t('vendor.network.searchPlaceholder')"
-          autocomplete="off"
-          @focus="showDropdown = searchQuery.trim().length >= 2"
-          @blur="closeDropdown"
-        />
-        <!-- Dropdown -->
-        <div v-if="showDropdown" class="dropdown">
-          <div v-if="searching" class="dd-loading">
-            {{ t("vendor.network.searching") }}
-          </div>
-          <template v-else>
-            <button
-              v-for="r in searchResults"
-              :key="r.partnerId"
-              class="dd-item"
-              @mousedown.prevent="addById(r.partnerId!)"
-            >
-              <div
-                class="dd-avatar"
-                :style="
-                  r.partnerCoverPhoto
-                    ? { backgroundImage: `url('${r.partnerCoverPhoto}')` }
-                    : {}
-                "
-              >
-                <span v-if="!r.partnerCoverPhoto">{{
-                  initials(r.partnerName)
-                }}</span>
-              </div>
-              <div class="dd-info">
-                <span class="dd-name">{{ r.partnerName }}</span>
-                <span class="dd-meta"
-                  >{{ categoryLabel(r.partnerCategory)
-                  }}<template v-if="r.partnerCity">
-                    · {{ r.partnerCity }}</template
-                  ></span
-                >
-              </div>
-              <span class="dd-platform-badge">{{
-                t("vendor.network.onPlatform")
-              }}</span>
-            </button>
-
-            <div
-              v-if="!searchResults.length && !searching"
-              class="dd-no-results"
-            >
-              {{ t("vendor.network.notOnPlatform") }}
-            </div>
-
-            <!-- Always offer add-by-name option -->
-            <button class="dd-item dd-item-name" @mousedown.prevent="addByName">
-              <div class="dd-avatar dd-avatar-name">＋</div>
-              <div class="dd-info">
-                <span class="dd-name">{{
-                  t("vendor.network.addAsPartner", { name: searchQuery.trim() })
-                }}</span>
-                <span class="dd-meta">{{ t("vendor.network.notLinked") }}</span>
-              </div>
-            </button>
-          </template>
-        </div>
+  <UpgradeGate feature="network">
+    <div class="network-view">
+      <div class="page-header">
+        <h2>{{ t("vendor.network.title") }}</h2>
+        <p class="subtitle">{{ t("vendor.network.subtitle") }}</p>
       </div>
-      <p v-if="error" class="error-msg">{{ error }}</p>
-    </div>
 
-    <!-- ── Partner list ── -->
-    <div v-if="loading" class="loading">{{ t("common.loading") }}</div>
-    <div v-else-if="partners.length === 0" class="empty">
-      <p>{{ t("vendor.network.noPartners") }}</p>
-      <p class="empty-hint">{{ t("vendor.network.noPartnersHint") }}</p>
-    </div>
-    <div v-else class="partner-list">
-      <div v-for="p in partners" :key="p.id" class="partner-card">
-        <div
-          class="pc-avatar"
-          :style="
-            p.partnerCoverPhoto
-              ? { backgroundImage: `url('${p.partnerCoverPhoto}')` }
-              : {}
-          "
-        >
-          <span v-if="!p.partnerCoverPhoto">{{ initials(p.partnerName) }}</span>
+      <!-- ── Add partner ── -->
+      <div class="add-section">
+        <div class="search-wrap">
+          <input
+            v-model="searchQuery"
+            class="search-input"
+            :placeholder="t('vendor.network.searchPlaceholder')"
+            autocomplete="off"
+            @focus="showDropdown = searchQuery.trim().length >= 2"
+            @blur="closeDropdown"
+          />
+          <!-- Dropdown -->
+          <div v-if="showDropdown" class="dropdown">
+            <div v-if="searching" class="dd-loading">
+              {{ t("vendor.network.searching") }}
+            </div>
+            <template v-else>
+              <button
+                v-for="r in searchResults"
+                :key="r.partnerId"
+                class="dd-item"
+                @mousedown.prevent="addById(r.partnerId!)"
+              >
+                <div
+                  class="dd-avatar"
+                  :style="
+                    r.partnerCoverPhoto
+                      ? { backgroundImage: `url('${r.partnerCoverPhoto}')` }
+                      : {}
+                  "
+                >
+                  <span v-if="!r.partnerCoverPhoto">{{
+                    initials(r.partnerName)
+                  }}</span>
+                </div>
+                <div class="dd-info">
+                  <span class="dd-name">{{ r.partnerName }}</span>
+                  <span class="dd-meta"
+                    >{{ categoryLabel(r.partnerCategory)
+                    }}<template v-if="r.partnerCity">
+                      · {{ r.partnerCity }}</template
+                    ></span
+                  >
+                </div>
+                <span class="dd-platform-badge">{{
+                  t("vendor.network.onPlatform")
+                }}</span>
+              </button>
+
+              <div
+                v-if="!searchResults.length && !searching"
+                class="dd-no-results"
+              >
+                {{ t("vendor.network.notOnPlatform") }}
+              </div>
+
+              <!-- Always offer add-by-name option -->
+              <button
+                class="dd-item dd-item-name"
+                @mousedown.prevent="addByName"
+              >
+                <div class="dd-avatar dd-avatar-name">＋</div>
+                <div class="dd-info">
+                  <span class="dd-name">{{
+                    t("vendor.network.addAsPartner", {
+                      name: searchQuery.trim(),
+                    })
+                  }}</span>
+                  <span class="dd-meta">{{
+                    t("vendor.network.notLinked")
+                  }}</span>
+                </div>
+              </button>
+            </template>
+          </div>
         </div>
-        <div class="pc-info">
-          <div class="pc-name-row">
-            <span class="pc-name">{{ p.partnerName }}</span>
-            <span v-if="p.onPlatform" class="pc-badge">{{
-              t("vendor.network.onPlatform")
+        <p v-if="error" class="error-msg">{{ error }}</p>
+      </div>
+
+      <!-- ── Partner list ── -->
+      <div v-if="loading" class="loading">{{ t("common.loading") }}</div>
+      <div v-else-if="partners.length === 0" class="empty">
+        <p>{{ t("vendor.network.noPartners") }}</p>
+        <p class="empty-hint">{{ t("vendor.network.noPartnersHint") }}</p>
+      </div>
+      <div v-else class="partner-list">
+        <div v-for="p in partners" :key="p.id" class="partner-card">
+          <div
+            class="pc-avatar"
+            :style="
+              p.partnerCoverPhoto
+                ? { backgroundImage: `url('${p.partnerCoverPhoto}')` }
+                : {}
+            "
+          >
+            <span v-if="!p.partnerCoverPhoto">{{
+              initials(p.partnerName)
             }}</span>
           </div>
-          <span v-if="p.partnerCategory || p.partnerCity" class="pc-meta">
-            {{ categoryLabel(p.partnerCategory)
-            }}<template v-if="p.partnerCategory && p.partnerCity"> · </template
-            >{{ p.partnerCity }}
-          </span>
+          <div class="pc-info">
+            <div class="pc-name-row">
+              <span class="pc-name">{{ p.partnerName }}</span>
+              <span v-if="p.onPlatform" class="pc-badge">{{
+                t("vendor.network.onPlatform")
+              }}</span>
+            </div>
+            <span v-if="p.partnerCategory || p.partnerCity" class="pc-meta">
+              {{ categoryLabel(p.partnerCategory)
+              }}<template v-if="p.partnerCategory && p.partnerCity">
+                · </template
+              >{{ p.partnerCity }}
+            </span>
+          </div>
+          <button
+            class="pc-remove"
+            :title="t('vendor.network.removePartner')"
+            @click="remove(p.id)"
+          >
+            <X :size="16" />
+          </button>
         </div>
-        <button
-          class="pc-remove"
-          :title="t('vendor.network.removePartner')"
-          @click="remove(p.id)"
-        >
-          <X :size="16" />
-        </button>
       </div>
     </div>
-  </div>
+  </UpgradeGate>
 </template>
 
 <style scoped>

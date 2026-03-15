@@ -21,6 +21,13 @@ public class AdminStatsDTO {
     /** Profile views in the last 7 days */
     public long profileViewsThisWeek;
 
+    /** Total landing-page visits (home page) */
+    public long landingPageVisits;
+    /** Distinct IPs that hit the landing page (all-time) */
+    public long uniqueLandingVisitors;
+    /** Landing-page visits in the last 7 days */
+    public long landingPageVisitsThisWeek;
+
     /** [{date: "2024-01-15", count: 5}, ...] — last 30 days */
     public List<DailySignup> signupsByDay;
 
@@ -29,6 +36,15 @@ public class AdminStatsDTO {
 
     /** Top 5 vendors by review count */
     public List<TopVendor> topVendors;
+
+    /** Reviews awaiting moderation */
+    public long pendingReviewsCount;
+
+    /** Vendors on STANDARD or PREMIUM plan */
+    public long paidVendors;
+
+    /** Couples on DREAM_WEDDING plan */
+    public long paidCouples;
 
     public static class DailySignup {
         public String date;

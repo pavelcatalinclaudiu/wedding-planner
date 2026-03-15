@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useAdminStore } from "@/stores/admin.store";
 import { useConfirm } from "@/composables/useConfirm";
-import { Trash2, Search } from "lucide-vue-next";
+import { useToast } from "@/composables/useToast";
+import { Trash2, Search, Zap } from "lucide-vue-next";
 
 const { t } = useI18n();
 const adminStore = useAdminStore();
 const confirm = useConfirm();
+const toast = useToast();
 
 const search = ref("");
 const roleFilter = ref("");
@@ -39,8 +41,17 @@ async function handleDelete(id: string, email: string) {
     danger: true,
   });
   if (!ok) return;
-  await adminStore.deleteUser(id);
+  try {
+    await adminStore.deleteUser(id);
+    toast.success(t("admin.users.deleteSuccess", { email }));
+  } catch {
+    toast.error(t("common.errorGeneric"));
+  }
 }
+
+const totalPages = computed(() =>
+  Math.max(1, Math.ceil(adminStore.usersTotal / PAGE_SIZE)),
+);
 
 function prevPage() {
   if (page.value > 0) {
@@ -48,7 +59,6 @@ function prevPage() {
     load();
   }
 }
-
 function nextPage() {
   if ((page.value + 1) * PAGE_SIZE < adminStore.usersTotal) {
     page.value++;
@@ -65,6 +75,64 @@ function roleBadgeClass(role: string) {
   if (role === "ADMIN") return "badge-admin";
   if (role === "VENDOR") return "badge-vendor";
   return "badge-couple";
+}
+
+async function handleSetCouplePlan(
+  profileId: string,
+  currentPlan: string,
+  newPlan: string,
+) {
+  if (newPlan === currentPlan) return;
+  const ok = await confirm.ask(
+    t("admin.users.confirmPlanChange", { plan: newPlan }),
+    { danger: newPlan === "FREE" },
+  );
+  if (!ok) return;
+  try {
+    await adminStore.setCouplePlan(profileId, newPlan);
+    toast.success(t("admin.users.planChangeSuccess", { plan: newPlan }));
+  } catch {
+    toast.error(t("common.errorGeneric"));
+  }
+}
+
+async function handleToggleCoupleMonetization(
+  profileId: string,
+  current: boolean,
+) {
+  try {
+    await adminStore.toggleCoupleMonetization(profileId, !current);
+    toast.success(
+      !current
+        ? t("admin.vendors.monetizationOnToast")
+        : t("admin.vendors.monetizationOffToast"),
+    );
+  } catch {
+    toast.error(t("common.errorGeneric"));
+  }
+}
+
+// Show bulk buttons only when showing couples (all roles or specifically COUPLE)
+const showBulk = computed(
+  () => roleFilter.value === "" || roleFilter.value === "COUPLE",
+);
+
+async function handleBulkCoupleMonetization(enabled: boolean) {
+  const label = enabled
+    ? t("admin.users.coupleMonetizationEnableAll")
+    : t("admin.users.coupleMonetizationDisableAll");
+  const ok = await confirm.ask(label + "?", { danger: !enabled });
+  if (!ok) return;
+  try {
+    await adminStore.bulkToggleCoupleMonetization(enabled);
+    toast.success(
+      enabled
+        ? t("admin.users.coupleMonetizationEnableAll")
+        : t("admin.users.coupleMonetizationDisableAll"),
+    );
+  } catch {
+    toast.error(t("common.errorGeneric"));
+  }
 }
 </script>
 
@@ -87,13 +155,52 @@ function roleBadgeClass(role: string) {
         <option value="VENDOR">VENDOR</option>
         <option value="ADMIN">ADMIN</option>
       </select>
+      <div v-if="showBulk" class="bulk-monetization">
+        <button
+          class="bulk-btn bulk-on"
+          @click="handleBulkCoupleMonetization(true)"
+        >
+          <Zap :size="13" /> {{ t("admin.users.coupleMonetizationEnableAll") }}
+        </button>
+        <button
+          class="bulk-btn bulk-off"
+          @click="handleBulkCoupleMonetization(false)"
+        >
+          <Zap :size="13" /> {{ t("admin.users.coupleMonetizationDisableAll") }}
+        </button>
+      </div>
     </div>
 
     <!-- Table -->
     <div class="card">
-      <div v-if="adminStore.usersLoading" class="loading-state">
-        {{ t("common.loading") }}
-      </div>
+      <!-- Skeleton rows -->
+      <template v-if="adminStore.usersLoading">
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>{{ t("common.email") }}</th>
+                <th>{{ t("admin.users.displayName") }}</th>
+                <th>{{ t("common.status") }}</th>
+                <th>{{ t("admin.users.verified") }}</th>
+                <th>{{ t("admin.users.joined") }}</th>
+                <th>{{ t("admin.users.lastLogin") }}</th>
+                <th>{{ t("admin.vendors.plan") }}</th>
+                <th>{{ t("admin.vendors.monetization") }}</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="i in 8" :key="i" class="skeleton-row">
+                <td v-for="j in 9" :key="j">
+                  <div class="skeleton skeleton-cell"></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </template>
+
       <div v-else-if="adminStore.users.length === 0" class="empty-state">
         {{ t("common.noResults") }}
       </div>
@@ -108,6 +215,8 @@ function roleBadgeClass(role: string) {
                 <th>{{ t("admin.users.verified") }}</th>
                 <th>{{ t("admin.users.joined") }}</th>
                 <th>{{ t("admin.users.lastLogin") }}</th>
+                <th>{{ t("admin.vendors.plan") }}</th>
+                <th>{{ t("admin.vendors.monetization") }}</th>
                 <th></th>
               </tr>
             </thead>
@@ -128,6 +237,47 @@ function roleBadgeClass(role: string) {
                 <td>{{ formatDate(user.createdAt) }}</td>
                 <td>{{ formatDate(user.lastLogin) }}</td>
                 <td>
+                  <select
+                    v-if="user.role === 'COUPLE' && user.profileId"
+                    :value="user.couplePlan || 'FREE'"
+                    class="plan-select"
+                    @change="
+                      handleSetCouplePlan(
+                        user.profileId!,
+                        user.couplePlan || 'FREE',
+                        ($event.target as HTMLSelectElement).value,
+                      )
+                    "
+                  >
+                    <option value="FREE">FREE</option>
+                    <option value="DREAM_WEDDING">DREAM WEDDING</option>
+                  </select>
+                  <span v-else class="muted">—</span>
+                </td>
+                <td>
+                  <button
+                    v-if="user.role === 'COUPLE' && user.profileId"
+                    class="action-btn monetization-btn"
+                    :class="{
+                      'monetization-on': user.coupleMonetizationEnabled,
+                    }"
+                    :title="
+                      user.coupleMonetizationEnabled
+                        ? t('admin.vendors.monetizationOn')
+                        : t('admin.vendors.monetizationOff')
+                    "
+                    @click="
+                      handleToggleCoupleMonetization(
+                        user.profileId!,
+                        user.coupleMonetizationEnabled,
+                      )
+                    "
+                  >
+                    <Zap :size="14" />
+                  </button>
+                  <span v-else class="muted">—</span>
+                </td>
+                <td class="actions-cell">
                   <button
                     class="btn-danger-sm"
                     :title="t('common.delete')"
@@ -153,13 +303,16 @@ function roleBadgeClass(role: string) {
             }}
           </span>
           <div class="page-btns">
-            <button :disabled="page === 0" @click="prevPage" class="page-btn">
+            <button :disabled="page === 0" class="page-btn" @click="prevPage">
               ←
             </button>
+            <span class="page-num">{{
+              t("admin.pagination.page", { page: page + 1, total: totalPages })
+            }}</span>
             <button
               :disabled="(page + 1) * PAGE_SIZE >= adminStore.usersTotal"
-              @click="nextPage"
               class="page-btn"
+              @click="nextPage"
             >
               →
             </button>
@@ -182,6 +335,11 @@ function roleBadgeClass(role: string) {
   gap: 12px;
   align-items: center;
   flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--color-surface);
+  padding: 8px 0 8px;
 }
 
 .search-wrap {
@@ -223,6 +381,42 @@ function roleBadgeClass(role: string) {
   color: var(--color-text);
   font-size: 14px;
   cursor: pointer;
+}
+
+.bulk-monetization {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.bulk-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1px solid;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  background: none;
+}
+
+.bulk-on {
+  color: #d97706;
+  border-color: #d97706;
+}
+.bulk-on:hover {
+  background: rgba(217, 119, 6, 0.08);
+}
+
+.bulk-off {
+  color: var(--color-text-muted);
+  border-color: var(--color-border);
+}
+.bulk-off:hover {
+  color: #e53e3e;
+  border-color: #e53e3e;
 }
 
 .card {
@@ -335,6 +529,13 @@ function roleBadgeClass(role: string) {
 .page-btns {
   display: flex;
   gap: 6px;
+  align-items: center;
+}
+
+.page-num {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  padding: 0 4px;
 }
 
 .page-btn {
@@ -369,5 +570,78 @@ function roleBadgeClass(role: string) {
   text-align: center;
   color: var(--color-text-muted);
   font-size: 14px;
+}
+
+.muted {
+  color: var(--color-text-muted);
+}
+
+.plan-select {
+  padding: 4px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-card);
+  color: var(--color-text);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.plan-select:focus {
+  outline: none;
+  border-color: var(--color-gold);
+}
+
+.action-btn {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 4px 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition:
+    color 0.15s,
+    border-color 0.15s;
+}
+
+.monetization-btn {
+  color: var(--color-text-muted);
+}
+.monetization-btn:hover {
+  color: #d97706;
+  border-color: #d97706;
+}
+.monetization-btn.monetization-on {
+  color: #d97706;
+  border-color: #d97706;
+}
+
+/* Skeleton */
+.skeleton-row td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--color-border);
+}
+.skeleton {
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--color-border) 25%,
+    var(--color-surface) 50%,
+    var(--color-border) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+.skeleton-cell {
+  height: 14px;
+  width: 80%;
+}
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 </style>

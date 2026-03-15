@@ -3,6 +3,7 @@ import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useAuthStore } from "@/stores/auth.store";
+import { useAdminStore } from "@/stores/admin.store";
 import { useTheme } from "@/composables/useTheme";
 import { setLocale } from "@/i18n";
 import {
@@ -22,6 +23,7 @@ const { t, locale } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
+const adminStore = useAdminStore();
 const { isDark, toggleDark } = useTheme();
 
 const sidebarOpen = ref(false);
@@ -31,26 +33,34 @@ const pageTitle = computed(() => {
   return key ? t(key) : "Admin";
 });
 
+const pendingReviews = computed(
+  () => adminStore.stats?.pendingReviewsCount ?? 0,
+);
+
 const navItems = [
   {
     label: computed(() => t("admin.nav.overview")),
     path: "/admin/overview",
     icon: LayoutDashboard,
+    badge: computed(() => 0),
   },
   {
     label: computed(() => t("admin.nav.users")),
     path: "/admin/users",
     icon: Users,
+    badge: computed(() => 0),
   },
   {
     label: computed(() => t("admin.nav.vendors")),
     path: "/admin/vendors",
     icon: Store,
+    badge: computed(() => 0),
   },
   {
     label: computed(() => t("admin.nav.reviews")),
     path: "/admin/reviews",
     icon: Star,
+    badge: computed(() => pendingReviews.value),
   },
 ];
 
@@ -66,6 +76,9 @@ function logout() {
 function switchLang() {
   setLocale(locale.value === "ro" ? "en" : "ro");
 }
+
+// Pre-load stats so the pending-reviews badge is immediately visible
+if (!adminStore.stats) adminStore.fetchStats();
 </script>
 
 <template>
@@ -104,6 +117,9 @@ function switchLang() {
         >
           <component :is="item.icon" :size="16" />
           <span>{{ item.label.value }}</span>
+          <span v-if="item.badge.value > 0" class="nav-badge">{{
+            item.badge.value
+          }}</span>
         </RouterLink>
       </div>
 
@@ -252,6 +268,18 @@ function switchLang() {
   background: rgba(212, 175, 55, 0.12);
   color: var(--color-gold);
   font-weight: 600;
+}
+
+.nav-badge {
+  margin-left: auto;
+  background: #e53e3e;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 20px;
+  padding: 1px 6px;
+  min-width: 18px;
+  text-align: center;
 }
 
 .sidebar-footer {

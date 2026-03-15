@@ -1,18 +1,24 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useAdminStore } from "@/stores/admin.store";
 import { useConfirm } from "@/composables/useConfirm";
+import { useToast } from "@/composables/useToast";
 import { Trash2, Search, Check, X } from "lucide-vue-next";
 
 const { t } = useI18n();
 const adminStore = useAdminStore();
 const confirm = useConfirm();
+const toast = useToast();
 
 const search = ref("");
 const statusFilter = ref<"" | "PENDING" | "APPROVED" | "REJECTED">("");
 const page = ref(0);
 const PAGE_SIZE = 20;
+
+const totalPages = computed(() =>
+  Math.max(1, Math.ceil(adminStore.reviewsTotal / PAGE_SIZE)),
+);
 
 function load() {
   adminStore.fetchReviews({
@@ -41,11 +47,27 @@ function setStatus(s: typeof statusFilter.value) {
 }
 
 async function handleApprove(id: string) {
-  await adminStore.approveReview(id);
+  try {
+    await adminStore.approveReview(id);
+    toast.success(t("admin.reviews.approveSuccess"));
+    if (statusFilter.value && statusFilter.value !== "APPROVED") {
+      load();
+    }
+  } catch {
+    toast.error(t("common.errorGeneric"));
+  }
 }
 
 async function handleReject(id: string) {
-  await adminStore.rejectReview(id);
+  try {
+    await adminStore.rejectReview(id);
+    toast.success(t("admin.reviews.rejectSuccess"));
+    if (statusFilter.value && statusFilter.value !== "REJECTED") {
+      load();
+    }
+  } catch {
+    toast.error(t("common.errorGeneric"));
+  }
 }
 
 async function handleDelete(id: string, vendorName: string) {
@@ -54,7 +76,12 @@ async function handleDelete(id: string, vendorName: string) {
     { danger: true },
   );
   if (!ok) return;
-  await adminStore.deleteReview(id);
+  try {
+    await adminStore.deleteReview(id);
+    toast.success(t("admin.reviews.deleteSuccess"));
+  } catch {
+    toast.error(t("common.errorGeneric"));
+  }
 }
 
 function prevPage() {
@@ -110,10 +137,22 @@ function formatDate(iso: string | null) {
       </div>
     </div>
 
-    <!-- Cards -->
-    <div v-if="adminStore.reviewsLoading" class="loading-state">
-      {{ t("common.loading") }}
-    </div>
+    <!-- Skeleton cards -->
+    <template v-if="adminStore.reviewsLoading">
+      <div class="reviews-list">
+        <div v-for="i in 5" :key="i" class="review-card skeleton-card">
+          <div
+            class="skeleton skeleton-line"
+            style="width: 40%; margin-bottom: 10px"
+          ></div>
+          <div
+            class="skeleton skeleton-line"
+            style="width: 90%; margin-bottom: 6px"
+          ></div>
+          <div class="skeleton skeleton-line" style="width: 70%"></div>
+        </div>
+      </div>
+    </template>
 
     <div v-else-if="adminStore.reviews.length === 0" class="empty-state">
       {{ t("common.noResults") }}
@@ -201,13 +240,16 @@ function formatDate(iso: string | null) {
           }}
         </span>
         <div class="page-btns">
-          <button :disabled="page === 0" @click="prevPage" class="page-btn">
+          <button :disabled="page === 0" class="page-btn" @click="prevPage">
             ←
           </button>
+          <span class="page-num">{{
+            t("admin.pagination.page", { page: page + 1, total: totalPages })
+          }}</span>
           <button
             :disabled="(page + 1) * PAGE_SIZE >= adminStore.reviewsTotal"
-            @click="nextPage"
             class="page-btn"
+            @click="nextPage"
           >
             →
           </button>
@@ -229,6 +271,11 @@ function formatDate(iso: string | null) {
   flex-wrap: wrap;
   gap: 12px;
   align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--color-surface);
+  padding: 8px 0;
 }
 
 .search-wrap {
@@ -482,6 +529,13 @@ function formatDate(iso: string | null) {
 .page-btns {
   display: flex;
   gap: 8px;
+  align-items: center;
+}
+
+.page-num {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  padding: 0 4px;
 }
 
 .page-btn {
@@ -504,11 +558,38 @@ function formatDate(iso: string | null) {
   border-color: var(--color-gold);
 }
 
-.loading-state,
 .empty-state {
   text-align: center;
   padding: 60px 20px;
   color: var(--color-text-muted);
   font-size: 15px;
+}
+
+/* Skeleton */
+.skeleton-card {
+  min-height: 90px;
+}
+.skeleton {
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--color-border) 25%,
+    var(--color-surface) 50%,
+    var(--color-border) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+.skeleton-line {
+  height: 14px;
+  display: block;
+}
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 </style>

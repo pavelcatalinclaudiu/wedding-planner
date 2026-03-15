@@ -58,4 +58,10 @@ public class VideoCallRepository implements PanacheRepositoryBase<VideoCall, UUI
                 .page(0, limit)
                 .list();
     }
+
+    /** Count non-cancelled calls for a vendor whose scheduledAt falls within [monthStart, monthEnd). */
+    public long countNonCancelledByVendorInMonth(UUID vendorId, Instant monthStart, Instant monthEnd) {
+        return count("lead.vendor.id = ?1 AND scheduledAt >= ?2 AND scheduledAt < ?3 AND status != ?4",
+                vendorId, monthStart, monthEnd, VideoCallStatus.CANCELLED);
+    }
 }

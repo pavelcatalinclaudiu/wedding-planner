@@ -299,6 +299,10 @@ public class VendorResource {
         UUID userId = UUID.fromString(jwt.getSubject());
         VendorProfile vendor = vendorService.getByUserId(userId);
 
+        if (vendor.monetizationEnabled && vendor.tier == VendorTier.FREE && vendor.photos.size() >= 5) {
+            throw new BusinessException("Free plan is limited to 5 portfolio photos. Upgrade your plan to add more.");
+        }
+
         try (InputStream is = Files.newInputStream(file.uploadedFile())) {
             String storagePath = storageService.store(is, file.fileName(), "vendors");
             String url = toUrl(storagePath);

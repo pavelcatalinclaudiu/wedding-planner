@@ -8,8 +8,11 @@ import ro.eternelle.exception.BusinessException;
 import ro.eternelle.lead.Lead;
 import ro.eternelle.lead.LeadRepository;
 import ro.eternelle.notification.NotificationService;
+import ro.eternelle.vendor.VendorTier;
 
 import java.time.Instant;
+import java.time.YearMonth;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -55,6 +58,16 @@ public class VideoCallService {
         Lead lead = leadRepository.findById(leadId);
         if (lead == null) throw new BusinessException("Lead not found");
 
+        if (lead.vendor != null && lead.vendor.monetizationEnabled && lead.vendor.tier == VendorTier.FREE) {
+            YearMonth ym = YearMonth.now(ZoneOffset.UTC);
+            Instant monthStart = ym.atDay(1).atStartOfDay(ZoneOffset.UTC).toInstant();
+            Instant monthEnd = ym.plusMonths(1).atDay(1).atStartOfDay(ZoneOffset.UTC).toInstant();
+            long used = videoCallRepository.countNonCancelledByVendorInMonth(lead.vendor.id, monthStart, monthEnd);
+            if (used >= 1) {
+                throw new BusinessException("Free plan vendors are limited to 1 video call per month. Upgrade your plan to schedule more.");
+            }
+        }
+
         String roomName = "eternelle-" + UUID.randomUUID().toString().replace("-", "");
         String roomUrl  = jaasEnabled()
                 ? JAAS_BASE + jaasAppId + "/" + roomName
@@ -75,8 +88,6 @@ public class VideoCallService {
         String coupleName = lead.couple != null
                 ? (lead.couple.partner1Name + (lead.couple.partner2Name != null ? " & " + lead.couple.partner2Name : ""))
                 : "the couple";
-        String proposer   = proposedByVendor ? vendorBiz : coupleName;
-        String recipient  = proposedByVendor ? coupleName : vendorBiz;
 
         if (lead.couple != null && lead.couple.user != null) {
             String msg = proposedByVendor
@@ -109,9 +120,6 @@ public class VideoCallService {
         String coupleName = lead.couple != null
                 ? (lead.couple.partner1Name + (lead.couple.partner2Name != null ? " & " + lead.couple.partner2Name : ""))
                 : "the couple";
-        boolean acceptedByVendor = lead.vendor != null && lead.vendor.user != null
-                && lead.vendor.user.id.equals(requestingUserId);
-
         // Notify the proposer that their request was accepted
         if (lead.couple != null && lead.couple.user != null
                 && !lead.couple.user.id.equals(requestingUserId)) {

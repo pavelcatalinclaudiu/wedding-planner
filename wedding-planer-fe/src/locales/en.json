@@ -48,6 +48,7 @@
     "show_less": "Show less",
     "noResults": "No results found",
     "error_generic": "An error occurred. Please try again.",
+    "errorGeneric": "Something went wrong. Please try again.",
     "pending": "Pending",
     "confirmed": "Confirmed",
     "cancelled": "Cancelled",
@@ -99,6 +100,7 @@
         "weddingWebsite": "Wedding Website",
         "documentVault": "Document Vault",
         "seatingChart": "Seating Chart",
+        "subscription": "Subscription",
         "myProfile": "My Profile"
       }
     },
@@ -865,7 +867,9 @@
     "minutes": "minutes",
     "pastCalls": "Past Calls",
     "goToEnquiries": "Go to My Enquiries and select a vendor to schedule a call.",
-    "goToLeads": "Go to your Inbox and select a lead to schedule a call."
+    "goToLeads": "Go to your Inbox and select a lead to schedule a call.",
+    "monthlyUsage": "{used}/1 monthly video call used",
+    "monthlyLimitReached": "Monthly video call limit reached. Upgrade to schedule more."
   },
 
   "team": {
@@ -1014,7 +1018,8 @@
       "noPhotos": "No photos in portfolio.",
       "uploading": "Uploading...",
       "setCover": "Set as cover photo",
-      "delete": "Delete photo"
+      "delete": "Delete photo",
+      "photoLimitReached": "5/5 photos — upgrade to add more"
     },
     "reviews": {
       "title": "Reviews",
@@ -1085,27 +1090,39 @@
       "cancelConfirm": "Are you sure? You'll lose access at the end of the billing period.",
       "yesCancel": "Yes, cancel",
       "keep": "Keep subscription",
+      "cancelNotice": "Your subscription will be cancelled at the end of the billing period.",
       "mostPopular": "Most Popular",
       "getStartedFree": "Get Started Free",
       "upgradeTo": "Upgrade to {plan}",
+      "switchTo": "Switch to {plan}",
+      "switching": "Switching...",
+      "cancelToDowngrade": "Cancel your current plan to return to Free",
+      "adminAssigned": "Plan assigned by administrator",
       "expiresOn": "Expires on",
       "features": "Features",
-      "basicFeatures": [
-        "Up to 3 active deals",
-        "Portfolio — 10 photos",
-        "Standard listing"
+      "freeLabel": "Free",
+      "standardLabel": "Standard",
+      "premiumLabel": "Premium",
+      "perMonth": "mo",
+      "standardPrice": "49 RON",
+      "premiumPrice": "99 RON",
+      "freeFeatures": [
+        "Profile listing",
+        "Up to 5 portfolio photos",
+        "Basic messaging",
+        "1 video call / month"
       ],
-      "proFeatures": [
-        "Unlimited active deals",
-        "Unlimited portfolio",
-        "Featured listing",
-        "Analytics dashboard",
-        "Priority support"
+      "standardFeatures": [
+        "30 photos in portfolio",
+        "Unlimited video calls",
+        "Full analytics dashboard",
+        "Partner network access"
       ],
-      "eliteFeatures": [
-        "Everything in Pro",
-        "Verified badge",
-        "Partner network access",
+      "premiumFeatures": [
+        "Unlimited photos",
+        "Top search placement",
+        "Featured on landing page",
+        "Lead export (CSV)",
         "Dedicated account manager"
       ]
     },
@@ -1296,6 +1313,10 @@
       "totalCouples": "Total Couples",
       "totalLeads": "Total Leads",
       "totalReviews": "Total Reviews",
+      "paidVendors": "Paid Vendors",
+      "paidCouples": "Paid Couples",
+      "ofTotal": "of {total} total",
+      "pending": "pending",
       "avgRating": "avg rating",
       "platformVisits": "Platform Visits",
       "uniqueVisitors": "unique visitors",
@@ -1312,7 +1333,12 @@
       "verified": "Verified",
       "joined": "Joined",
       "lastLogin": "Last Login",
-      "confirmDelete": "Permanently delete user {email}? This cannot be undone."
+      "confirmDelete": "Permanently delete user {email}? This cannot be undone.",
+      "deleteSuccess": "User {email} deleted.",
+      "confirmPlanChange": "Change plan to {plan}?",
+      "planChangeSuccess": "Plan changed to {plan}.",
+      "coupleMonetizationEnableAll": "Enable monetization for all couples",
+      "coupleMonetizationDisableAll": "Disable monetization for all couples"
     },
     "vendors": {
       "searchPlaceholder": "Search by name or city…",
@@ -1330,7 +1356,23 @@
       "activate": "Activate vendor",
       "verify": "Verify vendor",
       "unverify": "Remove verification",
-      "confirmSuspend": "Suspend {name}? They will no longer appear in listings."
+      "confirmSuspend": "Suspend {name}? They will no longer appear in listings.",
+      "suspendSuccess": "Vendor suspended.",
+      "activateSuccess": "Vendor activated.",
+      "verifySuccess": "Vendor verified.",
+      "unverifySuccess": "Verification removed.",
+      "confirmPlanChange": "Change plan to {plan}?",
+      "planChangeSuccess": "Plan changed to {plan}.",
+      "monetizationOnToast": "Monetization enabled.",
+      "monetizationOffToast": "Monetization disabled.",
+      "bulkFilterWarning": "(Only visible vendors affected by current filter)",
+      "viewProfile": "View public profile",
+      "plan": "Plan",
+      "monetization": "Monetization",
+      "monetizationOn": "Monetization active — click to disable",
+      "monetizationOff": "Monetization disabled — click to enable",
+      "monetizationEnableAll": "Enable monetization for all",
+      "monetizationDisableAll": "Disable monetization for all"
     },
     "reviews": {
       "searchPlaceholder": "Search by vendor or comment…",
@@ -1344,10 +1386,49 @@
       "hidden": "Hidden",
       "noComment": "No comment",
       "vendorReply": "Vendor reply",
-      "confirmDelete": "Delete review for {vendor}? This cannot be undone."
+      "confirmDelete": "Delete review for {vendor}? This cannot be undone.",
+      "deleteSuccess": "Review deleted.",
+      "approveSuccess": "Review approved.",
+      "rejectSuccess": "Review rejected."
     },
     "pagination": {
-      "showing": "Showing {from}–{to} of {total}"
+      "showing": "Showing {from}–{to} of {total}",
+      "page": "Page {page} of {total}"
+    }
+  },
+
+  "couple": {
+    "subscription": {
+      "title": "My Plan",
+      "subtitle": "Manage your subscription and unlock premium wedding tools.",
+      "freePlanName": "Free",
+      "freePrice": "0 RON / month",
+      "dreamWeddingLabel": "Dream Wedding",
+      "currentPlan": "Current Plan",
+      "monthly": "Monthly",
+      "oneTime": "One-time",
+      "upgradeBtn": "Get Dream Wedding",
+      "mostPopular": "Most Popular",
+      "renews": "Renews:",
+      "manageBilling": "Manage Billing",
+      "cancel": "Cancel subscription",
+      "cancelConfirm": "Are you sure? You'll lose access at the end of the billing period.",
+      "yesCancel": "Yes, cancel",
+      "keep": "Keep subscription",
+      "freeFeatures": [
+        "Up to 30 guests",
+        "Basic checklist & budget",
+        "Wedding website",
+        "3 video calls / month"
+      ],
+      "dreamFeatures": [
+        "Unlimited guests",
+        "Drag-and-drop seating plan",
+        "Advanced budget tracker",
+        "Group chat",
+        "Unlimited video calls",
+        "Document vault"
+      ]
     }
   },
 
@@ -1358,5 +1439,17 @@
     "unauthorized": "Unauthorized",
     "serverError": "Server error",
     "networkError": "Network error. Check your connection."
+  },
+
+  "upgrade": {
+    "title": "Premium Feature",
+    "description": "This feature requires an upgraded subscription. Unlock {feature} by upgrading your plan.",
+    "cta": "Upgrade Plan",
+    "features": {
+      "videoCalls": "Video Calls",
+      "network": "Partner Network",
+      "analytics": "Advanced Analytics",
+      "documents": "Document Vault"
+    }
   }
 }

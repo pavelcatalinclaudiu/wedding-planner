@@ -1,18 +1,31 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useAdminStore } from "@/stores/admin.store";
 import { useConfirm } from "@/composables/useConfirm";
-import { Search, BadgeCheck, Power, PowerOff } from "lucide-vue-next";
+import { useToast } from "@/composables/useToast";
+import {
+  Search,
+  BadgeCheck,
+  Power,
+  PowerOff,
+  Zap,
+  ExternalLink,
+} from "lucide-vue-next";
 
 const { t } = useI18n();
 const adminStore = useAdminStore();
 const confirm = useConfirm();
+const toast = useToast();
 
 const search = ref("");
 const categoryFilter = ref("");
 const page = ref(0);
 const PAGE_SIZE = 20;
+
+const totalPages = computed(() =>
+  Math.max(1, Math.ceil(adminStore.vendorsTotal / PAGE_SIZE)),
+);
 
 const CATEGORIES = [
   "PHOTOGRAPHER",
@@ -57,15 +70,80 @@ async function handleSuspend(id: string, name: string) {
     danger: true,
   });
   if (!ok) return;
-  await adminStore.suspendVendor(id);
+  try {
+    await adminStore.suspendVendor(id);
+    toast.success(t("admin.vendors.suspendSuccess", { name }));
+  } catch {
+    toast.error(t("common.errorGeneric"));
+  }
 }
 
 async function handleActivate(id: string) {
-  await adminStore.activateVendor(id);
+  try {
+    await adminStore.activateVendor(id);
+    toast.success(t("admin.vendors.activateSuccess"));
+  } catch {
+    toast.error(t("common.errorGeneric"));
+  }
 }
 
-async function handleToggleVerify(id: string) {
-  await adminStore.toggleVerifyVendor(id);
+async function handleToggleVerify(id: string, current: boolean) {
+  try {
+    await adminStore.toggleVerifyVendor(id);
+    toast.success(
+      current
+        ? t("admin.vendors.unverifySuccess")
+        : t("admin.vendors.verifySuccess"),
+    );
+  } catch {
+    toast.error(t("common.errorGeneric"));
+  }
+}
+
+async function handleSetPlan(id: string, currentPlan: string, newPlan: string) {
+  if (newPlan === currentPlan) return;
+  const ok = await confirm.ask(
+    t("admin.vendors.confirmPlanChange", { plan: newPlan }),
+    { danger: false },
+  );
+  if (!ok) return;
+  try {
+    await adminStore.setVendorPlan(id, newPlan);
+    toast.success(t("admin.vendors.planChangeSuccess", { plan: newPlan }));
+  } catch {
+    toast.error(t("common.errorGeneric"));
+  }
+}
+
+async function handleToggleMonetization(id: string, current: boolean) {
+  try {
+    await adminStore.toggleVendorMonetization(id, !current);
+    toast.success(
+      current
+        ? t("admin.vendors.monetizationOffToast")
+        : t("admin.vendors.monetizationOnToast"),
+    );
+  } catch {
+    toast.error(t("common.errorGeneric"));
+  }
+}
+
+async function handleBulkMonetization(enabled: boolean) {
+  const label = enabled
+    ? t("admin.vendors.monetizationEnableAll")
+    : t("admin.vendors.monetizationDisableAll");
+  let message = label + "?";
+  if (search.value || categoryFilter.value) {
+    message += " " + t("admin.vendors.bulkFilterWarning");
+  }
+  const ok = await confirm.ask(message, { danger: !enabled });
+  if (!ok) return;
+  try {
+    await adminStore.bulkToggleVendorMonetization(enabled);
+    toast.success(label);
+  } catch {
+    toast.error(t("common.errorGeneric"));
+  }
 }
 
 function prevPage() {
@@ -112,13 +190,53 @@ function formatPrice(price: number | null) {
           {{ cat.replace(/_/g, " ") }}
         </option>
       </select>
+      <div class="bulk-monetization">
+        <button class="bulk-btn bulk-on" @click="handleBulkMonetization(true)">
+          <Zap :size="13" /> {{ t("admin.vendors.monetizationEnableAll") }}
+        </button>
+        <button
+          class="bulk-btn bulk-off"
+          @click="handleBulkMonetization(false)"
+        >
+          <Zap :size="13" /> {{ t("admin.vendors.monetizationDisableAll") }}
+        </button>
+      </div>
     </div>
 
     <!-- Table -->
     <div class="card">
-      <div v-if="adminStore.vendorsLoading" class="loading-state">
-        {{ t("common.loading") }}
-      </div>
+      <!-- Skeleton rows -->
+      <template v-if="adminStore.vendorsLoading">
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>{{ t("admin.vendors.business") }}</th>
+                <th>{{ t("common.category") }}</th>
+                <th>{{ t("common.city") }}</th>
+                <th>{{ t("admin.vendors.basePrice") }}</th>
+                <th>{{ t("admin.vendors.avgRating") }}</th>
+                <th>{{ t("admin.vendors.leads") }}</th>
+                <th>{{ t("admin.vendors.views") }}</th>
+                <th>{{ t("common.status") }}</th>
+                <th>{{ t("admin.vendors.verified") }}</th>
+                <th>{{ t("admin.users.joined") }}</th>
+                <th>{{ t("admin.vendors.plan") }}</th>
+                <th>{{ t("admin.vendors.monetization") }}</th>
+                <th>{{ t("common.edit") }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="i in 8" :key="i" class="skeleton-row">
+                <td v-for="j in 13" :key="j">
+                  <div class="skeleton skeleton-cell"></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </template>
+
       <div v-else-if="adminStore.vendors.length === 0" class="empty-state">
         {{ t("common.noResults") }}
       </div>
@@ -137,14 +255,29 @@ function formatPrice(price: number | null) {
                 <th>{{ t("common.status") }}</th>
                 <th>{{ t("admin.vendors.verified") }}</th>
                 <th>{{ t("admin.users.joined") }}</th>
+                <th>{{ t("admin.vendors.plan") }}</th>
+                <th>{{ t("admin.vendors.monetization") }}</th>
                 <th>{{ t("common.edit") }}</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="v in adminStore.vendors" :key="v.id">
                 <td>
-                  <div class="vendor-name">{{ v.businessName }}</div>
-                  <div class="vendor-email">{{ v.email }}</div>
+                  <div class="vendor-name-row">
+                    <div>
+                      <div class="vendor-name">{{ v.businessName }}</div>
+                      <div class="vendor-email">{{ v.email }}</div>
+                    </div>
+                    <a
+                      :href="`/vendors/${v.id}`"
+                      target="_blank"
+                      rel="noopener"
+                      class="ext-link"
+                      :title="t('admin.vendors.viewProfile')"
+                    >
+                      <ExternalLink :size="13" />
+                    </a>
+                  </div>
                 </td>
                 <td>{{ v.category?.replace(/_/g, " ") || "—" }}</td>
                 <td>{{ v.city }}</td>
@@ -178,12 +311,45 @@ function formatPrice(price: number | null) {
                         ? t('admin.vendors.unverify')
                         : t('admin.vendors.verify')
                     "
-                    @click="handleToggleVerify(v.id)"
+                    @click="handleToggleVerify(v.id, v.isVerified)"
                   >
                     <BadgeCheck :size="16" />
                   </button>
                 </td>
                 <td>{{ formatDate(v.createdAt) }}</td>
+                <td>
+                  <select
+                    :value="v.tier || 'FREE'"
+                    class="plan-select"
+                    @change="
+                      handleSetPlan(
+                        v.id,
+                        v.tier || 'FREE',
+                        ($event.target as HTMLSelectElement).value,
+                      )
+                    "
+                  >
+                    <option value="FREE">FREE</option>
+                    <option value="STANDARD">STANDARD</option>
+                    <option value="PREMIUM">PREMIUM</option>
+                  </select>
+                </td>
+                <td>
+                  <button
+                    class="action-btn monetization-btn"
+                    :class="{ 'monetization-on': v.monetizationEnabled }"
+                    :title="
+                      v.monetizationEnabled
+                        ? t('admin.vendors.monetizationOn')
+                        : t('admin.vendors.monetizationOff')
+                    "
+                    @click="
+                      handleToggleMonetization(v.id, v.monetizationEnabled)
+                    "
+                  >
+                    <Zap :size="14" />
+                  </button>
+                </td>
                 <td>
                   <button
                     v-if="v.isActive"
@@ -219,13 +385,16 @@ function formatPrice(price: number | null) {
             }}
           </span>
           <div class="page-btns">
-            <button :disabled="page === 0" @click="prevPage" class="page-btn">
+            <button :disabled="page === 0" class="page-btn" @click="prevPage">
               ←
             </button>
+            <span class="page-num">{{
+              t("admin.pagination.page", { page: page + 1, total: totalPages })
+            }}</span>
             <button
               :disabled="(page + 1) * PAGE_SIZE >= adminStore.vendorsTotal"
-              @click="nextPage"
               class="page-btn"
+              @click="nextPage"
             >
               →
             </button>
@@ -248,6 +417,11 @@ function formatPrice(price: number | null) {
   gap: 12px;
   align-items: center;
   flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--color-surface);
+  padding: 8px 0;
 }
 
 .search-wrap {
@@ -334,6 +508,12 @@ function formatPrice(price: number | null) {
   background: var(--color-surface);
 }
 
+.vendor-name-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
 .vendor-name {
   font-weight: 600;
 }
@@ -341,6 +521,18 @@ function formatPrice(price: number | null) {
   font-size: 12px;
   color: var(--color-text-muted);
   margin-top: 1px;
+}
+
+.ext-link {
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  margin-top: 2px;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+.ext-link:hover {
+  color: var(--color-gold);
 }
 .muted {
   color: var(--color-text-muted);
@@ -411,6 +603,18 @@ function formatPrice(price: number | null) {
   border-color: #38a169;
 }
 
+.monetization-btn {
+  color: var(--color-text-muted);
+}
+.monetization-btn:hover {
+  color: #d97706;
+  border-color: #d97706;
+}
+.monetization-btn.monetization-on {
+  color: #d97706;
+  border-color: #d97706;
+}
+
 .pagination {
   display: flex;
   align-items: center;
@@ -424,6 +628,13 @@ function formatPrice(price: number | null) {
 .page-btns {
   display: flex;
   gap: 6px;
+  align-items: center;
+}
+
+.page-num {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  padding: 0 4px;
 }
 
 .page-btn {
@@ -458,5 +669,85 @@ function formatPrice(price: number | null) {
   text-align: center;
   color: var(--color-text-muted);
   font-size: 14px;
+}
+
+.plan-select {
+  padding: 4px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-card);
+  color: var(--color-text);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.plan-select:focus {
+  outline: none;
+  border-color: var(--color-gold);
+}
+
+.bulk-monetization {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.bulk-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1px solid;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  background: none;
+}
+
+.bulk-on {
+  color: #d97706;
+  border-color: #d97706;
+}
+.bulk-on:hover {
+  background: rgba(217, 119, 6, 0.08);
+}
+
+.bulk-off {
+  color: var(--color-text-muted);
+  border-color: var(--color-border);
+}
+.bulk-off:hover {
+  color: #e53e3e;
+  border-color: #e53e3e;
+}
+
+/* Skeleton */
+.skeleton-row td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--color-border);
+}
+.skeleton {
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--color-border) 25%,
+    var(--color-surface) 50%,
+    var(--color-border) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+.skeleton-cell {
+  height: 14px;
+  width: 80%;
+}
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 </style>

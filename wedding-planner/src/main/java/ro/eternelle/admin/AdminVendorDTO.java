@@ -19,8 +19,10 @@ public class AdminVendorDTO {
     public int profileViews;
     public boolean isVerified;
     public boolean isActive;
+    public boolean monetizationEnabled;
     public long leadCount;
     public Instant createdAt;
+    public String tier;
 
     public static AdminVendorDTO from(VendorProfile v, long leadCount) {
         AdminVendorDTO dto = new AdminVendorDTO();
@@ -36,8 +38,10 @@ public class AdminVendorDTO {
         dto.profileViews = v.profileViews;
         dto.isVerified = v.isVerified;
         dto.isActive = v.isActive;
+        dto.monetizationEnabled = v.monetizationEnabled;
         dto.leadCount = leadCount;
         dto.createdAt = v.createdAt;
+        dto.tier = v.tier != null ? v.tier.name() : "FREE";
         return dto;
     }
 }
