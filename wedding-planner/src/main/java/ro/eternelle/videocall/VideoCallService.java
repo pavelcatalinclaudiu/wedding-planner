@@ -31,20 +31,34 @@ public class VideoCallService {
     String jaasAppId;
 
     private boolean jaasEnabled() {
-        return jaasAppId != null && !jaasAppId.isBlank() && !jaasAppId.equals("your-jaas-app-id");
+        return jaasAppId != null && !jaasAppId.isBlank()
+                && !jaasAppId.equals("your-jaas-app-id")
+                && !jaasAppId.equals("placeholder");
+    }
+
+    /** Fixes a stale roomUrl that has "placeholder" as the appId — heals the DB record in place. */
+    @Transactional
+    public VideoCall repairRoomUrl(VideoCall call) {
+        if (jaasEnabled() && call.roomUrl != null && call.roomUrl.contains("/placeholder/")) {
+            call.roomUrl = call.roomUrl.replace("/placeholder/", "/" + jaasAppId + "/");
+            videoCallRepository.getEntityManager().merge(call);
+        }
+        return call;
     }
 
     public List<VideoCall> getByLead(UUID leadId) {
         return videoCallRepository.findByLead(leadId);
     }
 
-    /** Returns the most recent PENDING, SCHEDULED, or IN_PROGRESS call for the lead, or empty. */
+    /** Returns the most recent PENDING, SCHEDULED, or IN_PROGRESS call for the lead, or empty.
+     *  Heals stale "placeholder" roomUrls on the fly. */
     public Optional<VideoCall> getActiveForLead(UUID leadId) {
         return videoCallRepository.findByLead(leadId).stream()
                 .filter(c -> c.status == VideoCallStatus.PENDING
                           || c.status == VideoCallStatus.SCHEDULED
                           || c.status == VideoCallStatus.IN_PROGRESS)
-                .max(java.util.Comparator.comparing(c -> c.scheduledAt));
+                .max(java.util.Comparator.comparing(c -> c.scheduledAt))
+                .map(this::repairRoomUrl);
     }
 
     public List<VideoCall> getForUser(UUID userId, boolean isVendor) {
