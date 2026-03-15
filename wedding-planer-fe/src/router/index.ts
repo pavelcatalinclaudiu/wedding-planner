@@ -53,6 +53,13 @@ const VendorSubscriptionView = () =>
 const VendorGroupChatView = () =>
   import("@/views/vendor/VendorGroupChatView.vue");
 
+// Admin
+const AdminLayout = () => import("@/views/admin/AdminLayout.vue");
+const AdminOverviewView = () => import("@/views/admin/AdminOverviewView.vue");
+const AdminUsersView = () => import("@/views/admin/AdminUsersView.vue");
+const AdminVendorsView = () => import("@/views/admin/AdminVendorsView.vue");
+const AdminReviewsView = () => import("@/views/admin/AdminReviewsView.vue");
+
 // Public
 const LandingView = () => import("@/views/public/LandingView.vue");
 const VendorListingView = () => import("@/views/public/VendorListingView.vue");
@@ -223,6 +230,36 @@ const routes: RouteRecordRaw[] = [
         path: "group-chat",
         component: VendorGroupChatView,
         meta: { title: "nav.vendor.items.groupChat" },
+      },
+    ],
+  },
+
+  // ADMIN DASHBOARD
+  {
+    path: "/admin",
+    component: AdminLayout,
+    meta: { requiresAuth: true, role: "ADMIN" },
+    children: [
+      { path: "", redirect: "/admin/overview" },
+      {
+        path: "overview",
+        component: AdminOverviewView,
+        meta: { title: "admin.nav.overview" },
+      },
+      {
+        path: "users",
+        component: AdminUsersView,
+        meta: { title: "admin.nav.users" },
+      },
+      {
+        path: "vendors",
+        component: AdminVendorsView,
+        meta: { title: "admin.nav.vendors" },
+      },
+      {
+        path: "reviews",
+        component: AdminReviewsView,
+        meta: { title: "admin.nav.reviews" },
       },
     ],
   },

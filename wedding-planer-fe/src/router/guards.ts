@@ -33,10 +33,12 @@ export function setupGuards(router: Router) {
       // Allow logged-in users to reach auth pages if they have a pending
       // enquiry intent — so the context banner shows correctly.
       if (hasEnquiryIntent()) return next();
+      if (authStore.user?.role === "ADMIN") return next("/admin");
       return next(authStore.user?.role === "COUPLE" ? "/couple" : "/vendor");
     }
 
     if (to.meta.role && authStore.user?.role !== to.meta.role) {
+      if (authStore.user?.role === "ADMIN") return next("/admin");
       return next(authStore.user?.role === "COUPLE" ? "/couple" : "/vendor");
     }
 
@@ -49,6 +51,6 @@ declare module "vue-router" {
   interface RouteMeta {
     requiresAuth?: boolean;
     guest?: boolean;
-    role?: "COUPLE" | "VENDOR";
+    role?: "COUPLE" | "VENDOR" | "ADMIN";
   }
 }

@@ -62,7 +62,20 @@ async function submitReply(reviewId: string) {
               </p>
             </div>
           </div>
-          <RatingStars :rating="review.rating" />
+          <div class="review-title-right">
+            <RatingStars :rating="review.rating" />
+            <span
+              v-if="review.status !== 'APPROVED'"
+              class="moderation-badge"
+              :class="review.status.toLowerCase()"
+            >
+              {{
+                review.status === "PENDING"
+                  ? t("vendor.reviews.pendingApproval")
+                  : t("vendor.reviews.rejected")
+              }}
+            </span>
+          </div>
         </div>
         <p class="review-text">{{ review.comment }}</p>
         <div v-if="review.vendorReply" class="vendor-reply">
@@ -127,6 +140,30 @@ h2 {
   align-items: center;
   gap: 10px;
 }
+.review-title-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.moderation-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+.moderation-badge.pending {
+  background: rgba(214, 158, 46, 0.15);
+  color: #d69e2e;
+}
+
+.moderation-badge.rejected {
+  background: rgba(229, 62, 62, 0.12);
+  color: #e53e3e;
+}
+
 .pf-av {
   width: 32px;
   height: 32px;

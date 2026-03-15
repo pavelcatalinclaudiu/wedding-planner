@@ -34,7 +34,10 @@ public class ReviewService {
     public List<ReviewDTO> getByVendorUser(UUID userId) {
         VendorProfile vendor = vendorRepository.findByUserId(userId)
                 .orElseThrow(() -> new BusinessException("Vendor profile not found"));
-        return getByVendor(vendor.id);
+        // Vendors see ALL their reviews (including pending/rejected) on their own page
+        return reviewRepository.findAllByVendor(vendor.id).stream()
+                .map(ReviewDTO::from)
+                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -70,10 +73,10 @@ public class ReviewService {
         review.vendor = booking.lead.vendor;
         review.rating = rating;
         review.comment = comment;
+        review.status = "PENDING"; // awaits admin approval before appearing publicly
         reviewRepository.persist(review);
 
-        recalculateVendorRating(booking.lead.vendor.id);
-        vendorAnalyticsService.invalidateOverview(booking.lead.vendor.id);
+        // Rating is recalculated when the review is approved, not on submission
         return ReviewDTO.from(review);
     }
 
@@ -88,5 +91,25 @@ public class ReviewService {
             vendor.avgRating = BigDecimal.valueOf(avg).setScale(2, RoundingMode.HALF_UP);
             vendor.reviewCount = reviews.size();
         }
+    }
+
+    @Transactional
+    public ReviewDTO approveReview(UUID reviewId) {
+        Review review = reviewRepository.findById(reviewId);
+        if (review == null) throw new BusinessException("Review not found");
+        review.status = "APPROVED";
+        recalculateVendorRating(review.vendor.id);
+        vendorAnalyticsService.invalidateOverview(review.vendor.id);
+        return ReviewDTO.from(review);
+    }
+
+    @Transactional
+    public ReviewDTO rejectReview(UUID reviewId) {
+        Review review = reviewRepository.findById(reviewId);
+        if (review == null) throw new BusinessException("Review not found");
+        review.status = "REJECTED";
+        recalculateVendorRating(review.vendor.id);
+        vendorAnalyticsService.invalidateOverview(review.vendor.id);
+        return ReviewDTO.from(review);
     }
 }

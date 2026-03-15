@@ -14,6 +14,7 @@ public class ReviewDTO {
     public String comment;
     public String vendorReply;
     public boolean isPublic;
+    public String status;
     public Instant createdAt;
 
     public static ReviewDTO from(Review r) {
@@ -32,6 +33,7 @@ public class ReviewDTO {
         dto.comment = r.comment;
         dto.vendorReply = r.vendorReply;
         dto.isPublic = r.isPublic;
+        dto.status = r.status;
         dto.createdAt = r.createdAt;
         return dto;
     }

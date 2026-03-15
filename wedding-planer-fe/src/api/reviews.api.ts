@@ -11,6 +11,7 @@ export interface Review {
   comment?: string;
   vendorReply?: string;
   isPublic: boolean;
+  status: "PENDING" | "APPROVED" | "REJECTED";
   createdAt: string;
 }
 

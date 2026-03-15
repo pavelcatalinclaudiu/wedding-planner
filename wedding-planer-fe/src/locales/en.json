@@ -1023,7 +1023,9 @@
       "averageRating": "Average rating",
       "totalReviews": "Total reviews",
       "respondToReview": "Respond to review",
-      "reply": "Vendor reply"
+      "reply": "Vendor reply",
+      "pendingApproval": "Pending approval",
+      "rejected": "Rejected"
     },
     "network": {
       "title": "Partner Network",
@@ -1279,6 +1281,74 @@
     "missYou": "We'll miss you!",
     "thanksForLetting": "Thank you for letting us know. We hope to celebrate together another time.",
     "pleaseName": "Please enter your name."
+  },
+
+  "admin": {
+    "nav": {
+      "overview": "Overview",
+      "users": "Users",
+      "vendors": "Vendors",
+      "reviews": "Reviews"
+    },
+    "overview": {
+      "totalUsers": "Total Users",
+      "totalVendors": "Total Vendors",
+      "totalCouples": "Total Couples",
+      "totalLeads": "Total Leads",
+      "totalReviews": "Total Reviews",
+      "avgRating": "avg rating",
+      "platformVisits": "Platform Visits",
+      "uniqueVisitors": "unique visitors",
+      "thisWeek": "this week",
+      "active": "active",
+      "signupsChart": "Signups – Last 30 Days",
+      "vendorsByCategory": "Vendors by Category",
+      "topVendors": "Top Vendors"
+    },
+    "users": {
+      "searchPlaceholder": "Search by email…",
+      "allRoles": "All roles",
+      "displayName": "Name",
+      "verified": "Verified",
+      "joined": "Joined",
+      "lastLogin": "Last Login",
+      "confirmDelete": "Permanently delete user {email}? This cannot be undone."
+    },
+    "vendors": {
+      "searchPlaceholder": "Search by name or city…",
+      "allCategories": "All categories",
+      "business": "Business",
+      "basePrice": "Base Price",
+      "avgRating": "Rating",
+      "reviews": "Reviews",
+      "leads": "Leads",
+      "views": "Views",
+      "verified": "Verified",
+      "active": "Active",
+      "suspended": "Suspended",
+      "suspend": "Suspend vendor",
+      "activate": "Activate vendor",
+      "verify": "Verify vendor",
+      "unverify": "Remove verification",
+      "confirmSuspend": "Suspend {name}? They will no longer appear in listings."
+    },
+    "reviews": {
+      "searchPlaceholder": "Search by vendor or comment…",
+      "statusAll": "All",
+      "statusPending": "Pending",
+      "statusApproved": "Approved",
+      "statusRejected": "Rejected",
+      "approve": "Approve",
+      "reject": "Reject",
+      "public": "Public",
+      "hidden": "Hidden",
+      "noComment": "No comment",
+      "vendorReply": "Vendor reply",
+      "confirmDelete": "Delete review for {vendor}? This cannot be undone."
+    },
+    "pagination": {
+      "showing": "Showing {from}–{to} of {total}"
+    }
   },
 
   "errors": {

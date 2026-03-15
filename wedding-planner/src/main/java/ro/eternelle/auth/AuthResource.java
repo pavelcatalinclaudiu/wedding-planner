@@ -53,7 +53,7 @@ public class AuthResource {
 
     @GET
     @Path("/me")
-    @RolesAllowed({"COUPLE", "VENDOR"})
+    @RolesAllowed({"COUPLE", "VENDOR", "ADMIN"})
     public Response me() {
         UUID userId = UUID.fromString(jwt.getSubject());
         return Response.ok(authService.getByUserId(userId)).build();

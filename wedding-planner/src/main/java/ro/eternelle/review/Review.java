@@ -46,6 +46,13 @@ public class Review extends PanacheEntityBase {
     @Column(name = "is_public")
     public boolean isPublic = true;
 
+    /**
+     * Moderation state: PENDING (awaiting admin approval), APPROVED (visible on vendor page),
+     * REJECTED (hidden from public).
+     */
+    @Column(name = "status", nullable = false, length = 20)
+    public String status = "PENDING";
+
     @Column(name = "created_at")
     public Instant createdAt = Instant.now();
 }

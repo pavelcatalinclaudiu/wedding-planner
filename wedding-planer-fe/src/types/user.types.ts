@@ -1,7 +1,7 @@
 export interface User {
   id: string;
   email: string;
-  role: "COUPLE" | "VENDOR";
+  role: "COUPLE" | "VENDOR" | "ADMIN";
   emailVerified: boolean;
   createdAt: string;
 }

@@ -1023,7 +1023,9 @@
       "averageRating": "Rating mediu",
       "totalReviews": "Total recenzii",
       "respondToReview": "Răspunde la recenzie",
-      "reply": "Răspuns furnizor"
+      "reply": "Răspuns furnizor",
+      "pendingApproval": "În așteptarea aprobării",
+      "rejected": "Respinsă"
     },
     "network": {
       "title": "Rețea de parteneri",
@@ -1279,6 +1281,74 @@
     "missYou": "Ne va fi dor de tine!",
     "thanksForLetting": "Mulțumim că ne-ai anunțat. Sperăm să sărbătorim împreună altă dată.",
     "pleaseName": "Te rugăm să-ți introduci numele."
+  },
+
+  "admin": {
+    "nav": {
+      "overview": "Prezentare generală",
+      "users": "Utilizatori",
+      "vendors": "Furnizori",
+      "reviews": "Recenzii"
+    },
+    "overview": {
+      "totalUsers": "Total utilizatori",
+      "totalVendors": "Total furnizori",
+      "totalCouples": "Total cupluri",
+      "totalLeads": "Total lead-uri",
+      "totalReviews": "Total recenzii",
+      "avgRating": "rating mediu",
+      "platformVisits": "Vizite platformă",
+      "uniqueVisitors": "vizitatori unici",
+      "thisWeek": "săptămâna asta",
+      "active": "activi",
+      "signupsChart": "Înregistrări – Ultimele 30 de zile",
+      "vendorsByCategory": "Furnizori pe categorie",
+      "topVendors": "Top furnizori"
+    },
+    "users": {
+      "searchPlaceholder": "Caută după email…",
+      "allRoles": "Toate rolurile",
+      "displayName": "Nume",
+      "verified": "Verificat",
+      "joined": "Înregistrat",
+      "lastLogin": "Ultima autentificare",
+      "confirmDelete": "Șterge definitiv utilizatorul {email}? Acțiunea este ireversibilă."
+    },
+    "vendors": {
+      "searchPlaceholder": "Caută după nume sau oraș…",
+      "allCategories": "Toate categoriile",
+      "business": "Afacere",
+      "basePrice": "Preț de bază",
+      "avgRating": "Rating",
+      "reviews": "Recenzii",
+      "leads": "Lead-uri",
+      "views": "Vizualizări",
+      "verified": "Verificat",
+      "active": "Activ",
+      "suspended": "Suspendat",
+      "suspend": "Suspendă furnizorul",
+      "activate": "Activează furnizorul",
+      "verify": "Verifică furnizorul",
+      "unverify": "Elimină verificarea",
+      "confirmSuspend": "Suspendă {name}? Nu va mai apărea în listări."
+    },
+    "reviews": {
+      "searchPlaceholder": "Caută după furnizor sau comentariu…",
+      "statusAll": "Toate",
+      "statusPending": "În așteptare",
+      "statusApproved": "Aprobate",
+      "statusRejected": "Respinse",
+      "approve": "Aprobă",
+      "reject": "Respinge",
+      "public": "Public",
+      "hidden": "Ascuns",
+      "noComment": "Fără comentariu",
+      "vendorReply": "Răspuns furnizor",
+      "confirmDelete": "Șterge recenzia pentru {vendor}? Acțiunea este ireversibilă."
+    },
+    "pagination": {
+      "showing": "Afișând {from}–{to} din {total}"
+    }
   },
 
   "errors": {
