@@ -7,6 +7,8 @@ import { useConversation } from "@/composables/useConversation";
 import { useOffer } from "@/composables/useOffer";
 import { useVideoCallsStore } from "@/stores/videoCalls.store";
 import { conversationsApi } from "@/api/conversations.api";
+import { leadsApi } from "@/api/leads.api";
+import { useFeatureAccess } from "@/composables/useFeatureAccess";
 import LeadCard from "@/components/lead/LeadCard.vue";
 import ConversationThread from "@/components/lead/ConversationThread.vue";
 import OfferCard from "@/components/lead/OfferCard.vue";
@@ -23,6 +25,8 @@ import { Calendar } from "lucide-vue-next";
 
 const { t } = useI18n();
 const { leads, loading, fetchVendorLeads, accept, decline } = useLeads();
+const { canAccess } = useFeatureAccess();
+const exportingCsv = ref(false);
 const { conversation, messages, sending, loadForLead, send } =
   useConversation();
 const { offers, loadForLead: loadOffers, createOffer } = useOffer();
@@ -168,6 +172,23 @@ async function submitOffer() {
   showOfferForm.value = false;
   offerFormData.value = { packageDetails: "", price: "", expiresAt: "" };
 }
+
+async function downloadCsv() {
+  exportingCsv.value = true;
+  try {
+    const res = await leadsApi.exportCsv();
+    const url = URL.createObjectURL(
+      new Blob([res.data as unknown as BlobPart], { type: "text/csv" }),
+    );
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "leads.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  } finally {
+    exportingCsv.value = false;
+  }
+}
 </script>
 
 <template>
@@ -179,17 +200,27 @@ async function submitOffer() {
           <h2>{{ t("leads.vendor.title") }}</h2>
           <p class="panel-sub">{{ t("leads.vendor.subtitle") }}</p>
         </div>
-        <select v-model="statusFilter" class="filter-select">
-          <option value="">{{ t("leads.filterAll") }}</option>
-          <option value="NEW">{{ t("leads.filterNew") }}</option>
-          <option value="VIEWED">{{ t("leads.filterViewed") }}</option>
-          <option value="IN_DISCUSSION">
-            {{ t("leads.filterInDiscussion") }}
-          </option>
-          <option value="QUOTED">{{ t("leads.filterOfferSent") }}</option>
-          <option value="BOOKED">{{ t("leads.filterBooked") }}</option>
-          <option value="DECLINED">{{ t("leads.filterDeclined") }}</option>
-        </select>
+        <div class="panel-header-actions">
+          <select v-model="statusFilter" class="filter-select">
+            <option value="">{{ t("leads.filterAll") }}</option>
+            <option value="NEW">{{ t("leads.filterNew") }}</option>
+            <option value="VIEWED">{{ t("leads.filterViewed") }}</option>
+            <option value="IN_DISCUSSION">
+              {{ t("leads.filterInDiscussion") }}
+            </option>
+            <option value="QUOTED">{{ t("leads.filterOfferSent") }}</option>
+            <option value="BOOKED">{{ t("leads.filterBooked") }}</option>
+            <option value="DECLINED">{{ t("leads.filterDeclined") }}</option>
+          </select>
+          <button
+            v-if="canAccess('leadExport')"
+            class="btn-export-csv"
+            :disabled="exportingCsv"
+            @click="downloadCsv"
+          >
+            {{ exportingCsv ? t("common.loading") : t("leads.exportCsv") }}
+          </button>
+        </div>
       </div>
 
       <div v-if="loading" class="loading">{{ t("common.loading") }}</div>
@@ -460,6 +491,31 @@ async function submitOffer() {
   position: sticky;
   top: 0;
   z-index: 1;
+}
+.panel-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.btn-export-csv {
+  font-size: 0.78rem;
+  padding: 4px 10px;
+  border: 1px solid var(--color-gold);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-gold);
+  cursor: pointer;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.btn-export-csv:hover {
+  background: var(--color-gold);
+  color: #fff;
+}
+.btn-export-csv:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 .panel-sub {
   margin: 2px 0 0;

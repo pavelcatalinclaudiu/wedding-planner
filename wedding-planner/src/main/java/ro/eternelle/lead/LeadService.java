@@ -85,6 +85,30 @@ public class LeadService {
         return leads.stream().map(LeadDTO::from).collect(Collectors.toList());
     }
 
+    public String exportLeadsCsv(UUID vendorUserId) {
+        VendorProfile vendor = vendorRepository.findByUserId(vendorUserId)
+                .orElseThrow(() -> new BusinessException("Vendor not found"));
+        List<Lead> leads = leadRepository.findByVendor(vendor.id);
+        StringBuilder sb = new StringBuilder();
+        sb.append("id,coupleName,eventDate,budget,status,message,createdAt\n");
+        for (Lead l : leads) {
+            sb.append(escape(l.id.toString())).append(",");
+            sb.append(escape(l.couple != null ? l.couple.partner1Name + " & " + l.couple.partner2Name : "")).append(",");
+            sb.append(escape(l.eventDate != null ? l.eventDate.toString() : "")).append(",");
+            sb.append(escape(l.budget != null ? l.budget.toPlainString() : "")).append(",");
+            sb.append(escape(l.status != null ? l.status.name() : "")).append(",");
+            sb.append(escape(l.message != null ? l.message : "")).append(",");
+            sb.append(escape(l.createdAt != null ? l.createdAt.toString() : "")).append("\n");
+        }
+        return sb.toString();
+    }
+
+    private String escape(String value) {
+        if (value == null) return "";
+        // Wrap in quotes and escape internal quotes per RFC 4180
+        return "\"" + value.replace("\"", "\"\"") + "\"";
+    }
+
     public List<LeadDTO> getLeadsForCouple(UUID coupleUserId) {
         CoupleProfile couple = coupleRepository.findByUserId(coupleUserId)
                 .orElseThrow(() -> new BusinessException("Couple profile not found"));

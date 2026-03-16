@@ -56,8 +56,9 @@ public class VendorResource {
             @QueryParam("category") String category,
             @QueryParam("city") String city,
             @QueryParam("q") String keyword,
-            @QueryParam("date") String date) {
-        return Response.ok(vendorService.search(category, city, keyword, date)).build();
+            @QueryParam("date") String date,
+            @QueryParam("tier") String tier) {
+        return Response.ok(vendorService.search(category, city, keyword, date, tier)).build();
     }
 
     @GET
@@ -299,8 +300,17 @@ public class VendorResource {
         UUID userId = UUID.fromString(jwt.getSubject());
         VendorProfile vendor = vendorService.getByUserId(userId);
 
-        if (vendor.monetizationEnabled && vendor.tier == VendorTier.FREE && vendor.photos.size() >= 5) {
-            throw new BusinessException("Free plan is limited to 5 portfolio photos. Upgrade your plan to add more.");
+        if (vendor.monetizationEnabled) {
+            int limit = vendor.tier == VendorTier.FREE ? 5
+                      : vendor.tier == VendorTier.STANDARD ? 30
+                      : Integer.MAX_VALUE;
+            if (vendor.photos.size() >= limit) {
+                throw new BusinessException(
+                    vendor.tier == VendorTier.FREE
+                        ? "Free plan is limited to 5 portfolio photos. Upgrade your plan to add more."
+                        : "Standard plan is limited to 30 portfolio photos. Upgrade to Premium for unlimited photos."
+                );
+            }
         }
 
         try (InputStream is = Files.newInputStream(file.uploadedFile())) {

@@ -81,6 +81,16 @@ public class VideoCallService {
             }
         }
 
+        if (lead.couple != null && lead.couple.monetizationEnabled && lead.couple.plan == ro.eternelle.couple.CouplePlan.FREE) {
+            YearMonth ym = YearMonth.now(ZoneOffset.UTC);
+            Instant monthStart = ym.atDay(1).atStartOfDay(ZoneOffset.UTC).toInstant();
+            Instant monthEnd = ym.plusMonths(1).atDay(1).atStartOfDay(ZoneOffset.UTC).toInstant();
+            long used = videoCallRepository.countNonCancelledByCoupleInMonth(lead.couple.id, monthStart, monthEnd);
+            if (used >= 3) {
+                throw new BusinessException("Free plan couples are limited to 3 video calls per month. Upgrade to Dream Wedding for unlimited calls.");
+            }
+        }
+
         String roomName = "eternelle-" + UUID.randomUUID().toString().replace("-", "");
         String roomUrl  = jaasEnabled()
                 ? JAAS_BASE + jaasAppId + "/" + roomName

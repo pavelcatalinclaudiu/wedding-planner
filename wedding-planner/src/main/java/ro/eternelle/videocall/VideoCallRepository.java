@@ -64,4 +64,10 @@ public class VideoCallRepository implements PanacheRepositoryBase<VideoCall, UUI
         return count("lead.vendor.id = ?1 AND scheduledAt >= ?2 AND scheduledAt < ?3 AND status != ?4",
                 vendorId, monthStart, monthEnd, VideoCallStatus.CANCELLED);
     }
+
+    /** Count non-cancelled calls for a couple whose scheduledAt falls within [monthStart, monthEnd). */
+    public long countNonCancelledByCoupleInMonth(UUID coupleId, Instant monthStart, Instant monthEnd) {
+        return count("lead.couple.id = ?1 AND scheduledAt >= ?2 AND scheduledAt < ?3 AND status != ?4",
+                coupleId, monthStart, monthEnd, VideoCallStatus.CANCELLED);
+    }
 }

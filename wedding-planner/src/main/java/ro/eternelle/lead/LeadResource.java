@@ -10,6 +10,9 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.jwt.JsonWebToken;
+import ro.eternelle.vendor.VendorProfile;
+import ro.eternelle.vendor.VendorRepository;
+import ro.eternelle.vendor.VendorTier;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -22,6 +25,7 @@ public class LeadResource {
 
     @Inject LeadService leadService;
     @Inject JsonWebToken jwt;
+    @Inject VendorRepository vendorRepository;
 
     public record CreateLeadRequest(
             UUID vendorId,
@@ -94,5 +98,25 @@ public class LeadResource {
     public Response decline(@PathParam("id") UUID id) {
         UUID vendorUserId = UUID.fromString(jwt.getSubject());
         return Response.ok(leadService.declineLead(id, vendorUserId)).build();
+    }
+
+    // Vendor exports all their leads as CSV (PREMIUM only)
+    @GET
+    @Path("/export/csv")
+    @RolesAllowed("VENDOR")
+    @Produces("text/csv")
+    public Response exportCsv() {
+        UUID vendorUserId = UUID.fromString(jwt.getSubject());
+        VendorProfile vendor = vendorRepository.findByUserId(vendorUserId)
+                .orElseThrow(() -> new WebApplicationException("Vendor profile not found", 404));
+        if (vendor.monetizationEnabled && vendor.tier != VendorTier.PREMIUM) {
+            return Response.status(Response.Status.FORBIDDEN)
+                    .entity("Lead export is available on the Premium plan.")
+                    .build();
+        }
+        String csv = leadService.exportLeadsCsv(vendorUserId);
+        return Response.ok(csv)
+                .header("Content-Disposition", "attachment; filename=\"leads.csv\"")
+                .build();
     }
 }

@@ -13,6 +13,7 @@ import {
 } from "lucide-vue-next";
 import { useGuestsStore } from "@/stores/guests.store";
 import { useCoupleStore } from "@/stores/couple.store";
+import { useFeatureAccess } from "@/composables/useFeatureAccess";
 import { guestsApi } from "@/api/guests.api";
 import { coupleApi } from "@/api/couple.api";
 import { useToast } from "@/composables/useToast";
@@ -30,7 +31,17 @@ import type {
 const { t } = useI18n();
 const store = useGuestsStore();
 const coupleStore = useCoupleStore();
+const { monetizationEnabled } = useFeatureAccess();
 const toast = useToast();
+
+// -- FREE plan guest limit -------------------------------------------------
+const GUEST_FREE_LIMIT = 30;
+const isFreePlan = computed(
+  () => monetizationEnabled.value && coupleStore.profile?.plan === "FREE",
+);
+const guestLimitReached = computed(
+  () => isFreePlan.value && store.guests.length >= GUEST_FREE_LIMIT,
+);
 
 // -- Keyboard shortcuts ----------------------------------------------------
 const searchInputEl = ref<HTMLInputElement | null>(null);
@@ -198,6 +209,7 @@ function emptyForm(): GuestRequest {
 }
 
 function openAdd() {
+  if (guestLimitReached.value) return;
   editTarget.value = null;
   form.value = emptyForm();
   showModal.value = true;
@@ -398,10 +410,37 @@ async function copyInviteLink(g: Guest) {
         <button class="btn btn-outline" @click="exportCsv">
           &#8681; {{ t("guests.exportCsv") }}
         </button>
-        <button class="btn btn-primary" @click="openAdd">
+        <button
+          class="btn btn-primary"
+          :disabled="guestLimitReached"
+          :title="guestLimitReached ? t('guests.freeLimitReached') : undefined"
+          @click="openAdd"
+        >
           + {{ t("guests.addGuest") }}
         </button>
       </div>
+    </div>
+
+    <!-- FREE plan guest limit banner -->
+    <div
+      v-if="isFreePlan"
+      class="guest-limit-banner"
+      :class="{ reached: guestLimitReached }"
+    >
+      <span v-if="!guestLimitReached">{{
+        t("guests.freeLimit", {
+          used: store.guests.length,
+          max: GUEST_FREE_LIMIT,
+        })
+      }}</span>
+      <span v-else>{{ t("guests.freeLimitReached") }}</span>
+      <RouterLink
+        v-if="guestLimitReached"
+        to="/couple/subscription"
+        class="upgrade-link"
+      >
+        {{ t("couple.subscription.upgradeBtn") }}
+      </RouterLink>
     </div>
 
     <!-- ── Stats strip ──────────────────────────────────────────────────── -->
@@ -434,13 +473,13 @@ async function copyInviteLink(g: Guest) {
               width:
                 Math.min(
                   100,
-                  (store.stats.confirmed / store.stats.estimatedCapacity) * 100,
+                  (store.stats.total / store.stats.estimatedCapacity) * 100,
                 ) + '%',
             }"
           />
         </div>
         <span class="ss-cap"
-          >{{ store.stats.confirmed }}/{{ store.stats.estimatedCapacity }}</span
+          >{{ store.stats.total }}/{{ store.stats.estimatedCapacity }}</span
         >
       </div>
     </div>
@@ -555,7 +594,11 @@ async function copyInviteLink(g: Guest) {
           <div class="empty-icon"><Users :size="48" /></div>
           <h3 class="empty-title">{{ t("guests.emptyTitle") }}</h3>
           <p class="empty-text">{{ t("guests.emptyText") }}</p>
-          <button class="btn btn-primary" @click="openAdd">
+          <button
+            class="btn btn-primary"
+            :disabled="guestLimitReached"
+            @click="openAdd"
+          >
             {{ t("guests.addGuest") }}
           </button>
         </template>
@@ -1170,6 +1213,34 @@ async function copyInviteLink(g: Guest) {
   font-size: 0.85rem;
   color: var(--color-muted);
 }
+
+/* -- FREE plan guest limit banner ---------------------------------------- */
+.guest-limit-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--color-gold-light, #fdf8ee);
+  border: 1px solid var(--color-gold);
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-gold);
+  margin-bottom: 16px;
+}
+.guest-limit-banner.reached {
+  background: var(--chip-red-bg, #fef2f2);
+  border-color: var(--color-error, #e53935);
+  color: var(--color-error, #e53935);
+}
+.upgrade-link {
+  color: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
 .header-actions {
   display: flex;
   gap: 8px;

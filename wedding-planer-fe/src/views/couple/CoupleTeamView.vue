@@ -32,6 +32,7 @@ const bookings = ref<Booking[]>([]);
 
 onMounted(async () => {
   if (leadsStore.leads.length === 0) await leadsStore.fetchCoupleLeads();
+  if (!coupleStore.profile) await coupleStore.fetchProfile();
   try {
     const res = await bookingsApi.list();
     bookings.value = res.data;
@@ -47,9 +48,10 @@ function bookingForLead(leadId: string): Booking | undefined {
 function canReview(leadId: string): boolean {
   const b = bookingForLead(leadId);
   if (!b || b.hasReview) return false;
-  const weddingDate = coupleStore.profile?.weddingDate;
-  if (!weddingDate) return false;
-  return new Date(weddingDate) < new Date();
+  const eventDate = b.weddingDate ?? coupleStore.profile?.weddingDate;
+  if (!eventDate) return false;
+  const today = new Date().toISOString().slice(0, 10);
+  return eventDate < today;
 }
 
 function isReviewed(leadId: string): boolean {

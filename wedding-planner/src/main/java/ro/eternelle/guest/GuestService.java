@@ -3,6 +3,7 @@ package ro.eternelle.guest;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import ro.eternelle.couple.CouplePlan;
 import ro.eternelle.couple.CoupleProfile;
 import ro.eternelle.couple.CoupleRepository;
 import ro.eternelle.exception.BusinessException;
@@ -35,6 +36,12 @@ public class GuestService {
     @Transactional
     public GuestDTO addGuest(UUID coupleUserId, GuestRequest req) {
         CoupleProfile couple = requireCouple(coupleUserId);
+        if (couple.monetizationEnabled && couple.plan == CouplePlan.FREE) {
+            long current = guestRepository.countByCouple(couple.id);
+            if (current >= 30) {
+                throw new BusinessException("Free plan is limited to 30 guests. Upgrade to Dream Wedding for unlimited guests.");
+            }
+        }
         Guest g = applyRequest(new Guest(), req);
         g.couple    = couple;
         g.createdAt = Instant.now();

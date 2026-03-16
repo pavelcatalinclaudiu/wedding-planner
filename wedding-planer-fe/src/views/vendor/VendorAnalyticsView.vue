@@ -4,13 +4,19 @@ import { useI18n } from "vue-i18n";
 import UpgradeGate from "@/components/ui/UpgradeGate.vue";
 import { vendorApi } from "@/api/vendor.api";
 import type { VendorDeepAnalytics } from "@/types/vendor.types";
+import { useFeatureAccess } from "@/composables/useFeatureAccess";
 
 const data = ref<VendorDeepAnalytics | null>(null);
 const loading = ref(true);
 const error = ref("");
 const { t } = useI18n();
+const { canAccess } = useFeatureAccess();
 
 onMounted(async () => {
+  if (!canAccess("analytics")) {
+    loading.value = false;
+    return;
+  }
   try {
     data.value = (await vendorApi.getDeepAnalytics()).data;
   } catch {

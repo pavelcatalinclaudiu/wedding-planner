@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { subscriptionsApi } from "@/api/subscriptions.api";
 import type { Subscription } from "@/api/subscriptions.api";
@@ -11,6 +11,9 @@ const checkingOut = ref(false);
 const cancelConfirm = ref(false);
 const billingType = ref<"monthly" | "onetime">("monthly");
 const { t, tm } = useI18n();
+
+const currentPlan = computed(() => subscription.value?.plan ?? "FREE");
+const hasStripeSub = computed(() => !!subscription.value?.stripeSubscriptionId);
 
 onMounted(async () => {
   loading.value = true;
@@ -48,6 +51,7 @@ onMounted(async () => {
 });
 
 const checkoutError = ref("");
+const checkingOutOneTime = ref(false);
 
 async function checkout() {
   checkingOut.value = true;
@@ -67,6 +71,27 @@ async function checkout() {
       e?.response?.data?.error ?? "Failed to start checkout. Please try again.";
   } finally {
     checkingOut.value = false;
+  }
+}
+
+async function switchToOneTime() {
+  checkingOutOneTime.value = true;
+  checkoutError.value = "";
+  try {
+    const successUrl = `${window.location.origin}/couple/subscription?session_id={CHECKOUT_SESSION_ID}`;
+    const cancelUrl = `${window.location.origin}/couple/subscription`;
+    const response = await subscriptionsApi.checkout(
+      "DREAM_WEDDING",
+      "onetime",
+      successUrl,
+      cancelUrl,
+    );
+    window.location.href = response.data.url;
+  } catch (e: any) {
+    checkoutError.value =
+      e?.response?.data?.error ?? "Failed to start checkout. Please try again.";
+  } finally {
+    checkingOutOneTime.value = false;
   }
 }
 
@@ -103,109 +128,141 @@ async function cancel() {
 
     <div v-if="loading" class="loading">{{ t("common.loading") }}</div>
 
-    <div v-if="checkoutError" class="error-banner">{{ checkoutError }}</div>
+    <template v-else>
+      <div v-if="checkoutError" class="error-banner">{{ checkoutError }}</div>
 
-    <!-- Active paid plan -->
-    <div
-      v-else-if="
-        subscription?.status === 'active' &&
-        subscription?.plan === 'DREAM_WEDDING'
-      "
-      class="current-plan"
-    >
-      <div class="plan-badge">
-        {{ t("couple.subscription.dreamWeddingLabel") }}
-      </div>
-      <p class="plan-renews">
-        {{ t("couple.subscription.renews") }}
-        {{
-          subscription.currentPeriodEnd
-            ? new Date(subscription.currentPeriodEnd).toLocaleDateString()
-            : ""
-        }}
-      </p>
-      <button class="portal-btn" @click="openPortal">
-        {{ t("couple.subscription.manageBilling") }}
-      </button>
-      <button
-        v-if="!cancelConfirm"
-        class="cancel-link"
-        @click="cancelConfirm = true"
-      >
-        {{ t("couple.subscription.cancel") }}
-      </button>
-      <div v-if="cancelConfirm" class="cancel-confirm">
-        <p>{{ t("couple.subscription.cancelConfirm") }}</p>
-        <button class="confirm-cancel-btn" @click="cancel">
-          {{ t("couple.subscription.yesCancel") }}
-        </button>
-        <button class="keep-btn" @click="cancelConfirm = false">
-          {{ t("couple.subscription.keep") }}
-        </button>
-      </div>
-    </div>
-
-    <!-- Upgrade prompt (FREE plan) -->
-    <div v-else class="plans-grid">
-      <!-- Free plan card -->
-      <div class="plan-card">
-        <h3>{{ t("couple.subscription.freePlanName") }}</h3>
-        <div class="plan-price">
-          <span class="price-amount">{{
-            t("couple.subscription.freePrice")
-          }}</span>
-        </div>
-        <ul class="feature-list">
-          <li
-            v-for="f in tm('couple.subscription.freeFeatures') as string[]"
-            :key="f"
-          >
-            <Check :size="14" /> {{ f }}
-          </li>
-        </ul>
-        <button class="current-btn" disabled>
-          {{ t("couple.subscription.currentPlan") }}
-        </button>
-      </div>
-
-      <!-- Dream Wedding card -->
-      <div class="plan-card featured">
-        <div class="featured-badge">
-          {{ t("couple.subscription.mostPopular") }}
-        </div>
-        <h3>{{ t("couple.subscription.dreamWeddingLabel") }}</h3>
-
-        <!-- Billing toggle -->
-        <div class="billing-toggle">
-          <button
-            :class="{ active: billingType === 'monthly' }"
-            @click="billingType = 'monthly'"
-          >
-            {{ t("couple.subscription.monthly") }}
-            <span class="price-tag">59 RON</span>
-          </button>
-          <button
-            :class="{ active: billingType === 'onetime' }"
-            @click="billingType = 'onetime'"
-          >
-            {{ t("couple.subscription.oneTime") }}
-            <span class="price-tag">299 RON</span>
-          </button>
+      <div class="plans-grid">
+        <!-- FREE -->
+        <div
+          class="plan-card"
+          :class="{ 'is-current': currentPlan === 'FREE' }"
+        >
+          <span v-if="currentPlan === 'FREE'" class="current-badge">
+            {{ t("couple.subscription.currentPlan") }}
+          </span>
+          <h3>{{ t("couple.subscription.freePlanName") }}</h3>
+          <div class="plan-price">
+            <span class="price-amount">{{
+              t("couple.subscription.freePrice")
+            }}</span>
+          </div>
+          <ul class="feature-list">
+            <li
+              v-for="f in tm('couple.subscription.freeFeatures') as string[]"
+              :key="f"
+            >
+              <Check :size="14" /> {{ f }}
+            </li>
+          </ul>
+          <p v-if="currentPlan !== 'FREE'" class="downgrade-note">
+            {{ t("couple.subscription.cancelToDowngrade") }}
+          </p>
         </div>
 
-        <ul class="feature-list">
-          <li
-            v-for="f in tm('couple.subscription.dreamFeatures') as string[]"
-            :key="f"
-          >
-            <Check :size="14" /> {{ f }}
-          </li>
-        </ul>
-        <button class="upgrade-btn" :disabled="checkingOut" @click="checkout">
-          {{ t("couple.subscription.upgradeBtn") }}
-        </button>
+        <!-- DREAM_WEDDING -->
+        <div
+          class="plan-card"
+          :class="{
+            featured: currentPlan !== 'DREAM_WEDDING',
+            'is-current': currentPlan === 'DREAM_WEDDING',
+          }"
+        >
+          <span v-if="currentPlan !== 'DREAM_WEDDING'" class="featured-badge">
+            {{ t("couple.subscription.mostPopular") }}
+          </span>
+          <span v-else class="current-badge">
+            {{ t("couple.subscription.currentPlan") }}
+          </span>
+          <h3>{{ t("couple.subscription.dreamWeddingLabel") }}</h3>
+          <ul class="feature-list">
+            <li
+              v-for="f in tm('couple.subscription.dreamFeatures') as string[]"
+              :key="f"
+            >
+              <Check :size="14" /> {{ f }}
+            </li>
+          </ul>
+          <template v-if="currentPlan === 'DREAM_WEDDING'">
+            <p
+              v-if="subscription?.currentPeriodEnd && hasStripeSub"
+              class="plan-renews"
+            >
+              {{ t("couple.subscription.renews") }}
+              {{ new Date(subscription.currentPeriodEnd).toLocaleDateString() }}
+            </p>
+            <p v-else-if="!hasStripeSub" class="admin-note">
+              {{ t("couple.subscription.adminAssigned") }}
+            </p>
+            <button v-if="hasStripeSub" class="portal-btn" @click="openPortal">
+              {{ t("couple.subscription.manageBilling") }}
+            </button>
+            <div
+              v-if="hasStripeSub && !subscription?.cancelAtPeriodEnd"
+              class="onetime-switch"
+            >
+              <p class="onetime-hint">
+                {{ t("couple.subscription.switchOneTimeHint") }}
+              </p>
+              <button
+                class="onetime-btn"
+                :disabled="checkingOutOneTime"
+                @click="switchToOneTime"
+              >
+                {{ t("couple.subscription.switchOneTime") }}
+              </button>
+            </div>
+            <p v-if="subscription?.cancelAtPeriodEnd" class="cancel-notice">
+              {{ t("couple.subscription.cancelNotice") }}
+            </p>
+            <button
+              v-if="
+                hasStripeSub &&
+                !cancelConfirm &&
+                !subscription?.cancelAtPeriodEnd
+              "
+              class="cancel-link"
+              @click="cancelConfirm = true"
+            >
+              {{ t("couple.subscription.cancel") }}
+            </button>
+            <div v-if="cancelConfirm" class="cancel-confirm">
+              <p>{{ t("couple.subscription.cancelConfirm") }}</p>
+              <button class="confirm-cancel-btn" @click="cancel">
+                {{ t("couple.subscription.yesCancel") }}
+              </button>
+              <button class="keep-btn" @click="cancelConfirm = false">
+                {{ t("couple.subscription.keep") }}
+              </button>
+            </div>
+          </template>
+          <template v-else>
+            <div class="billing-toggle">
+              <button
+                :class="{ active: billingType === 'monthly' }"
+                @click="billingType = 'monthly'"
+              >
+                {{ t("couple.subscription.monthly") }}
+                <span class="price-tag">59 RON</span>
+              </button>
+              <button
+                :class="{ active: billingType === 'onetime' }"
+                @click="billingType = 'onetime'"
+              >
+                {{ t("couple.subscription.oneTime") }}
+                <span class="price-tag">299 RON</span>
+              </button>
+            </div>
+            <button
+              class="upgrade-btn"
+              :disabled="checkingOut"
+              @click="checkout"
+            >
+              {{ t("couple.subscription.upgradeBtn") }}
+            </button>
+          </template>
+        </div>
       </div>
-    </div>
+    </template>
   </div>
 </template>
 
@@ -232,26 +289,6 @@ h2 {
   padding: 12px 16px;
   margin-bottom: 16px;
   font-size: 0.9rem;
-}
-.current-plan {
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
-  border-radius: 14px;
-  padding: 28px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  max-width: 420px;
-}
-.plan-badge {
-  background: var(--color-gold);
-  color: #fff;
-  border-radius: 20px;
-  padding: 4px 16px;
-  font-size: 0.9rem;
-  font-weight: 700;
-  display: inline-flex;
-  align-self: flex-start;
 }
 .plan-renews {
   color: var(--color-muted);
@@ -309,11 +346,54 @@ h2 {
   cursor: pointer;
   align-self: flex-start;
 }
+.onetime-switch {
+  border-top: 1px solid var(--color-border);
+  padding-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.onetime-hint {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--color-muted);
+}
+.onetime-btn {
+  background: none;
+  border: 1px solid var(--color-gold);
+  color: var(--color-gold);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.85rem;
+  align-self: flex-start;
+}
+.onetime-btn:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
 .plans-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 18px;
   max-width: 760px;
+}
+@media (max-width: 600px) {
+  .plans-grid {
+    grid-template-columns: 1fr;
+    max-width: 100%;
+    gap: 28px;
+  }
+  .plan-card {
+    padding: 22px 18px;
+  }
+  .plan-card.featured {
+    order: -1;
+  }
+  .subscription-view {
+    padding-bottom: 24px;
+  }
 }
 .plan-card {
   background: var(--color-white);
@@ -414,13 +494,35 @@ h2 {
 .upgrade-btn:disabled {
   opacity: 0.5;
 }
-.current-btn {
-  background: var(--color-surface);
+.is-current {
+  border-color: var(--color-gold);
+  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+}
+.current-badge {
+  display: inline-flex;
+  align-self: flex-start;
+  background: var(--color-gold);
+  color: #fff;
+  border-radius: 20px;
+  padding: 3px 14px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.downgrade-note {
+  font-size: 0.8rem;
   color: var(--color-muted);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: 11px;
-  font-weight: 600;
-  cursor: default;
+  margin: 0;
+}
+.cancel-notice {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-amber, #d97706);
+}
+.admin-note {
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  margin: 0;
+  font-style: italic;
 }
 </style>

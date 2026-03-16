@@ -608,6 +608,9 @@
     "allDietary": "All Dietary",
     "capacity": "Capacity",
     "noMatch": "No guests match your filters.",
+    "freeLimit": "{used}/{max} guests used on Free plan",
+    "freeLimitReached": "Guest limit reached (30/30). Upgrade to Dream Wedding for unlimited guests.",
+    "planLimit": "Plan limit",
     "noMatchText": "Try adjusting your search term or clearing some filters.",
     "clearFilters": "Clear filters",
     "emptyTitle": "No guests yet",
@@ -818,6 +821,7 @@
     "filterOfferSent": "Offer Sent",
     "filterBooked": "Booked",
     "filterDeclined": "Declined",
+    "exportCsv": "Export CSV",
     "selectLead": "Select a lead to view the conversation and send an offer.",
     "enquiryMessage": "Enquiry message:",
     "noMessage": "(no message)",
@@ -869,7 +873,8 @@
     "goToEnquiries": "Go to My Enquiries and select a vendor to schedule a call.",
     "goToLeads": "Go to your Inbox and select a lead to schedule a call.",
     "monthlyUsage": "{used}/1 monthly video call used",
-    "monthlyLimitReached": "Monthly video call limit reached. Upgrade to schedule more."
+    "monthlyLimitReached": "Monthly video call limit reached. Upgrade to schedule more.",
+    "coupleMonthlyUsage": "{used}/3 monthly video calls used"
   },
 
   "team": {
@@ -1411,10 +1416,11 @@
       "mostPopular": "Most Popular",
       "renews": "Renews:",
       "manageBilling": "Manage Billing",
+      "switchOneTimeHint": "Pay once, keep access forever — no more monthly charges.",
+      "switchOneTime": "Switch to one-time (299 RON)",
       "cancel": "Cancel subscription",
-      "cancelConfirm": "Are you sure? You'll lose access at the end of the billing period.",
-      "yesCancel": "Yes, cancel",
-      "keep": "Keep subscription",
+      "cancelNotice": "Your subscription will be cancelled at the end of the billing period.",
+      "adminAssigned": "Plan assigned by administrator",
       "freeFeatures": [
         "Up to 30 guests",
         "Basic checklist & budget",
@@ -1449,7 +1455,8 @@
       "videoCalls": "Video Calls",
       "network": "Partner Network",
       "analytics": "Advanced Analytics",
-      "documents": "Document Vault"
+      "documents": "Document Vault",
+      "leadExport": "Lead Export (CSV)"
     }
   }
 }

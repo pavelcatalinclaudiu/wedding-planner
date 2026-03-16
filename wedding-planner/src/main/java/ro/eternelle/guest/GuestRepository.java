@@ -13,6 +13,10 @@ public class GuestRepository implements PanacheRepositoryBase<Guest, UUID> {
         return find("couple.id = ?1 ORDER BY firstName, lastName", coupleId).list();
     }
 
+    public long countByCouple(UUID coupleId) {
+        return count("couple.id = ?1", coupleId);
+    }
+
     public long countByCoupleAndRsvp(UUID coupleId, String status) {
         return count("couple.id = ?1 AND rsvpStatus = ?2", coupleId, status);
     }

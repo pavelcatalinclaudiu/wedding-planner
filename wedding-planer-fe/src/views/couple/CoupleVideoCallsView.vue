@@ -3,13 +3,40 @@ import { computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import UpgradeGate from "@/components/ui/UpgradeGate.vue";
 import { useVideoCallsStore } from "@/stores/videoCalls.store";
+import { useCoupleStore } from "@/stores/couple.store";
+import { useFeatureAccess } from "@/composables/useFeatureAccess";
 import VideoCallCard from "@/components/video/VideoCallCard.vue";
 import ScheduleCallModal from "@/components/video/ScheduleCallModal.vue";
 
 const { t } = useI18n();
 const videoStore = useVideoCallsStore();
+const coupleStore = useCoupleStore();
+const { monetizationEnabled } = useFeatureAccess();
 
-onMounted(() => videoStore.fetchCalls());
+onMounted(() => {
+  videoStore.fetchCalls();
+  coupleStore.fetchProfile();
+});
+
+const isFreePlan = computed(
+  () => monetizationEnabled.value && coupleStore.profile?.plan === "FREE",
+);
+
+const callsUsedThisMonth = computed(() => {
+  if (!isFreePlan.value) return 0;
+  const now = new Date();
+  return videoStore.calls.filter((c) => {
+    if (c.status === "CANCELLED") return false;
+    const d = new Date(c.scheduledAt);
+    return (
+      d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
+    );
+  }).length;
+});
+
+const monthlyLimitReached = computed(
+  () => isFreePlan.value && callsUsedThisMonth.value >= 3,
+);
 
 const upcomingCalls = computed(() =>
   videoStore.calls.filter(
@@ -47,6 +74,24 @@ async function onCallScheduled() {
       <div class="page-header">
         <h2>{{ t("videoCalls.title") }}</h2>
         <p class="page-sub">{{ t("videoCalls.subtitle") }}</p>
+      </div>
+
+      <!-- FREE plan monthly limit banner -->
+      <div
+        v-if="isFreePlan"
+        class="monthly-limit-banner"
+        :class="{ reached: monthlyLimitReached }"
+      >
+        <span>{{
+          t("videoCalls.coupleMonthlyUsage", { used: callsUsedThisMonth })
+        }}</span>
+        <RouterLink
+          v-if="monthlyLimitReached"
+          to="/couple/subscription"
+          class="upgrade-link"
+        >
+          {{ t("couple.subscription.upgradeBtn") }}
+        </RouterLink>
       </div>
 
       <!-- Upcoming / active calls -->
@@ -121,6 +166,32 @@ h2 {
   margin: 0;
   font-size: 0.88rem;
   color: var(--color-muted);
+}
+
+.monthly-limit-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--color-gold-light, #fdf8ee);
+  border: 1px solid var(--color-gold);
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-gold);
+  margin-bottom: 20px;
+}
+.monthly-limit-banner.reached {
+  background: var(--chip-red-bg, #fef2f2);
+  border-color: var(--color-error, #e53935);
+  color: var(--color-error, #e53935);
+}
+.upgrade-link {
+  color: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  white-space: nowrap;
 }
 
 .calls-section {

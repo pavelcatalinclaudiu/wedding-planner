@@ -611,6 +611,9 @@
     "emptyTitle": "Niciun invitat încă",
     "emptyText": "Începe să construiești lista de invitați adăugând primul invitat sau importând din CSV.",
     "noMatch": "Niciun invitat nu se potrivește cu filtrele.",
+    "freeLimit": "{used}/{max} invitați folosiți pe planul Gratuit",
+    "freeLimitReached": "Limită de invitați atinsă (30/30). Fă upgrade la Dream Wedding pentru invitați nelimitați.",
+    "planLimit": "Limită plan",
     "noTablesAssigned": "Nicio masă alocată. Folosește coloana Masă din tabul Lista de invitați.",
     "unassigned": "Nealocat",
     "importTitle": "Importă invitați din CSV",
@@ -817,6 +820,7 @@
     "filterOfferSent": "Ofertă trimisă",
     "filterBooked": "Rezervat",
     "filterDeclined": "Refuzat",
+    "exportCsv": "Exportă CSV",
     "selectLead": "Selectează un lead pentru a vedea conversația şi a trimite o ofertă.",
     "enquiryMessage": "Mesajul de solicitare:",
     "noMessage": "(fără mesaj)",
@@ -868,7 +872,8 @@
     "goToEnquiries": "Mergi la Solicitările mele şi selectează un furnizor pentru a programa un apel.",
     "goToLeads": "Accesază Mesaje primite şi selectează un lead pentru a programa un apel.",
     "monthlyUsage": "{used}/1 apel video lunar folosit",
-    "monthlyLimitReached": "Limita lunară de apeluri video a fost atinsă. Fă upgrade pentru mai multe."
+    "monthlyLimitReached": "Limita lunară de apeluri video a fost atinsă. Fă upgrade pentru mai multe.",
+    "coupleMonthlyUsage": "{used}/3 apeluri video lunare folosite"
   },
 
   "team": {
@@ -1409,10 +1414,15 @@
       "mostPopular": "Cel mai popular",
       "renews": "Se reînnoiește:",
       "manageBilling": "Gestionează facturarea",
+      "switchOneTimeHint": "Plătește o singură dată, păstrează accesul pentru totdeauna — fără taxe lunare.",
+      "switchOneTime": "Treci la plată unică (299 RON)",
       "cancel": "Anulează abonamentul",
       "cancelConfirm": "Ești sigur? Vei pierde accesul la sfârșitul perioadei.",
       "yesCancel": "Da, anulează",
       "keep": "Păstrează abonamentul",
+      "cancelToDowngrade": "Anulează planul curent pentru a reveni la Gratuit",
+      "cancelNotice": "Abonamentul tău va fi anulat la sfârșitul perioadei de facturare.",
+      "adminAssigned": "Plan atribuit de administrator",
       "freeFeatures": [
         "Până la 30 de invitați",
         "Listă de sarcini & buget de bază",
@@ -1447,7 +1457,8 @@
       "videoCalls": "Apeluri Video",
       "network": "Rețea de Parteneri",
       "analytics": "Analiză Avansată",
-      "documents": "Seif Documente"
+      "documents": "Seif Documente",
+      "leadExport": "Export Lead-uri (CSV)"
     }
   }
 }

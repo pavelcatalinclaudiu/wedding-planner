@@ -45,7 +45,7 @@ public class VendorService {
         return vendor;
     }
 
-    public List<VendorProfile> search(String category, String city, String keyword, String dateStr) {
+    public List<VendorProfile> search(String category, String city, String keyword, String dateStr, String tier) {
         List<VendorProfile> results;
         if (category != null) {
             results = vendorRepository.findByCategory(VendorCategory.valueOf(category.toUpperCase()));
@@ -55,6 +55,18 @@ public class VendorService {
             results = vendorRepository.searchByKeyword(keyword);
         } else {
             results = vendorRepository.findActiveVendors();
+        }
+
+        // Filter by tier if requested (e.g. landing page fetching PREMIUM vendors)
+        if (tier != null && !tier.isBlank()) {
+            try {
+                VendorTier t = VendorTier.valueOf(tier.toUpperCase());
+                results = results.stream()
+                        .filter(v -> v.monetizationEnabled && v.tier == t)
+                        .collect(Collectors.toList());
+            } catch (IllegalArgumentException ignored) {
+                // Unknown tier value — skip filtering
+            }
         }
 
         // Filter by date availability if requested
@@ -71,6 +83,13 @@ public class VendorService {
                 // Malformed date — skip filtering
             }
         }
+
+        // Premium vendors appear first, then Standard, then Free
+        results.sort((a, b) -> {
+            int tierA = a.monetizationEnabled ? a.tier.ordinal() : -1;
+            int tierB = b.monetizationEnabled ? b.tier.ordinal() : -1;
+            return Integer.compare(tierB, tierA);
+        });
 
         return results;
     }

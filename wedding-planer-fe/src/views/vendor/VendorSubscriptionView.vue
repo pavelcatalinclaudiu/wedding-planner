@@ -465,6 +465,23 @@ h2 {
   grid-template-columns: repeat(3, 1fr);
   gap: 18px;
 }
+@media (max-width: 700px) {
+  .plans-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .plan-card {
+    padding: 22px 18px;
+  }
+  .plan-card.featured {
+    order: -1;
+  }
+}
+@media (min-width: 701px) and (max-width: 900px) {
+  .plans-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
 .plan-card {
   background: var(--color-white);
   border: 1px solid var(--color-border);

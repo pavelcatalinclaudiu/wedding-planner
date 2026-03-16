@@ -100,10 +100,14 @@ function dismissReview(bookingId: string) {
   bookings.value = [...bookings.value];
 }
 
+const today = new Date().toISOString().slice(0, 10);
+
 const pendingReviewBookings = computed(() => {
-  const wDate = coupleStore.profile?.weddingDate;
-  if (!wDate || new Date(wDate) >= new Date()) return [];
-  return bookings.value.filter((b) => !b.hasReview && !isDismissed(b.id));
+  return bookings.value.filter((b) => {
+    if (b.hasReview || isDismissed(b.id)) return false;
+    const eventDate = b.weddingDate ?? coupleStore.profile?.weddingDate;
+    return !!eventDate && eventDate < today;
+  });
 });
 
 // ── Review modal (from banner) ─────────────────────────────────────────────

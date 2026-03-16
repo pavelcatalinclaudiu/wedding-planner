@@ -5,9 +5,11 @@ import UpgradeGate from "@/components/ui/UpgradeGate.vue";
 import { networkApi } from "@/api/network.api";
 import type { VendorPartner } from "@/types/vendor.types";
 import { X } from "lucide-vue-next";
+import { useFeatureAccess } from "@/composables/useFeatureAccess";
 
 const partners = ref<VendorPartner[]>([]);
 const loading = ref(false);
+const { canAccess } = useFeatureAccess();
 
 // ── Search / add ────────────────────────────────────────────────────────────
 const searchQuery = ref("");
@@ -20,6 +22,7 @@ let searchTimer: ReturnType<typeof setTimeout> | null = null;
 const { t } = useI18n();
 
 onMounted(async () => {
+  if (!canAccess("network")) return;
   loading.value = true;
   try {
     const res = await networkApi.getPartners();

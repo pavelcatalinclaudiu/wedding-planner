@@ -7,10 +7,11 @@ const VENDOR_FEATURES: Record<string, string[]> = {
   videoCalls: ["FREE", "STANDARD", "PREMIUM"],
   network: ["STANDARD", "PREMIUM"],
   analytics: ["STANDARD", "PREMIUM"],
+  leadExport: ["PREMIUM"],
 };
 
 const COUPLE_FEATURES: Record<string, string[]> = {
-  videoCalls: ["DREAM_WEDDING"],
+  videoCalls: ["FREE", "DREAM_WEDDING"],
   documents: ["DREAM_WEDDING"],
 };
 

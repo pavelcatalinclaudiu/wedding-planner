@@ -38,7 +38,7 @@ const accessible = computed(() => canAccess(props.feature));
   align-items: center;
   justify-content: center;
   min-height: 300px;
-  background: var(--bg-secondary, #f8f8f8);
+  background: var(--color-surface-alt);
   border-radius: 12px;
   margin: 16px 0;
 }
@@ -54,24 +54,25 @@ const accessible = computed(() => canAccess(props.feature));
 }
 
 .gate-icon {
-  color: var(--text-muted, #aaa);
+  color: var(--color-muted);
 }
 
 .gate-title {
   font-size: 1.2rem;
   font-weight: 600;
   margin: 0;
+  color: var(--color-text);
 }
 
 .gate-desc {
-  color: var(--text-muted, #888);
+  color: var(--color-muted);
   font-size: 0.9rem;
   margin: 0;
 }
 
 .gate-btn {
   padding: 10px 24px;
-  background: var(--primary, #6c63ff);
+  background: var(--color-gold);
   color: #fff;
   border: none;
   border-radius: 8px;

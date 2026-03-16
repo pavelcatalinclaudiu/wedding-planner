@@ -11,6 +11,7 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 import ro.eternelle.exception.BusinessException;
 import ro.eternelle.vendor.VendorProfile;
 import ro.eternelle.vendor.VendorRepository;
+import ro.eternelle.vendor.VendorTier;
 
 import java.util.List;
 import java.util.UUID;
@@ -20,6 +21,8 @@ import java.util.stream.Collectors;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class VendorPartnerResource {
+
+    private static final String NETWORK_FORBIDDEN = "Partner network access is available on the Standard plan and above.";
 
     @Inject VendorPartnerRepository partnerRepository;
     @Inject VendorRepository vendorRepository;
@@ -31,6 +34,9 @@ public class VendorPartnerResource {
     @RolesAllowed("VENDOR")
     public Response getPartners() {
         VendorProfile vendor = getVendor();
+        if (vendor.monetizationEnabled && vendor.tier == VendorTier.FREE) {
+            return Response.status(Response.Status.FORBIDDEN).entity(NETWORK_FORBIDDEN).build();
+        }
         List<VendorPartnerDTO> result = partnerRepository.findByVendor(vendor.id)
                 .stream().map(VendorPartnerDTO::from).collect(Collectors.toList());
         return Response.ok(result).build();
@@ -57,6 +63,9 @@ public class VendorPartnerResource {
             return Response.ok(List.of()).build();
         }
         VendorProfile self = getVendor();
+        if (self.monetizationEnabled && self.tier == VendorTier.FREE) {
+            return Response.status(Response.Status.FORBIDDEN).entity(NETWORK_FORBIDDEN).build();
+        }
         List<VendorProfile> hits = vendorRepository.searchByName(q.trim(), 10);
         List<VendorPartnerDTO> dtos = hits.stream()
                 .filter(v -> !v.id.equals(self.id))
@@ -81,6 +90,9 @@ public class VendorPartnerResource {
     @Transactional
     public Response addPartner(AddPartnerRequest req) {
         VendorProfile vendor = getVendor();
+        if (vendor.monetizationEnabled && vendor.tier == VendorTier.FREE) {
+            return Response.status(Response.Status.FORBIDDEN).entity(NETWORK_FORBIDDEN).build();
+        }
         VendorPartner vp = new VendorPartner();
         vp.vendor = vendor;
 

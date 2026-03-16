@@ -30,4 +30,8 @@ export const leadsApi = {
 
   /** Vendor: Decline */
   decline: (id: string) => apiClient.patch<Lead>(`/leads/${id}/decline`),
+
+  /** Vendor: Export all leads as CSV (PREMIUM only) */
+  exportCsv: () =>
+    apiClient.get<string>("/leads/export/csv", { responseType: "blob" }),
 };
